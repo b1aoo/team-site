@@ -195,7 +195,7 @@ export default function SHOTM() {
 
   return (
     <div>
-      <h1>Team Synergy SHOTM <Link to="/admin" className="invisible-link">!</Link></h1>
+      <h1>Team Synergy 月度闪光猎人 <Link to="/admin" className="invisible-link">!</Link></h1>
       <img src={getAssetUrl('images/pagebreak.png')} alt="分隔线" className="pagebreak" />
 
       {/* Collapsible sections */}

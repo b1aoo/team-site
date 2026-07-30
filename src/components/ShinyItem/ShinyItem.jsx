@@ -26,6 +26,11 @@ const ICON_MAP = {
   MysteriousBall: [`${BASE}images/Shiny Showcase/mysteriousball.gif`, 'mysteriousballGif'],
   Favourite: [`${BASE}images/Shiny Showcase/heart.png`, 'favouriteHeart'],
 }
+const ICON_LABELS = {
+  'Secret Shiny': '隐藏闪光', 'Honey Tree': '甜甜蜜树', Egg: '孵化', Safari: '狩猎地带',
+  Fossil: '化石复原', Fishing: '垂钓', Swarm: '大量出现', Headbutt: '撞树',
+  Event: '活动', MysteriousBall: '神秘球', Favourite: '收藏',
+}
 
 // Detect if device is mobile
 function isMobileDevice() {
@@ -76,7 +81,7 @@ function ShinyItem({ shiny, points, userName, localizeDates = true }) {
             key={key}
             src={src}
             className={styles[cls]}
-            alt={key}
+            alt={ICON_LABELS[key] || key}
             width="20"
             height="20"
             loading="lazy"
@@ -95,7 +100,7 @@ function ShinyItem({ shiny, points, userName, localizeDates = true }) {
           key="reaction"
           src={`${BASE}images/Shiny Showcase/reaction.png`}
           className={styles.reactionIcon}
-          alt="Reaction"
+          alt="反应闪记录"
           width="18"
           height="18"
           loading="lazy"

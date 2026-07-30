@@ -19,7 +19,7 @@ export default function TrophyShelf({ playerName, trophies, trophyAssignments })
 
   return (
     <div className={styles.section}>
-      <h2 className={styles.heading}>Trophy Board</h2>
+      <h2 className={styles.heading}>奖杯榜</h2>
       <div className={styles.shelfContainer}>
         <div className={styles.shelf}>
           {playerTrophies.map(({ awardName, imgSrc, assignedPlayers }) => {

@@ -10,7 +10,7 @@ export default function TrophyPage() {
   const { trophySlug } = useParams() || {}; // safe default
   const { data: trophiesData, isLoading: loadingTrophies } = useTrophies();
   const { data: shinyData, isLoading: loadingDB } = useDatabase();
-  const DOMAIN = 'https://synergymmo.com';
+  const DOMAIN = 'https://b1aoo.github.io/team-site';
 
   const trophies = trophiesData?.trophies || {};
   const trophyAssignments = trophiesData?.trophyAssignments || {};
@@ -23,31 +23,31 @@ export default function TrophyPage() {
   const ogUrl = `${DOMAIN}/trophy/${trophySlug || ''}/`;
 
   const breadcrumbs = trophyKey ? [
-    { name: 'Home', url: '/' },
-    { name: 'Trophy Board', url: '/trophy-board' },
+    { name: '首页', url: '/' },
+    { name: '奖杯墙', url: '/trophy-board' },
     { name: trophyKey, url: `/trophy/${trophySlug}` }
   ] : [
-    { name: 'Home', url: '/' },
-    { name: 'Trophy Board', url: '/trophy-board' }
+    { name: '首页', url: '/' },
+    { name: '奖杯墙', url: '/trophy-board' }
   ];
 
   useDocumentHead({
-    title: trophyKey ? `${trophyKey} Trophy - Team Synergy PokeMMO Awards` : trophySlug || 'Trophy',
+    title: trophyKey ? `${trophyKey} 奖杯－Team Synergy PokeMMO 奖项` : trophySlug || '奖杯',
     description: trophyKey
-      ? `View which Team Synergy members earned the ${trophyKey} trophy in PokeMMO. Discover milestone achievements and competitive accomplishments.`
-      : `View trophy details for Team Synergy in PokeMMO.`,
+      ? `查看哪些 Team Synergy 成员在 PokeMMO 中获得了“${trophyKey}”奖杯，了解里程碑成就与竞赛荣誉。`
+      : `查看 Team Synergy 的 PokeMMO 奖杯详情。`,
     canonicalPath: ogUrl,
     ogImage: trophyImg,
     url: ogUrl,
     breadcrumbs: breadcrumbs
   });
 
-  if (loadingTrophies || loadingDB) return <div className="message">Loading...</div>;
+  if (loadingTrophies || loadingDB) return <div className="message">加载中…</div>;
 
   if (!trophyKey) {
     return (
       <h2 style={{ color: 'white', textAlign: 'center' }}>
-        Trophy "{trophySlug}" not found
+        未找到奖杯“{trophySlug}”
       </h2>
     );
   }
@@ -58,7 +58,7 @@ export default function TrophyPage() {
 
   return (
     <div className={styles.trophyPage}>
-      <BackButton to="/trophy-board/" label="&larr; Return to Trophy Board" />
+      <BackButton to="/trophy-board/" label="&larr; 返回奖杯墙" />
       <div className={styles.header}>
         <img
           src={trophyImg}
@@ -69,7 +69,7 @@ export default function TrophyPage() {
         />
         <h1>{trophyKey}</h1>
       </div>
-      <h2 className={styles.playersHeading}>Players who have this trophy:</h2>
+      <h2 className={styles.playersHeading}>获得此奖杯的训练家：</h2>
       <ul className={styles.playersList}>
         {players.map(player => (
           <li key={player}>

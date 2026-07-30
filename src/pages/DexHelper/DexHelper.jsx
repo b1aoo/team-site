@@ -5,7 +5,7 @@ import './DexHelper.css';
 import generationData from '../../data/generation.json';
 import dexHelperData from '../../data/dex_helper.json';
 import pokemonData from '../../data/pokemmo_data/pokemon-data.json';
-import { getLocalPokemonGif, onGifError, normalizePokemonName } from '../../utils/pokemon';
+import { getLocalPokemonGif, onGifError, normalizePokemonName, translatePokemonName } from '../../utils/pokemon';
 import { useDatabase } from '../../hooks/useDatabase';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 import { API } from '../../api/endpoints';
@@ -22,6 +22,7 @@ const FILTERED_POKEMON = [
 ];
 const FILTERED_POKEMON_SET = new Set(FILTERED_POKEMON.map((name) => normalizePokemonName(String(name))));
 const CATEGORY_ORDER = ['Horde', 'Singles', 'Eggs'];
+const CATEGORY_LABELS = { Horde: '群怪', Singles: '单遇', Eggs: '孵蛋' };
 
 
 const CATEGORY_OVERRIDE_FILTERS = {
@@ -67,10 +68,7 @@ function formatPokemonDisplayName(name) {
   if (Array.isArray(name)) {
     return name.map((item) => formatPokemonDisplayName(item)).join(', ');
   }
-  return String(name)
-    .split('-')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('-');
+  return translatePokemonName(String(name));
 }
 
 function bountyPokemonList(bounty) {
@@ -133,13 +131,13 @@ function normalizeBounties(rawData, month, year, monthName) {
 
 export default function DexHelper() {
   useDocumentHead({
-    title: 'Dex Helper - Missing Shiny Dex Tracker',
-    description: 'Track missing base evolution Pokemon for Team Synergy\'s shiny dex. View Horde, Singles, and Egg targets, spot active bounties, and use hunt notes from our Dex Helper database.',
+    title: '图鉴助手－缺失闪光图鉴追踪器',
+    description: '追踪 Team Synergy 闪光图鉴中仍缺少的初始形态宝可梦。查看群怪、单遇与孵蛋目标，关注有效悬赏并使用图鉴助手中的刷闪备注。',
     canonicalPath: '/dex-helper/',
     robots: 'index, follow, max-image-preview:large',
     breadcrumbs: [
-      { name: 'Home', url: '/' },
-      { name: 'Dex Helper', url: '/dex-helper/' },
+      { name: '首页', url: '/' },
+      { name: '图鉴助手', url: '/dex-helper/' },
     ],
     keywords: 'PokeMMO Dex Helper, shiny dex tracker, missing Pokemon list, Team Synergy, shiny hunt targets, PokeMMO bounties, evolution line tracker, horde singles egg hunts',
   });
@@ -284,33 +282,33 @@ export default function DexHelper() {
   }, [missingPokemon]);
 
   if (dbLoading || bountiesLoading) {
-    return <p className="dexStatus">Loading Dex Helper...</p>;
+    return <p className="dexStatus">正在加载图鉴助手…</p>;
   }
 
   if (dbError || bountiesError) {
-    return <p className="dexStatus dexStatusError">Failed to load Dex Helper data.</p>;
+    return <p className="dexStatus dexStatusError">图鉴助手数据加载失败。</p>;
   }
 
   return (
     <div className="dexContainer">
       <div className="dexHeader">
-        <h1 className="dexTitle">Dex Helper</h1>
+        <h1 className="dexTitle">图鉴助手</h1>
         <p className="dexSummary">
-          Missing: {missingPokemon.length} / {dexEvolutionBases.length} Pokemon
+          缺失：{missingPokemon.length} / {dexEvolutionBases.length} 个进化家族
         </p>
       </div>
 
       <p className="dexDescription">
-        These Pokemon are the 1st evolution in their family, getting any of the Evolution line would complete them for the dex. Hover over the bouncy icon for details on any active bounties related to the Pokemon. 
+        这里列出的是每个进化家族的初始形态；获得该进化链中的任意一只即可补全图鉴。将鼠标悬停在跳动图标上，可查看与该宝可梦相关的有效悬赏。
       </p>
 
       {missingPokemon.length === 0 ? (
-        <p className="dexStatus">Your team currently owns every Pokemon in this dex list.</p>
+        <p className="dexStatus">公会目前已拥有此图鉴列表中的全部宝可梦。</p>
       ) : (
         <div className="dexSections">
           {CATEGORY_ORDER.filter((category) => missingByCategory[category]?.length > 0).map((category) => (
             <section key={category} className="categorySection">
-              <h2 className="categoryTitle">{category}</h2>
+              <h2 className="categoryTitle">{CATEGORY_LABELS[category] || category}</h2>
               <div className="categoryCards">
                 {missingByCategory[category].map((pokemon) => {
                   let bounty = null;
@@ -337,18 +335,18 @@ export default function DexHelper() {
                         </Link>
 
                         {bounty && (
-                          <div className="bountyMarker" tabIndex={0} aria-label={`Bounty found for ${pokemon.name}`}>
+                          <div className="bountyMarker" tabIndex={0} aria-label={`${formatPokemonDisplayName(pokemon.name)} 的悬赏`}>
                             <span className="bountyIcon" aria-hidden="true">B</span>
                             <div className="bountyTooltip" role="tooltip">
-                              <p><strong>Title:</strong> {bounty.title || bounty.pokemon || 'Untitled'}</p>
-                              <p><strong>Bounty For:</strong> <strong>{formatPokemonDisplayName(bountySourcePokemon)}</strong></p>
+                              <p><strong>标题：</strong> {bounty.title || formatPokemonDisplayName(bounty.pokemon) || '未命名'}</p>
+                              <p><strong>悬赏目标：</strong> <strong>{formatPokemonDisplayName(bountySourcePokemon)}</strong></p>
                               <p>
-                                <strong>Description:</strong>{' '}
-                                {bounty.description || 'No description provided'}
+                                <strong>说明：</strong>{' '}
+                                {bounty.description || '暂无说明'}
                               </p>
-                              <p><strong>Type:</strong> {bounty.bountyType === 'monthly' ? 'monthly' : 'perm'}</p>
-                              <p><strong>Reward:</strong> {bounty.reward || 'N/A'}</p>
-                              <p><strong>Host:</strong> {bounty.host || 'Unknown'}</p>
+                              <p><strong>类型：</strong> {bounty.bountyType === 'monthly' ? '月度' : '永久'}</p>
+                              <p><strong>奖励：</strong> {bounty.reward || '未注明'}</p>
+                              <p><strong>主办人：</strong> {bounty.host || '未知'}</p>
                             </div>
                           </div>
                         )}

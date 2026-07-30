@@ -4,7 +4,8 @@ import GraphZoomModal from './GraphZoomModal'
 import ZoomableChart from './ZoomableChart'
 import HoverTooltip from './HoverTooltip'
 import tierPokemonData from '../../data/tier_pokemon.json'
-import { getLocalPokemonGif, onGifError } from '../../utils/pokemon'
+import { getLocalPokemonGif, onGifError, translatePokemonName } from '../../utils/pokemon'
+import { translateEncounterTerm, translateRegionName } from '../../utils/pokemonTermsZh'
 
 export default function StatisticsSection({ playerData, playerName, sectionFlags = {} }) {
   const [statsExpanded, setStatsExpanded] = useState(false)
@@ -574,12 +575,12 @@ export default function StatisticsSection({ playerData, playerName, sectionFlags
     return (
       <div className={styles.encounterTable}>
         <div className={styles.tableHeader}>
-          <div className={styles.tableHeaderCell}>Pokémon</div>
-          <div className={styles.tableHeaderCell}>Encounters</div>
+          <div className={styles.tableHeaderCell}>宝可梦</div>
+          <div className={styles.tableHeaderCell}>遇敌次数</div>
         </div>
         {sortedData.map((pokemon, i) => (
           <div key={i} className={styles.tableRow}>
-            <div className={styles.tableCell}>{pokemon.nickname || pokemon.Pokemon}</div>
+            <div className={styles.tableCell}>{pokemon.nickname || translatePokemonName(pokemon.Pokemon)}</div>
             <div className={styles.tableCell}>{pokemon.encounter_count?.toLocaleString() || 0}</div>
           </div>
         ))}
@@ -596,7 +597,7 @@ export default function StatisticsSection({ playerData, playerName, sectionFlags
 
   return (
       <div className={styles.statisticsSection}>
-      <h2 className={styles.mainTitle}>📊 Shiny Statistics</h2>
+      <h2 className={styles.mainTitle}>📊 闪光统计</h2>
 
       {/* Missing Pokémon Info - above dropdown */}
       {stats.missingPokemon.length > 0 && (
@@ -605,7 +606,7 @@ export default function StatisticsSection({ playerData, playerName, sectionFlags
             content={
               <div style={{ maxWidth: 350 }}>
                 <div style={{ fontWeight: 600, marginBottom: 4 }}>
-                  Pokémon missing required data:
+                  以下宝可梦缺少统计所需资料：
                 </div>
                 <div style={{ maxHeight: 220, overflowY: 'auto', fontSize: 14 }}>
                   {stats.missingPokemon.map((p, idx) => {
@@ -615,10 +616,10 @@ export default function StatisticsSection({ playerData, playerName, sectionFlags
                      if (!p.type && !p.types) missingFields.push('method');
                     return (
                       <div key={idx} style={{ marginBottom: 2 }}>
-                        • {p.Pokemon}
+                        • {translatePokemonName(p.Pokemon)}
                         {missingFields.length > 0 && (
                           <span style={{ color: '#ffb6b6', fontSize: 13, marginLeft: 4 }}>
-                            ({missingFields.join(', ')})
+                            （{missingFields.map(field => ({ encounter: '遇敌次数', location: '地点', method: '遇敌方式' })[field]).join('、')}）
                           </span>
                         )}
                       </div>
@@ -629,7 +630,7 @@ export default function StatisticsSection({ playerData, playerName, sectionFlags
             }
           >
             <span style={{ color: '#ffa8a8', fontWeight: 600, cursor: 'pointer', borderBottom: '1px dotted #ef4444' }}>
-              {stats.missingPokemon.length} Pokémon require encounter information to display full statistics.
+              有 {stats.missingPokemon.length} 只宝可梦需要补充遇敌资料，才能显示完整统计。
             </span>
           </HoverTooltip>
         </div>
@@ -642,7 +643,7 @@ export default function StatisticsSection({ playerData, playerName, sectionFlags
           onClick={toggleStats}
         >
           <span className={styles.icon}>📈</span>
-          <span className={styles.title}>Statistics Dashboard</span>
+          <span className={styles.title}>统计面板</span>
           <span className={`${styles.arrow} ${statsExpanded ? styles.expanded : ''}`}>
             ▼
           </span>
@@ -651,36 +652,36 @@ export default function StatisticsSection({ playerData, playerName, sectionFlags
           <div className={`${styles.mainStatsContent} ${statsClosing ? styles.closing : ''}`}>
           <div style={{ marginBottom: '1rem'}}>
             <a href="https://www.shinyboard.net/" target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'underline', fontWeight: 'bold' }}>
-              Encounter Data provided by Shinyboard API
+              遇敌数据由 Shinyboard API 提供
             </a>
           </div>
             {showEncounterSections && (
             <NestedCategory
-              title={`General Statistics (${stats.shinyCount}/${stats.totalShinies})`}
+              title={`综合统计（${stats.shinyCount}/${stats.totalShinies}）`}
               icon="📊"
             >
               <div className={styles.statsGrid}>
-                <StatCard label="Total Encounters" value={stats.totalEncounters.toLocaleString()} />
+                <StatCard label="总遇敌次数" value={stats.totalEncounters.toLocaleString()} />
                 <StatCard 
-                  label="Average per Shiny" 
+                  label="每只闪光平均遇敌"
                   value={stats.avgEncounters.toLocaleString()} 
-                  subtext={`with ${stats.shinyCount}/${stats.totalShinies} data`} 
+                  subtext={`已记录 ${stats.shinyCount}/${stats.totalShinies} 只`}
                 />
                 <StatCard
-                  label="Most Encounters"
-                  value={stats.maxEncounterPokemon?.Pokemon ? stats.maxEncounterPokemon.Pokemon.charAt(0).toUpperCase() + stats.maxEncounterPokemon.Pokemon.slice(1) : 'N/A'}
-                  subtext={`${stats.maxEncounterPokemon?.encounter_count.toLocaleString() || 0} encounters`}
+                  label="遇敌次数最多"
+                  value={stats.maxEncounterPokemon?.Pokemon ? translatePokemonName(stats.maxEncounterPokemon.Pokemon) : '暂无'}
+                  subtext={`${stats.maxEncounterPokemon?.encounter_count.toLocaleString() || 0} 次遇敌`}
                 />
                 <StatCard
-                  label="Least Encounters"
-                  value={stats.minEncounterPokemon?.Pokemon ? stats.minEncounterPokemon.Pokemon.charAt(0).toUpperCase() + stats.minEncounterPokemon.Pokemon.slice(1) : 'N/A'}
-                  subtext={`${stats.minEncounterPokemon?.encounter_count.toLocaleString() || 0} encounters`}
+                  label="遇敌次数最少"
+                  value={stats.minEncounterPokemon?.Pokemon ? translatePokemonName(stats.minEncounterPokemon.Pokemon) : '暂无'}
+                  subtext={`${stats.minEncounterPokemon?.encounter_count.toLocaleString() || 0} 次遇敌`}
                 />
                 {showLocationSections && (
                   <StatCard
-                    label="Top Region"
-                    value={stats.topRegion?.[0] || 'N/A'}
-                    subtext={`${stats.topRegion?.[1] || 0} shinies`}
+                    label="闪光最多地区"
+                    value={translateRegionName(stats.topRegion?.[0]) || '暂无'}
+                    subtext={`${stats.topRegion?.[1] || 0} 只闪光`}
                   />
                 )}
               </div>
@@ -689,20 +690,20 @@ export default function StatisticsSection({ playerData, playerName, sectionFlags
 
             {/* Hunting Methods Category */}
             {showMethodSections && (
-            <NestedCategory title="Hunting Methods" icon="🎣">
+            <NestedCategory title="刷闪方式" icon="🎣">
               <div className={styles.methodsTable}>
                 <div className={styles.methodsHeader}>
-                  <div className={styles.methodsHeaderCell}>Method</div>
-                  <div className={styles.methodsHeaderCell}>Count</div>
-                  <div className={styles.methodsHeaderCell}>Percentage</div>
-                  <div className={styles.methodsHeaderCell}>Total Encounters</div>
-                  <div className={styles.methodsHeaderCell}>Avg Encounter/Shiny</div>
+                  <div className={styles.methodsHeaderCell}>方式</div>
+                  <div className={styles.methodsHeaderCell}>数量</div>
+                  <div className={styles.methodsHeaderCell}>占比</div>
+                  <div className={styles.methodsHeaderCell}>总遇敌</div>
+                  <div className={styles.methodsHeaderCell}>平均遇敌 / 闪光</div>
                 </div>
                 {Object.entries(stats.methodCounts)
                   .sort((a, b) => b[1].count - a[1].count)
                   .map(([method, data]) => (
                     <div key={method} className={styles.methodsRow}>
-                      <div className={styles.methodsCell}>{method}</div>
+                      <div className={styles.methodsCell}>{translateEncounterTerm(method)}</div>
                       <div className={styles.methodsCell}>{data.count}</div>
                       <div className={styles.methodsCell}>{((data.count / stats.totalShinies) * 100).toFixed(1)}%</div>
                       <div className={styles.methodsCell}>{data.totalEncounters.toLocaleString()}</div>
@@ -715,15 +716,15 @@ export default function StatisticsSection({ playerData, playerName, sectionFlags
 
             {/* Region Stats Category */}
             {showLocationSections && (
-            <NestedCategory title="Region Distribution" icon="🗺️">
-              <PieChart data={stats.regionCounts} title="Shinies by Region" />
+            <NestedCategory title="地区分布" icon="🗺️">
+              <PieChart data={Object.fromEntries(Object.entries(stats.regionCounts).map(([region, count]) => [translateRegionName(region), count]))} title="各地区闪光数" />
             </NestedCategory>
             )}
 
             {/* Encounter Charts Category */}
             {showEncounterSections && stats.shiniesWithEncounters.length > 0 && (
               <NestedCategory
-                title={`Encounter Analysis (${stats.shinyCount} Pokémon)`}
+                title={`遇敌分析（${stats.shinyCount} 只宝可梦）`}
                 icon="📉"
               >
                 <div className={styles.encounterGraphsDesktop}>
@@ -736,11 +737,11 @@ export default function StatisticsSection({ playerData, playerName, sectionFlags
                             return acc
                           }, {})}
                           maxValue={Math.max(...stats.shiniesWithEncounters.map(s => s.encounter_count))}
-                          title="Encounters per Pokémon"
+                          title="每只宝可梦的遇敌次数"
                           pokemonData={stats.shiniesWithEncounters}
                         />
                       </ZoomableChart>,
-                      'Encounters per Pokémon'
+                      '每只宝可梦的遇敌次数'
                     )}
                     style={{ cursor: 'pointer', position: 'relative' }}
                   >
@@ -750,26 +751,26 @@ export default function StatisticsSection({ playerData, playerName, sectionFlags
                         return acc
                       }, {})}
                       maxValue={Math.max(...stats.shiniesWithEncounters.map(s => s.encounter_count))}
-                      title="Encounters per Pokémon"
+                      title="每只宝可梦的遇敌次数"
                       pokemonData={stats.shiniesWithEncounters}
                     />
                     <div className={styles.zoomIndicator}>
-                      👆 Click to zoom
+                      👆 点击放大
                     </div>
                   </div>
 
                   <div 
                     onClick={() => openZoomModal(
                       <ZoomableChart>
-                        <LineChart data={stats.shiniesWithEncounters} title="Encounter Progression" />
+                        <LineChart data={stats.shiniesWithEncounters} title="遇敌进度" />
                       </ZoomableChart>,
-                      'Encounter Progression'
+                      '遇敌进度'
                     )}
                     style={{ cursor: 'pointer', position: 'relative' }}
                   >
-                    <LineChart data={stats.shiniesWithEncounters} title="Encounter Progression" />
+                    <LineChart data={stats.shiniesWithEncounters} title="遇敌进度" />
                     <div className={styles.zoomIndicator}>
-                      👆 Click to zoom
+                      👆 点击放大
                     </div>
                   </div>
                 </div>
@@ -786,25 +787,25 @@ export default function StatisticsSection({ playerData, playerName, sectionFlags
                               return acc
                             }, {})}
                             maxValue={Math.max(...stats.shiniesWithEncounters.map(s => s.encounter_count))}
-                            title="Encounters per Pokémon"
+                            title="每只宝可梦的遇敌次数"
                             pokemonData={stats.shiniesWithEncounters}
                           />
                         </ZoomableChart>,
-                        'Encounters per Pokémon'
+                        '每只宝可梦的遇敌次数'
                       )}
                     >
-                      📊 Bar Graph
+                      📊 柱状图
                     </button>
                     <button 
                       className={styles.graphsZoomButton}
                       onClick={() => openZoomModal(
                         <ZoomableChart>
-                          <LineChart data={stats.shiniesWithEncounters} title="Encounter Progression" />
+                          <LineChart data={stats.shiniesWithEncounters} title="遇敌进度" />
                         </ZoomableChart>,
-                        'Encounter Progression'
+                        '遇敌进度'
                       )}
                     >
-                      📈 Line Graph
+                      📈 折线图
                     </button>
                   </div>
                   <EncounterDataTable data={stats.shiniesWithEncounters} />
@@ -813,7 +814,7 @@ export default function StatisticsSection({ playerData, playerName, sectionFlags
                 {/* Encounter Distribution with Ranges */}
                 {stats.maxEncounterPokemon && (
                   <div className={styles.chartContainer}>
-                    <h4 className={styles.chartTitle}>How Encounters Spread Out (Low to High)</h4>
+                    <h4 className={styles.chartTitle}>遇敌次数分布（从低到高）</h4>
                     <EnterpriseDistributionPie 
                       shinies={stats.shiniesWithEncounters}
                       maxEncounters={stats.maxEncounterPokemon.encounter_count}
@@ -826,12 +827,12 @@ export default function StatisticsSection({ playerData, playerName, sectionFlags
             {/* Tier Distribution Category */}
             {showEncounterSections && Object.values(stats.tierCounts).some(count => count > 0) && (
               <NestedCategory
-                title="Tier Distribution"
+                title="分层分布"
                 icon="⭐"
               >
                 <PieChart
                   data={stats.tierCounts}
-                  title="Pokémon by Tier"
+                  title="各分层宝可梦数量"
                   customColors={['#ffd700', '#c084fc', '#60a5fa', '#4ade80', '#2dd4bf', '#fb923c', '#94a3b8', '#cbd5e1']}
                 />
               </NestedCategory>

@@ -11,29 +11,29 @@ const REQUIRED_SHINY_FIELDS = [
 function validateDatabaseSchema(data) {
   const errors = []
   if (typeof data !== 'object' || data === null || Array.isArray(data)) {
-    errors.push('Root must be an object with player names as keys.')
+    errors.push('根对象必须以训练家名称为键。')
     return errors
   }
   for (const [player, playerData] of Object.entries(data)) {
     if (typeof playerData !== 'object' || playerData === null) {
-      errors.push(`"${player}": must be an object.`)
+      errors.push(`“${player}”：必须是对象。`)
       continue
     }
     if (typeof playerData.shiny_count !== 'number') {
-      errors.push(`"${player}": missing or invalid "shiny_count" (must be a number).`)
+      errors.push(`“${player}”：缺少或包含无效的 “shiny_count”（必须为数字）。`)
     }
     if (typeof playerData.shinies !== 'object' || playerData.shinies === null) {
-      errors.push(`"${player}": missing or invalid "shinies" (must be an object).`)
+      errors.push(`“${player}”：缺少或包含无效的 “shinies”（必须为对象）。`)
       continue
     }
     for (const [id, shiny] of Object.entries(playerData.shinies)) {
       if (typeof shiny !== 'object' || shiny === null) {
-        errors.push(`"${player}" shiny #${id}: must be an object.`)
+        errors.push(`“${player}”的闪光记录 #${id}：必须是对象。`)
         continue
       }
       for (const field of REQUIRED_SHINY_FIELDS) {
         if (!(field in shiny)) {
-          errors.push(`"${player}" shiny #${id}: missing field "${field}".`)
+          errors.push(`“${player}”的闪光记录 #${id}：缺少字段 “${field}”。`)
         }
       }
     }
@@ -44,16 +44,16 @@ function validateDatabaseSchema(data) {
 function validateStreamersSchema(data) {
   const errors = []
   if (typeof data !== 'object' || data === null || Array.isArray(data)) {
-    errors.push('Root must be an object with streamer names as keys.')
+    errors.push('根对象必须以主播名称为键。')
     return errors
   }
   for (const [name, entry] of Object.entries(data)) {
     if (typeof entry !== 'object' || entry === null) {
-      errors.push(`"${name}": must be an object.`)
+      errors.push(`“${name}”：必须是对象。`)
       continue
     }
     if (typeof entry.twitch_username !== 'string') {
-      errors.push(`"${name}": missing or invalid "twitch_username".`)
+      errors.push(`“${name}”：缺少或包含无效的 “twitch_username”。`)
     }
   }
   return errors
@@ -63,7 +63,7 @@ function validateStreamersSchema(data) {
 function validateEventsSchema(data) {
   const errors = []
   if (typeof data !== 'object' || data === null || Array.isArray(data)) {
-    errors.push('Root must be an object with event names as keys.')
+    errors.push('根对象必须以活动名称为键。')
   }
   return errors
 }
@@ -101,7 +101,7 @@ function normalizePokemonDatabase(data) {
       correctedData[player].shiny_count = newShinyCount
 
       corrections.push(
-        `"${player}": Fixed entry gaps and recalculated shiny_count (was ${playerData.shiny_count}, now ${newShinyCount})`
+        `“${player}”：已修复编号空缺并重新计算 shiny_count（原为 ${playerData.shiny_count}，现为 ${newShinyCount}）`
       )
     }
   }
@@ -116,16 +116,16 @@ function computeChangeSummary(oldData, newData, mode) {
 
   for (const k of newKeys) {
     if (!oldKeys.has(k)) changes.push(
-      mode === 'pokemon' ? `+ Added player "${k}"` :
-      mode === 'streamers' ? `+ Added streamer "${k}"` :
-      `+ Added event "${k}"`
+      mode === 'pokemon' ? `+ 已添加训练家“${k}”` :
+      mode === 'streamers' ? `+ 已添加主播“${k}”` :
+      `+ 已添加活动“${k}”`
     )
   }
   for (const k of oldKeys) {
     if (!newKeys.has(k)) changes.push(
-      mode === 'pokemon' ? `- Removed player "${k}"` :
-      mode === 'streamers' ? `- Removed streamer "${k}"` :
-      `- Removed event "${k}"`
+      mode === 'pokemon' ? `- 已移除训练家“${k}”` :
+      mode === 'streamers' ? `- 已移除主播“${k}”` :
+      `- 已移除活动“${k}”`
     )
   }
 
@@ -135,12 +135,12 @@ function computeChangeSummary(oldData, newData, mode) {
         const oldCount = Object.keys(oldData[k]?.shinies || {}).length
         const newCount = Object.keys(newData[k]?.shinies || {}).length
         if (oldCount !== newCount) {
-          changes.push(`~ "${k}": shinies ${oldCount} -> ${newCount}`)
+          changes.push(`~ “${k}”：闪光记录 ${oldCount} → ${newCount}`)
         } else if (JSON.stringify(oldData[k]) !== JSON.stringify(newData[k])) {
-          changes.push(`~ "${k}": data modified`)
+          changes.push(`~ “${k}”：数据已修改`)
         }
       } else if (JSON.stringify(oldData[k]) !== JSON.stringify(newData[k])) {
-        changes.push(`~ "${k}": data modified`)
+        changes.push(`~ “${k}”：数据已修改`)
       }
     }
   }
@@ -186,7 +186,7 @@ export default function AdvancedJsonTab({
     try {
       parsed = JSON.parse(editingJson)
     } catch (err) {
-      setValidationErrors([`Invalid JSON: ${err.message}`])
+      setValidationErrors([`JSON 无效：${err.message}`])
       return
     }
 
@@ -214,7 +214,7 @@ export default function AdvancedJsonTab({
     // Add corrections to summary if any were made
     if (corrections.length > 0) {
       summary = [
-        ...corrections.map(c => `AUTO-CORRECTED: ${c}`),
+        ...corrections.map(c => `已自动修正：${c}`),
         ...summary
       ]
     }
@@ -228,11 +228,11 @@ export default function AdvancedJsonTab({
     if (!parsedData) return
     let result
     if (mode === 'pokemon') {
-      result = await onUpdateDatabase(parsedData, `Manual JSON edit (pokemon)`)
+      result = await onUpdateDatabase(parsedData, `手动 JSON 编辑（宝可梦）`)
     } else if (mode === 'streamers') {
-      result = await onUpdateStreamers(parsedData, `Manual JSON edit (streamers)`)
+      result = await onUpdateStreamers(parsedData, `手动 JSON 编辑（主播）`)
     } else if (mode === 'events') {
-      result = await onUpdateEvents(parsedData, `Manual JSON edit (events)`)
+      result = await onUpdateEvents(parsedData, `手动 JSON 编辑（活动）`)
     }
 
     if (result?.success) {
@@ -247,15 +247,15 @@ export default function AdvancedJsonTab({
   return (
     <div>
       <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 12 }}>
-        <label style={{ margin: 0 }}>Data Source:</label>
+        <label style={{ margin: 0 }}>数据源：</label>
         <select
           value={mode}
           onChange={e => { setMode(e.target.value); setIsEditing(false) }}
           style={{ width: 'auto' }}
         >
-          <option value="pokemon">Pokemon Database</option>
-          <option value="streamers">Streamers Database</option>
-          <option value="events">Events Database</option>
+          <option value="pokemon">宝可梦数据库</option>
+          <option value="streamers">主播数据库</option>
+          <option value="events">活动数据库</option>
         </select>
       </div>
 
@@ -264,7 +264,7 @@ export default function AdvancedJsonTab({
           <pre className={styles.preview} onClick={openEditor} style={{ cursor: 'pointer' }}>
             {previewText}
           </pre>
-          <p className={styles.hintText}>Click the JSON above to open the editor.</p>
+          <p className={styles.hintText}>点击上方 JSON 以打开编辑器。</p>
         </>
       ) : (
         <>
@@ -277,7 +277,7 @@ export default function AdvancedJsonTab({
 
           {validationErrors.length > 0 && (
             <div className={styles.validationErrors}>
-              <strong>Validation Errors:</strong>
+              <strong>校验错误：</strong>
               <ul>
                 {validationErrors.map((err, i) => <li key={i}>{err}</li>)}
               </ul>
@@ -286,22 +286,22 @@ export default function AdvancedJsonTab({
 
           <div className={styles.modalButtons} style={{ marginTop: 12 }}>
             <button onClick={handleValidateAndSave} disabled={isMutating}>
-              {isMutating ? 'Saving...' : 'Validate & Save'}
+              {isMutating ? '保存中…' : '校验并保存'}
             </button>
-            <button onClick={() => setIsEditing(false)}>Cancel</button>
+            <button onClick={() => setIsEditing(false)}>取消</button>
           </div>
         </>
       )}
 
       {showConfirm && (
         <ConfirmDialog
-          title="Confirm JSON Update"
+          title="确认更新 JSON"
           message={
             changeSummary.length === 0
-              ? 'No structural changes detected. Save anyway?'
-              : `${changeSummary.length} change(s) detected:\n\n${changeSummary.join('\n')}`
+              ? '未检测到结构性变更，仍要保存吗？'
+              : `检测到 ${changeSummary.length} 项变更：\n\n${changeSummary.join('\n')}`
           }
-          confirmLabel="Save Changes"
+          confirmLabel="保存修改"
           onConfirm={handleConfirmSave}
           onCancel={() => { setShowConfirm(false); setParsedData(null) }}
         />

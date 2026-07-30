@@ -1,5 +1,6 @@
 import { useRef, useEffect, useMemo } from 'react'
 import styles from './InfoBox.module.css'
+import { translatePokemonName } from '../../utils/pokemonNamesZh'
 
 const TRAIT_CHECKS = [
   { key: 'Secret Shiny', label: '隐藏闪光', cls: 'tagSecret' },
@@ -19,7 +20,7 @@ const TRAIT_CHECKS = [
 ] 
 
 const API_FIELDS = [
-  { key: 'ivs', label: 'IVs' },
+  { key: 'ivs', label: '个体值' },
   { key: 'nature', label: '性格' },
   { key: 'location', label: '地点', fallback: 'Location' },
   { key: 'encounter_method', label: '遭遇方式', fallback: 'Encounter Type' },
@@ -42,22 +43,19 @@ function formatDate(dateStr, localize = true) {
         const day = parseInt(parts[2], 10)
         
         if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-          const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-          const monthName = monthNames[month - 1] || ''
-          return `${monthName} ${day}, ${year}`
+          return `${year}年${month}月${day}日`
         }
       }
       
       // Fallback: try parsing as UTC
       const date = new Date(dateStr + 'T00:00:00Z')
       if (!isNaN(date.getTime())) {
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-        return `${monthNames[date.getUTCMonth()]} ${date.getUTCDate()}, ${date.getUTCFullYear()}`
+        return `${date.getUTCFullYear()}年${date.getUTCMonth() + 1}月${date.getUTCDate()}日`
       }
     } else {
       // Localized: convert to user timezone
       const date = new Date(dateStr)
-      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+      return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' })
     }
     
     return null
@@ -179,7 +177,7 @@ export default function InfoBox({ shiny, points, customText, localizeDates = tru
       ref={boxRef}
       data-show-mobile={showOnMobile}
     >
-      <strong>{customText || shiny.Pokemon}</strong>
+      <strong>{customText || translatePokemonName(shiny.Pokemon)}</strong>
       {points !== undefined && (
         <div className={styles.detail}>({points} pts)</div>
       )}

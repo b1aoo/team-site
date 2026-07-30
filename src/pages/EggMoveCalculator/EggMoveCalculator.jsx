@@ -2,18 +2,14 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useDocumentHead } from '../../hooks/useDocumentHead'
 import pokemonData from '../../data/pokemmo_data/pokemon-data.json'
+import { translatePokemonName } from '../../utils/pokemon'
+import { translateEggGroupName, translateMoveName } from '../../utils/pokemonTermsZh'
 import styles from './EggMoveCalculator.module.css'
 
 const MAX_CHAIN_DEPTH = 6
 const MAX_RESULTS = 80
 
-function titleCase(value) {
-  return String(value || '')
-    .split(/[-\s]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ')
-}
+function titleCase(value) { return translatePokemonName(String(value || '')) }
 
 function normalize(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '')
@@ -74,15 +70,7 @@ function getPokemonKey(pokemon, fallbackKey = null) {
   return namedKey
 }
 
-function formatEggGroup(group) {
-  const lower = String(group || '').toLowerCase()
-  if (lower === 'watera') return 'Water A'
-  if (lower === 'waterb') return 'Water B'
-  if (lower === 'waterc') return 'Water C'
-  if (lower === 'humanshape') return 'Human-Like'
-  if (lower === 'no-eggs') return 'Undiscovered'
-  return titleCase(lower)
-}
+function formatEggGroup(group) { return translateEggGroupName(group) }
 
 function getMoveKey(move) {
   return normalize(move?.name)
@@ -201,7 +189,7 @@ function getNaturalMoveMethod(pokemon, moveName) {
       return lvl > max ? lvl : max
     }, 0)
 
-    return `Level ${best}`
+    return `Lv.${best}`
   }
 
   const startMove = methods.find((m) => String(m.type).toLowerCase() === 'start')
@@ -210,7 +198,7 @@ function getNaturalMoveMethod(pokemon, moveName) {
   }
 
   const evoMove = methods.find((m) => String(m.type).toLowerCase() === 'evolution')
-  if (evoMove) return 'Evolution'
+  if (evoMove) return '进化时习得'
 
   return null
 }
@@ -436,18 +424,15 @@ function describeStep(fromKey, edge, index, moveName) {
   const fromName = titleCase(pokemonData[fromKey]?.name || fromKey)
   const toName = titleCase(pokemonData[edge.to]?.name || edge.to)
   const groups = edge.sharedGroups.map(formatEggGroup).join(', ')
-  return `Breed ${fromName} with ${toName} through ${groups} to pass ${moveName}.`
+  return `让${fromName}与${toName}通过${groups}孵化，将${translateMoveName(moveName)}遗传下去。`
 }
 
 export default function EggMoveCalculator() {
   useDocumentHead({
-    title: 'PokeMMO Egg Move Calculator',
-    description: 'Calculate PokeMMO egg move breeding chains from natural move learners through shared egg groups.',
+    title: 'PokeMMO 遗传招式计算器', description: '根据共享蛋组计算从自然习得者到目标宝可梦的遗传招式孵化链。',
     canonicalPath: '/egg-move-calculator/',
     breadcrumbs: [
-      { name: 'Home', url: '/' },
-      { name: 'Tools', url: '/tools' },
-      { name: 'Egg Move Calculator', url: '/egg-move-calculator' },
+      { name: '首页', url: '/' }, { name: '工具', url: '/tools' }, { name: '遗传招式计算器', url: '/egg-move-calculator' },
     ],
   })
 
@@ -481,19 +466,19 @@ export default function EggMoveCalculator() {
     <article className={styles.page}>
       <header className={styles.header}>
         <div>
-          <h1>Egg Move Calculator</h1>
+          <h1>遗传招式计算器</h1>
           <p className={styles.lede}>
-            Pick a Pokemon and one of its egg moves to find the shortest breeding line, currently in BETA.
+            选择宝可梦及其遗传招式，查找最短的孵化链。此工具仍处于测试阶段。
           </p>
         </div>
       </header>
 
-      <section className={styles.controls} aria-label="Egg move search controls">
+      <section className={styles.controls} aria-label="遗传招式查询控件">
         <label className={styles.field}>
-          <span>Pokemon</span>
+          <span>宝可梦</span>
             <input
               type="text"
-              placeholder="Search Pokemon..."
+              placeholder="搜索宝可梦…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -527,18 +512,18 @@ export default function EggMoveCalculator() {
         </label>
 
         <label className={styles.field}>
-          <span>Egg Move</span>
+          <span>遗传招式</span>
           <select
             value={activeMove}
             onChange={(event) => setSelectedMove(event.target.value)}
             disabled={eggMoves.length === 0}
           >
             {eggMoves.length === 0 ? (
-              <option value="">No egg moves</option>
+              <option value="">没有遗传招式</option>
             ) : (
               eggMoves.map((move) => (
                 <option key={move} value={move}>
-                  {move}
+                  {translateMoveName(move)}
                 </option>
               ))
             )}
@@ -548,7 +533,7 @@ export default function EggMoveCalculator() {
 
       <section className={styles.targetPanel}>
         <div>
-          <span className={styles.summaryLabel}>Target</span>
+          <span className={styles.summaryLabel}>目标</span>
           <h2>{targetName}</h2>
           <div className={styles.chips}>
             {targetEggGroups.map((group) => (
@@ -558,22 +543,22 @@ export default function EggMoveCalculator() {
         </div>
       </section>
 
-      <section className={styles.results} aria-label="Egg move breeding chains">
+      <section className={styles.results} aria-label="遗传招式孵化链">
         <div className={styles.resultsHeader}>
-          <h2>{activeMove || 'Egg move'} lines</h2>
-          <span>{result.chains.length} result{result.chains.length === 1 ? '' : 's'}</span>
+          <h2>{activeMove ? translateMoveName(activeMove) : '遗传招式'}路线</h2>
+          <span>{result.chains.length} 条结果</span>
         </div>
 
         {!activeMove && (
-          <p className={styles.empty}>This Pokemon has no egg moves in the current data.</p>
+          <p className={styles.empty}>当前资料中，这只宝可梦没有遗传招式。</p>
         )}
 
         {activeMove && !result.receiver && (
-          <p className={styles.empty}>No breedable receiver was found for this move in the target family.</p>
+          <p className={styles.empty}>目标进化家族中没有可孵化并接收该招式的宝可梦。</p>
         )}
 
         {activeMove && result.receiver && result.chains.length === 0 && (
-          <p className={styles.empty}>No chain was found from a natural learner within {MAX_CHAIN_DEPTH} transfers.</p>
+          <p className={styles.empty}>在最多 {MAX_CHAIN_DEPTH} 次传递内，未找到从自然习得者开始的孵化链。</p>
         )}
 
         <div className={styles.chainList}>
@@ -582,12 +567,12 @@ export default function EggMoveCalculator() {
             return (
               <section key={chain.nodes.join('>')} className={styles.chainCard}>
                 <div className={styles.chainTopline}>
-                  <strong>{chain.nodes.map((node) => titleCase(pokemonData[node]?.name || node)).join(' -> ')}</strong>
-                  <span>{chain.steps.length} transfer{chain.steps.length === 1 ? '' : 's'}</span>
+                  <strong>{chain.nodes.map((node) => titleCase(pokemonData[node]?.name || node)).join(' → ')}</strong>
+                  <span>{chain.steps.length} 次传递</span>
                 </div>
                 <ol className={styles.steps}>
                   <li>
-                    Teach {activeMove} to <Link to={`/pokemon/${sourceKey}/`}>{titleCase(pokemonData[sourceKey]?.name || sourceKey)}</Link> by {chain.sourceMethod}.
+                    让 <Link to={`/pokemon/${sourceKey}/`}>{titleCase(pokemonData[sourceKey]?.name || sourceKey)}</Link> 通过{chain.sourceMethod}习得{translateMoveName(activeMove)}。
                   </li>
                   {chain.steps.map((step, index) => (
                     <li key={`${step.to}-${index}`}>

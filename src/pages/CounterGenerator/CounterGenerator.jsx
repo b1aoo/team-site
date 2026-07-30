@@ -4,13 +4,13 @@ import styles from './CounterGenerator.module.css'
 
 export default function CounterGenerator() {
   const breadcrumbs = [
-    { name: 'Home', url: '/' },
-    { name: 'Counter Generator', url: '/counter-generator' }
+    { name: '首页', url: '/' },
+    { name: '遇敌计数器主题生成器', url: '/counter-generator' }
   ];
 
   useDocumentHead({
-    title: 'PokeMMO Counter Theme Generator - Custom Encounter Counters',
-    description: 'PokeMMO encounter counter theme generator tool.',
+    title: 'PokeMMO 遇敌计数器主题生成器',
+    description: '用于生成 PokeMMO 自定义遇敌计数器主题的工具。',
     canonicalPath: '/counter-generator/',
     breadcrumbs
   })
@@ -24,7 +24,7 @@ export default function CounterGenerator() {
     if (!file) return
 
     loadedFileRef.current = file
-    setStatus('File loaded. Press Generate to process.')
+    setStatus('文件已加载，点击“生成 XML 与压缩包”开始处理。')
     setGenerateEnabled(true)
   }, [])
 
@@ -52,7 +52,7 @@ export default function CounterGenerator() {
 
       img.onerror = () => {
         URL.revokeObjectURL(url)
-        reject(new Error('Image load failed'))
+        reject(new Error('图片加载失败'))
       }
 
       img.src = url
@@ -62,7 +62,7 @@ export default function CounterGenerator() {
   const handleGenerate = useCallback(async () => {
     const file = loadedFileRef.current
     if (!file) {
-      setStatus('Please upload a GIF or PNG first.')
+      setStatus('请先上传 GIF 或 PNG。')
       return
     }
 
@@ -70,7 +70,7 @@ export default function CounterGenerator() {
     const h = Number(document.getElementById('gifHeight').value) || 250
     const userDuration = Number(document.getElementById('frameDuration').value) || 100
 
-    setStatus('Processing frames...')
+    setStatus('正在处理帧…')
 
     try {
       const { GifReader } = await import('omggif')
@@ -132,7 +132,7 @@ export default function CounterGenerator() {
         const blob = await resizeToBlob(file, w, h)
         frames = [{ name: 'frame-00001.png', blob, duration: userDuration }]
       } else {
-        throw new Error('Unsupported file type. Please upload a GIF or PNG.')
+        throw new Error('不支持的文件类型，请上传 GIF 或 PNG。')
       }
 
       // ✅ FIX: smooth looping
@@ -145,10 +145,10 @@ export default function CounterGenerator() {
         })
       }
 
-      setStatus(`Extracted ${frames.length} frames. Loading XML templates...`)
+      setStatus(`已提取 ${frames.length} 帧，正在加载 XML 模板…`)
 
       const fetchXml = (path) => fetch(path).then(r => {
-        if (!r.ok) throw new Error(`Failed to load ${path}: ${r.status}`)
+        if (!r.ok) throw new Error(`加载 ${path} 失败：${r.status}`)
         return r.text()
       })
 
@@ -217,19 +217,19 @@ export default function CounterGenerator() {
       a.download = outputZipName
       a.click()
 
-      setStatus('ZIP created successfully!')
+      setStatus('压缩包已成功生成！')
     } catch (err) {
       console.error(err)
-      setStatus('Error processing file: ' + err.message)
+      setStatus('文件处理失败：' + err.message)
     }
   }, [resizeToBlob])
 
   return (
     <div className={styles.page}>
-      <h2>PokeMMO Encounter Counter Generator</h2>
+      <h2>PokeMMO 遇敌计数器主题生成器</h2>
 
       <div className={styles.formGroup}>
-        <label htmlFor="zipFileInput">Upload a gif or image</label>
+        <label htmlFor="zipFileInput">上传 GIF 或图片</label>
         <input
           id="zipFileInput"
           type="file"
@@ -239,45 +239,45 @@ export default function CounterGenerator() {
       </div>
 
       <div className={`${styles.formGroup} ${styles.sizeGroup}`}>
-        <label>Gif/Image Size</label>
+        <label>GIF / 图片尺寸</label>
         <div className={styles.sizeInputs}>
           <div>
-            <span>Width</span>
+            <span>宽度</span>
             <input type="number" id="gifWidth" defaultValue={300} min={1} />
           </div>
           <div>
-            <span>Height</span>
+            <span>高度</span>
             <input type="number" id="gifHeight" defaultValue={250} min={1} />
           </div>
         </div>
       </div>
 
       <div className={styles.formGroup}>
-        <label htmlFor="zipName">Theme Name:</label>
-        <input type="text" id="zipName" placeholder="Custom Theme.zip" defaultValue="Custom Theme" />
+        <label htmlFor="zipName">主题名称：</label>
+        <input type="text" id="zipName" placeholder="自定义主题.zip" defaultValue="自定义主题" />
       </div>
 
       <div className={styles.formGroup}>
-        <label htmlFor="minimisedFile">Minimised Image (optional):</label>
+        <label htmlFor="minimisedFile">最小化图片（可选）：</label>
         <input type="file" id="minimisedFile" accept="image/*" />
       </div>
 
       <div className={`${styles.formGroup} ${styles.sizeGroup}`}>
-        <label>Minimised Image Size</label>
+        <label>最小化图片尺寸</label>
         <div className={styles.sizeInputs}>
           <div>
-            <span>Width</span>
+            <span>宽度</span>
             <input type="number" id="miniWidth" defaultValue={200} min={1} />
           </div>
           <div>
-            <span>Height</span>
+            <span>高度</span>
             <input type="number" id="miniHeight" defaultValue={50} min={1} />
           </div>
         </div>
       </div>
 
       <div className={styles.formGroup}>
-        <label htmlFor="frameDuration">Frame Duration (ms)</label>
+        <label htmlFor="frameDuration">帧时长（毫秒）</label>
         <input type="number" id="frameDuration" defaultValue={100} min={1} step={1} />
       </div>
 
@@ -288,7 +288,7 @@ export default function CounterGenerator() {
         disabled={!generateEnabled}
         onClick={handleGenerate}
       >
-        Generate XML & Zip
+        生成 XML 与压缩包
       </button>
     </div>
   )

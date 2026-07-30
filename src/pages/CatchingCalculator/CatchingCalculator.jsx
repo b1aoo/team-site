@@ -3,7 +3,13 @@ import { Link } from 'react-router-dom'
 import { useDocumentHead } from '../../hooks/useDocumentHead'
 import { useInGameClock } from '../../hooks/useInGameClock'
 import { useOfficialEvents } from '../../hooks/useOfficialEvents'
-import { getLocalPokemonGif, normalizePokemonName, onGifError } from '../../utils/pokemon'
+import { getLocalPokemonGif, normalizePokemonName, onGifError, translatePokemonName } from '../../utils/pokemon'
+import {
+  translateEggGroupName,
+  translateEncounterTerm,
+  translateLocationName,
+  translateRegionName,
+} from '../../utils/pokemonTermsZh'
 import pokemonData from '../../data/pokemmo_data/pokemon-data.json'
 import generationData from '../../data/generation.json'
 import safariData from '../../data/safari_zones.json'
@@ -130,12 +136,12 @@ function titleCase(value) {
 }
 
 function getEncounterLocationName(encounter) {
-  return titleCase(String(
+  return translateLocationName(titleCase(String(
     encounter?.location
       || encounter?.location_name_full
       || encounter?.location_name
       || ''
-  ))
+  )))
 }
 
 function addEncounterRarityAndTimes(summary, encounter) {
@@ -214,7 +220,7 @@ function extractUtcTime(description) {
 }
 
 function formatEventLocalStart(eventDate, utcTime) {
-  if (!eventDate || !utcTime) return 'Start time unavailable'
+  if (!eventDate || !utcTime) return '开始时间待公布'
 
   const utcDate = new Date(Date.UTC(
     eventDate.getFullYear(),
@@ -224,7 +230,7 @@ function formatEventLocalStart(eventDate, utcTime) {
     utcTime.minutes
   ))
 
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat('zh-CN', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -450,7 +456,40 @@ function isBlacklistedCatchEventTitle(title) {
 }
 
 function formatPokemonDisplayName(value) {
-  return String(value || '').replace(/(^|[\s-])([a-z])/g, (match, prefix, char) => `${prefix}${char.toUpperCase()}`)
+  return translatePokemonName(String(value || '').replace(/(^|[\s-])([a-z])/g, (match, prefix, char) => `${prefix}${char.toUpperCase()}`))
+}
+
+const BALL_NAMES_ZH = Object.freeze({
+  'Poke Ball': '精灵球',
+  'Great Ball': '超级球',
+  'Ultra Ball': '高级球',
+  'Master Ball': '大师球',
+  'Safari Ball': '狩猎球',
+  'Quick Ball': '先机球',
+  'Dusk Ball': '黑暗球',
+  'Timer Ball': '计时球',
+  'Repeat Ball': '重复球',
+  'Net Ball': '捕网球',
+  'Dive Ball': '潜水球',
+  'Nest Ball': '巢穴球',
+  'Luxury Ball': '豪华球',
+  'Heal Ball': '治愈球',
+  'Premier Ball': '纪念球',
+  'Fast Ball': '速度球',
+  'Level Ball': '等级球',
+  'Lure Ball': '诱饵球',
+  'Heavy Ball': '沉重球',
+  'Love Ball': '甜蜜球',
+  'Friend Ball': '友友球',
+  'Moon Ball': '月亮球',
+})
+
+function translateBallName(name) {
+  return BALL_NAMES_ZH[name] || name
+}
+
+function formatPeriod(period) {
+  return ({ Morning: '早晨', Day: '白天', Night: '夜晚' })[period] || period
 }
 
 function formatPercent(value) {
@@ -459,7 +498,7 @@ function formatPercent(value) {
 }
 
 function formatMoney(value) {
-  if (!Number.isFinite(value)) return 'N/A'
+  if (!Number.isFinite(value)) return '不适用'
   return Math.round(value).toLocaleString()
 }
 
@@ -477,17 +516,17 @@ function formatTurnSummary(value) {
 function getTurnSetupLabel(methodLabel) {
   switch (methodLabel) {
     case '1% HP':
-      return '1 HP'
+      return '1% HP'
 
     case '1% HP + Sleep':
-      return '1 HP / Sleep'
+      return '1% HP／睡眠'
 
     case '100% HP':
     case '100% HP (Turn 1)':
-      return 'Full HP'
+      return '满 HP'
 
     case '100% HP + Sleep':
-      return 'Full HP / Sleep'
+      return '满 HP／睡眠'
 
     default:
       return ''
@@ -508,24 +547,27 @@ function formatExpectedTurns(turns) {
 function getPriorityLabel(priority) {
   switch (priority) {
     case PRIORITY_CHEAPEST:
-      return 'Cheapest'
+      return '最低成本'
     case PRIORITY_FASTEST:
-      return 'Fastest'
+      return '最快捕捉'
     case PRIORITY_HIGHEST:
-      return 'Highest Catch Chance'
+      return '最高捕获率'
     default:
-      return 'Best Overall'
+      return '综合最优'
   }
 }
 
 function getCanonicalPokemonName(value) {
   const normalized = normalizeKey(value)
   if (!normalized) return null
-  return POKEMON_VALUES.find((pokemon) => normalizeKey(pokemon.name) === normalized)?.name || null
+  return POKEMON_VALUES.find((pokemon) => (
+    normalizeKey(pokemon.name) === normalized
+    || normalizeKey(translatePokemonName(pokemon.name)) === normalized
+  ))?.name || null
 }
 
 function getPokemonSearchTargets(value) {
-  const normalizedTarget = normalizeKey(value)
+  const normalizedTarget = normalizeKey(getCanonicalPokemonName(value) || value)
   if (!normalizedTarget) return new Set()
 
   const targets = new Set([normalizedTarget])
@@ -558,25 +600,25 @@ function buildSafariBallCandidate(ball, safariCatchData) {
   const chance = Number(safariCatchData?.bestOdds)
   const catchRate = Number(safariCatchData?.catchRate)
   if (!Number.isFinite(chance) || chance <= 0 || !Number.isFinite(catchRate)) {
-    return createUnavailableCandidate(ball, 'Safari catch data is unavailable for this Pokemon.')
+    return createUnavailableCandidate(ball, '该宝可梦暂未收录狩猎地带捕捉数据。')
   }
 
   const strategyLabel = {
-    balls: 'Balls only',
-    ballsOnly: 'Balls only',
-    bait: '1 bait then balls',
-    oneBait: '1 bait then balls',
-    mud: '1 mud then balls',
-    oneMud: '1 mud then balls',
-  }[String(safariCatchData?.bestStrategy || '')] || 'Safari strategy data loaded.'
+    balls: '只投球',
+    ballsOnly: '只投球',
+    bait: '先投 1 次诱饵，再投球',
+    oneBait: '先投 1 次诱饵，再投球',
+    mud: '先投 1 次泥巴，再投球',
+    oneMud: '先投 1 次泥巴，再投球',
+  }[String(safariCatchData?.bestStrategy || '')] || '已载入狩猎地带策略数据。'
 
   const expectedThrows = 100 / chance
 
   return {
     ballId: ball.id,
-    ball: ball.name,
+    ball: translateBallName(ball.name),
     available: true,
-    availabilityNote: `${strategyLabel}. Best safari odds: ${formatPercent(chance)}.`,
+    availabilityNote: `${strategyLabel}。最佳狩猎成功率：${formatPercent(chance)}。`,
     multiplier: 1,
     chance,
     expectedThrows,
@@ -602,10 +644,10 @@ function createApricornSelection(enabled) {
 const MIN_QUICK_BALL_CHANCE = Number(catchCalculatorConfig?.thresholds?.minQuickBallChance) || 90
 const TIMER_TARGET_TURN = Number(catchCalculatorConfig?.assumptions?.timerTargetTurn) || 11
 const METHOD_PROFILES = [
-  { id: 'normal100', hpPercent: 100, statusMod: 1, turns: 0, label: '100% HP' },
-  { id: 'normal1', hpPercent: 1, statusMod: 1, turns: 1, label: '1 HP' },
-  { id: 'sleep100', hpPercent: 100, statusMod: 2, turns: 1, label: '100% HP + Sleep' },
-  { id: 'sleep1', hpPercent: 1, statusMod: 2, turns: 2, label: '1 HP + Sleep' },
+  { id: 'normal100', hpPercent: 100, statusMod: 1, turns: 0, label: '满 HP' },
+  { id: 'normal1', hpPercent: 1, statusMod: 1, turns: 1, label: '1% HP' },
+  { id: 'sleep100', hpPercent: 100, statusMod: 2, turns: 1, label: '满 HP＋睡眠' },
+  { id: 'sleep1', hpPercent: 1, statusMod: 2, turns: 2, label: '1% HP＋睡眠' },
 ]
 
 function toStarLabel(scoreOutOf100) {
@@ -780,7 +822,7 @@ function buildRouteEncounterIndex() {
 
     const encounters = Array.isArray(pokemon?.location_area_encounters) ? pokemon.location_area_encounters : []
     encounters.forEach((encounter) => {
-      const regionName = titleCase(String(encounter?.region_name || ''))
+      const regionName = translateRegionName(titleCase(String(encounter?.region_name || '')))
       const routeName = getEncounterLocationName(encounter)
       if (!regionName || !routeName) return
 
@@ -825,7 +867,7 @@ function buildAllRouteUniverse(encounterMethod) {
       if (method !== encounterMethod) return
       if (isSpecialEncounterType(encounterType) && pokemonSlug !== 'feebas') return
 
-      const region = titleCase(String(encounter?.region_name || '').trim())
+      const region = translateRegionName(titleCase(String(encounter?.region_name || '').trim()))
       const routeName = getEncounterLocationName(encounter)
       if (!region || !routeName) return
 
@@ -837,7 +879,7 @@ function buildAllRouteUniverse(encounterMethod) {
           region,
           routeName,
           displayName: routeName,
-          variation: 'All Encounters',
+          variation: '全部遭遇',
           encounterCategory: method,
           pokemonPercents: new Map(),
         })
@@ -951,7 +993,7 @@ function getHeavyMultiplier(weightKg) {
 function createUnavailableCandidate(ball, reason) {
   return {
     ballId: ball.id,
-    ball: ball.name,
+    ball: translateBallName(ball.name),
     available: false,
     availabilityNote: reason,
     multiplier: 1,
@@ -1019,7 +1061,7 @@ function getBallCandidate(ball, context) {
   } = context
 
   if (ball.apricorn && !apricornEnabled.has(ball.id)) {
-    return createUnavailableCandidate(ball, 'This Apricorn Ball is disabled.')
+    return createUnavailableCandidate(ball, '此柑果球未启用。')
   }
 
   const lowerTypes = types.map((type) => String(type).toLowerCase())
@@ -1027,10 +1069,10 @@ function getBallCandidate(ball, context) {
 
   let multiplier = 1
   let available = true
-  let availabilityNote = 'Available'
+  let availabilityNote = '可用'
 
   if (context.isSafari && ball.id !== 'safari-ball') {
-    return createUnavailableCandidate(ball, 'Only Safari Balls are usable in Safari Zone and Great Marsh.')
+    return createUnavailableCandidate(ball, '狩猎地带与大湿原只能使用狩猎球。')
   }
 
   if (context.isSafari && ball.id === 'safari-ball') {
@@ -1047,23 +1089,23 @@ function getBallCandidate(ball, context) {
     case 'safari-ball':
       if (!context.isSafari) {
         available = false
-        availabilityNote = 'Only usable in Safari Zones.'
+        availabilityNote = '仅能在狩猎地带使用。'
       } else {
         multiplier = 2.5
       }
       break
     case 'net-ball':
       multiplier = lowerTypes.includes('water') || lowerTypes.includes('bug') ? 3.5 : 1
-      availabilityNote = multiplier > 1 ? 'Type bonus active.' : 'No type bonus on this Pokemon.'
+      availabilityNote = multiplier > 1 ? '属性加成生效。' : '该宝可梦不享受属性加成。'
       break
     case 'nest-ball':
       multiplier = getNestMultiplier(level)
-      availabilityNote = `Level-based bonus (${multiplier.toFixed(1)}x).`
+      availabilityNote = `等级加成生效（${multiplier.toFixed(1)} 倍）。`
       break
     case 'dive-ball':
       if (!isWater) {
         available = false
-        availabilityNote = 'Only usable for fishing/surf encounters.'
+        availabilityNote = '仅适用于垂钓／冲浪遭遇。'
       } else {
         multiplier = 3.5
       }
@@ -1071,77 +1113,77 @@ function getBallCandidate(ball, context) {
     case 'repeat-ball':
       multiplier = getRepeatMultiplier(context.repeatStreak || 0)
       availabilityNote = context.repeatStreak > 0
-        ? `Repeat streak bonus (${multiplier.toFixed(1)}x).`
-        : 'No streak bonus on first catch.'
+        ? `连锁加成生效（${multiplier.toFixed(1)} 倍）。`
+        : '首次捕捉没有连锁加成。'
       break
     case 'timer-ball':
       multiplier = getTimerMultiplier(timerTurn)
-      availabilityNote = `Turn-based bonus (${multiplier.toFixed(1)}x at throw turn ${timerTurn}).`
+      availabilityNote = `回合加成生效（第 ${timerTurn} 次投球为 ${multiplier.toFixed(1)} 倍）。`
       break
     case 'quick-ball':
       multiplier = 5
-      availabilityNote = 'Assumes opening throw with Turn 1 bonus active.'
+      availabilityNote = '按首回合投球并享受加成计算。'
       break
     case 'dusk-ball':
       if (!isNight && !isBuilding) {
         available = false
-        availabilityNote = 'Requires in-game night, Force Night Time, or an indoor/cave encounter.'
+        availabilityNote = '需处于游戏内夜晚、强制夜晚，或室内／洞穴遭遇。'
       } else {
         multiplier = 2.5
         availabilityNote = isNight
-          ? 'Night-time bonus active.'
-          : 'Indoor/cave bonus active.'
+          ? '夜晚加成生效。'
+          : '室内／洞穴加成生效。'
       }
       break
     case 'luxury-ball':
       multiplier = hasFriendship ? 2 : 1
-      availabilityNote = hasFriendship ? 'Friendship evolution bonus active.' : 'No friendship evolution bonus.'
+      availabilityNote = hasFriendship ? '亲密度进化宝可梦加成生效。' : '无亲密度进化加成。'
       break
     case 'level-ball':
       multiplier = level === 30 ? 4 : 1
-      availabilityNote = level === 30 ? 'Wild level matches level 30 catcher.' : 'No level match bonus.'
+      availabilityNote = level === 30 ? '野生宝可梦等级与 30 级捕捉方相同。' : '无等级相同加成。'
       break
     case 'lure-ball':
       if (!isWater) {
         available = false
-        availabilityNote = 'Only boosted for fishing encounters.'
+        availabilityNote = '仅在垂钓遭遇时获得加成。'
       } else {
         multiplier = 4
       }
       break
     case 'moon-ball':
       multiplier = hasMoon ? 3.5 : 1
-      availabilityNote = hasMoon ? 'Moon-stone evolution line bonus active.' : 'No moon-stone evolution bonus.'
+      availabilityNote = hasMoon ? '月之石进化家族加成生效。' : '无月之石进化加成。'
       break
     case 'friend-ball':
       multiplier = hasFriendship ? 2.5 : 1
-      availabilityNote = hasFriendship ? 'Friendship evolution line bonus active.' : 'No friendship evolution bonus.'
+      availabilityNote = hasFriendship ? '亲密度进化家族加成生效。' : '无亲密度进化加成。'
       break
     case 'heavy-ball': {
       const heavyMultiplier = getHeavyMultiplier(weightKg)
       if (heavyMultiplier == null) {
         available = false
-        availabilityNote = 'Weight data is unavailable for this Pokemon.'
+        availabilityNote = '该宝可梦暂未收录体重数据。'
       } else {
         multiplier = heavyMultiplier
-        availabilityNote = `Weight bonus active (${multiplier.toFixed(1)}x).`
+        availabilityNote = `体重加成生效（${multiplier.toFixed(1)} 倍）。`
       }
       break
     }
     case 'fast-ball':
       multiplier = speed >= 100 ? 4 : 1
-      availabilityNote = speed >= 100 ? 'Speed bonus active (100+ base speed).' : 'No speed bonus below 100 base speed.'
+      availabilityNote = speed >= 100 ? '速度加成生效（基础速度 100 以上）。' : '基础速度低于 100，没有速度加成。'
       break
     case 'love-ball':
       if (targetGenderLabel === 'genderless') {
         available = false
-        availabilityNote = 'Love Ball does not work on genderless Pokemon.'
+        availabilityNote = '甜蜜球对无性别宝可梦无效。'
       } else if (targetGenderLabel === 'male-only' || targetGenderLabel === 'female-only') {
         available = false
-        availabilityNote = 'Opposite-gender same-species setup is impossible for single-gender Pokemon.'
+        availabilityNote = '单一性别宝可梦无法满足同种异性条件。'
       } else {
         multiplier = 8
-        availabilityNote = '8.0x active with same-species opposite-gender lead (high prep strategy).'
+        availabilityNote = '同种异性首发时倍率为 8.0（需要较高准备成本）。'
       }
       break
     default:
@@ -1154,7 +1196,7 @@ function getBallCandidate(ball, context) {
 
   const quickTurnOneDetails = calculateCatchChanceDetails(context.catchRate, multiplier, 100, 1)
   if (ball.id === 'quick-ball' && quickTurnOneDetails.chance < MIN_QUICK_BALL_CHANCE) {
-    return createUnavailableCandidate(ball, `Quick Ball requires at least ${MIN_QUICK_BALL_CHANCE}% catch chance (currently ${formatPercent(quickTurnOneDetails.chance)}).`)
+    return createUnavailableCandidate(ball, `先机球要求首回合捕获率至少为 ${MIN_QUICK_BALL_CHANCE}%（当前为 ${formatPercent(quickTurnOneDetails.chance)}）。`)
   }
 
   const price = ball.price == null ? NaN : ball.price
@@ -1210,7 +1252,7 @@ function getBallCandidate(ball, context) {
 
   return {
     ballId: ball.id,
-    ball: ball.name,
+    ball: translateBallName(ball.name),
     available,
     availabilityNote,
     multiplier,
@@ -1329,7 +1371,7 @@ function buildPokemonRecommendation(pokemonName, routeEntry, options, routeEncou
       avgCost: Number.POSITIVE_INFINITY,
       avgTurns: 0,
       avgChance: 0,
-      explanation: 'No available balls with current filter settings.',
+      explanation: '当前筛选条件下没有可用的精灵球。',
       genderRatios,
       eggGroups: pokemon.egg_groups || [],
       catchRate,
@@ -1357,8 +1399,8 @@ function buildPokemonRecommendation(pokemonName, routeEntry, options, routeEncou
   const repeatThreshold = getRepeatThreshold(calcContext, bestOverall.efficiency)
 
   const explanation = selected === bestOverall
-    ? `${selected.ball} is the best overall value for this setup.`
-    : `${selected.ball} is selected because your priority is ${getPriorityLabel(options.priority)}.`
+    ? `在当前条件下，${selected.ball}的综合性价比最高。`
+    : `按“${getPriorityLabel(options.priority)}”优先级，推荐使用${selected.ball}。`
 
   return {
     pokemonName,
@@ -1618,10 +1660,10 @@ function getDisplayPercentLabel(routeEntry, pokemonName) {
 
 function buildComparisonRows(result, priority) {
   return [
-    { key: PRIORITY_OVERALL, label: 'Best Overall', value: result.bestOverall ? `${result.bestOverall.ball} (${formatPercent(result.bestOverall.chance)})` : 'N/A' },
-    { key: PRIORITY_CHEAPEST, label: 'Cheapest', value: result.cheapest ? `${result.cheapest.ball} (${formatMoney(result.cheapest.expectedCost)})` : 'N/A' },
-    { key: PRIORITY_FASTEST, label: 'Fastest', value: result.fastest ? `${result.fastest.ball} (${formatExpectedTurns(result.fastest.expectedTurnsToSuccess)})` : 'N/A' },
-    { key: PRIORITY_HIGHEST, label: 'Highest Catch Chance', value: result.highestCatch ? `${result.highestCatch.ball} (${formatPercent(result.highestCatch.chance)})` : 'N/A' },
+    { key: PRIORITY_OVERALL, label: '综合最优', value: result.bestOverall ? `${result.bestOverall.ball}（${formatPercent(result.bestOverall.chance)}）` : '不适用' },
+    { key: PRIORITY_CHEAPEST, label: '最低成本', value: result.cheapest ? `${result.cheapest.ball}（${formatMoney(result.cheapest.expectedCost)}）` : '不适用' },
+    { key: PRIORITY_FASTEST, label: '最快捕捉', value: result.fastest ? `${result.fastest.ball}（${formatExpectedTurns(result.fastest.expectedTurnsToSuccess)} 回合）` : '不适用' },
+    { key: PRIORITY_HIGHEST, label: '最高捕获率', value: result.highestCatch ? `${result.highestCatch.ball}（${formatPercent(result.highestCatch.chance)}）` : '不适用' },
   ].filter((entry) => entry.key !== priority)
 }
 
@@ -1658,8 +1700,8 @@ export default function CatchingCalculator() {
   const disableAllApricornBalls = () => setApricornEnabled(createApricornSelection([]))
 
   useDocumentHead({
-    title: 'Catching Calculator - Team Synergy',
-    description: 'Plan the fastest and most cost-efficient catch strategy by route, Pokemon, or egg group in PokeMMO.',
+    title: '捕捉计算器｜PokeMMO',
+    description: '按地点、宝可梦或蛋组计算 PokeMMO 中兼顾成功率、时间与成本的捕捉方案。',
     canonicalPath: '/catching-calculator/',
   })
   function getInitialInfoDropdownOpen() {
@@ -1684,7 +1726,7 @@ export default function CatchingCalculator() {
 
         return {
           id: item?.link || `${item?.title || 'event'}-${index}`,
-          title: item?.title || 'Untitled Event',
+          title: item?.title || '未命名活动',
           link: item?.link || '',
           location: extractCatchEventLocation(item?.description || ''),
           eventDate,
@@ -1723,7 +1765,7 @@ export default function CatchingCalculator() {
 
   const pokemonNames = useMemo(
     () => POKEMON_VALUES
-      .map((pokemon) => formatPokemonDisplayName(pokemon.name))
+      .map((pokemon) => pokemon.name)
       .filter(Boolean)
       .sort((a, b) => a.localeCompare(b)),
     []
@@ -1829,7 +1871,7 @@ export default function CatchingCalculator() {
     const query = normalizeKey(pokemonSearch)
     if (query.length < POKEMON_SUGGESTION_MIN_CHARS) return []
     return pokemonNames
-      .filter((name) => normalizeKey(name).includes(query))
+      .filter((name) => normalizeKey(name).includes(query) || normalizeKey(translatePokemonName(name)).includes(query))
       .slice(0, MAX_SUGGESTIONS)
   }, [pokemonNames, pokemonSearch])
 
@@ -1837,7 +1879,7 @@ export default function CatchingCalculator() {
     const query = normalizeKey(specificPokemonSearch)
     if (query.length < POKEMON_SUGGESTION_MIN_CHARS) return []
     return pokemonNames
-      .filter((name) => normalizeKey(name).includes(query))
+      .filter((name) => normalizeKey(name).includes(query) || normalizeKey(translatePokemonName(name)).includes(query))
       .slice(0, MAX_SUGGESTIONS)
   }, [pokemonNames, specificPokemonSearch])
 
@@ -1929,10 +1971,10 @@ export default function CatchingCalculator() {
 
       const syntheticRoute = {
         id: `event-entry-${normalizePokemonName(canonicalName)}`,
-        region: 'Catch Event',
-        routeName: enabledOfficialCatchEvent?.location || enabledOfficialCatchEvent?.title || 'Event Location',
-        displayName: enabledOfficialCatchEvent?.location || enabledOfficialCatchEvent?.title || 'Catch Event',
-        variation: 'Event Entry',
+        region: '捕捉活动',
+        routeName: enabledOfficialCatchEvent?.location || enabledOfficialCatchEvent?.title || '活动地点',
+        displayName: enabledOfficialCatchEvent?.location || enabledOfficialCatchEvent?.title || '捕捉活动',
+        variation: '活动参赛条目',
         encounterCategory: METHOD_NORMAL,
         pokemonPercents: new Map([[normalizePokemonName(canonicalName), { percent: 100, label: '100.0%' }]]),
       }
@@ -1971,20 +2013,20 @@ export default function CatchingCalculator() {
 
   return (
     <div className={styles.page}>
-      <h1 className="page-title">Catching Calculator</h1>
+      <h1 className="page-title">捕捉计算器</h1>
 
       <details className={styles.infoDropdown} open={isInfoDropdownOpen} onToggle={handleInfoDropdownToggle}>
-        <summary>Work In Progress</summary>
+        <summary>测试版说明</summary>
         <p>
-            This is currently work in progress, it uses the Catch %, Ball cost, and Turn Time to calculate the best ball, I have tested a few routes and pokemon and think its good enough to be released, although I am sure there may be some mistakes lurking, if you find any catch %s that are just wrong, please contact oHypers on discord.
+          本工具以捕获率、精灵球成本和所需回合数综合计算推荐用球。它仍在持续校验中；若你发现明显错误的捕获率或计算结果，请通过 Discord 联系 oHypers。
         </p>
         <p>
-            Until I am confident with the calculations, take this page with a grain of salt. Regardless, I am sure this page can still be useful!
+          在计算模型完全定稿前，请将结果作为实战决策的参考；它仍能帮助你更快比较不同捕捉方案。
         </p>
         </details>
 
       <section className={styles.controlsCard}>
-        <div className={styles.modeTabs} role="tablist" aria-label="Search mode">
+        <div className={styles.modeTabs} role="tablist" aria-label="搜索模式">
           <button
             type="button"
             className={`${styles.modeTab} ${mode === MODE_ROUTE ? styles.modeTabActive : ''}`}
@@ -1993,7 +2035,7 @@ export default function CatchingCalculator() {
               setShowMoreCount(1)
             }}
           >
-            Route Search
+            地点搜索
           </button>
           <button
             type="button"
@@ -2003,7 +2045,7 @@ export default function CatchingCalculator() {
               setShowMoreCount(1)
             }}
           >
-            Pokemon Search
+            宝可梦搜索
           </button>
           <button
             type="button"
@@ -2013,7 +2055,7 @@ export default function CatchingCalculator() {
               setShowMoreCount(1)
             }}
           >
-            Egg Group Search
+            蛋组搜索
           </button>
           <button
             type="button"
@@ -2023,7 +2065,7 @@ export default function CatchingCalculator() {
               setShowMoreCount(1)
             }}
           >
-            Specific Mon Search
+            指定宝可梦
           </button>
           <button
             type="button"
@@ -2033,20 +2075,20 @@ export default function CatchingCalculator() {
               setShowMoreCount(1)
             }}
           >
-            Catch Events
+            捕捉活动
           </button>
         </div>
 
         <div className={styles.controlGrid}>
           {mode === MODE_ROUTE && (
             <label className={styles.controlField}>
-              <span>Route</span>
+              <span>地点</span>
               <input
                 type="text"
                 list="catch-calc-route-list"
                 value={routeSearch}
                 onChange={(event) => handleRoutePick(event.target.value)}
-                placeholder="Search route (e.g. Route 24, Viridian Forest)"
+                placeholder="搜索地点（如 24号道路、常青森林）"
               />
               <datalist id="catch-calc-route-list">
                 {filteredRouteOptions.map((route) => (
@@ -2058,18 +2100,18 @@ export default function CatchingCalculator() {
 
           {mode === MODE_ROUTE && (
             <label className={styles.controlField}>
-              <span>Encounter Method</span>
+              <span>遭遇方式</span>
               <select value={routeEncounterMethod} onChange={(event) => setRouteEncounterMethod(event.target.value)}>
-                <option value={METHOD_NORMAL}>Normal Encounters</option>
-                <option value={METHOD_FISHING}>Fishing</option>
-                <option value={METHOD_SURFING}>Surfing</option>
+                <option value={METHOD_NORMAL}>普通遭遇</option>
+                <option value={METHOD_FISHING}>垂钓</option>
+                <option value={METHOD_SURFING}>冲浪</option>
               </select>
             </label>
           )}
 
           {mode === MODE_POKEMON && (
             <label className={styles.controlField}>
-              <span>Pokemon</span>
+              <span>宝可梦</span>
               <input
                 type="text"
                 list="catch-calc-pokemon-list-main"
@@ -2078,11 +2120,11 @@ export default function CatchingCalculator() {
                   setPokemonSearch(event.target.value)
                   setShowMoreCount(1)
                 }}
-                placeholder="Search a Pokemon"
+                placeholder="搜索宝可梦（可输入中文或英文）"
               />
               <datalist id="catch-calc-pokemon-list-main">
                 {filteredPokemonOptions.map((name) => (
-                  <option key={name} value={name} />
+                  <option key={name} value={name} label={formatPokemonDisplayName(name)} />
                 ))}
               </datalist>
             </label>
@@ -2090,7 +2132,7 @@ export default function CatchingCalculator() {
 
           {mode === MODE_EGG && (
             <label className={styles.controlField}>
-              <span>Egg Group</span>
+              <span>蛋组</span>
               <select
                 value={eggGroupSearch}
                 onChange={(event) => {
@@ -2098,9 +2140,9 @@ export default function CatchingCalculator() {
                   setShowMoreCount(1)
                 }}
               >
-                <option value="">Select egg group</option>
+                <option value="">选择蛋组</option>
                 {eggGroups.map((group) => (
-                  <option key={group} value={group}>{group}</option>
+                  <option key={group} value={group}>{translateEggGroupName(group)}</option>
                 ))}
               </select>
             </label>
@@ -2109,29 +2151,29 @@ export default function CatchingCalculator() {
           {mode === MODE_SPECIFIC && (
             <>
               <label className={styles.controlField}>
-                <span>Pokemon</span>
+                <span>宝可梦</span>
                 <input
                   type="text"
                   list="catch-calc-pokemon-list-specific"
                   value={specificPokemonSearch}
                   onChange={(event) => setSpecificPokemonSearch(event.target.value)}
-                  placeholder="Type exact Pokemon name"
+                  placeholder="输入宝可梦名称（中文或英文）"
                 />
                 <datalist id="catch-calc-pokemon-list-specific">
                   {filteredSpecificPokemonOptions.map((name) => (
-                    <option key={name} value={name} />
+                    <option key={name} value={name} label={formatPokemonDisplayName(name)} />
                   ))}
                 </datalist>
               </label>
 
               <label className={styles.controlField}>
-                <span>Route Location</span>
+                <span>捕捉地点</span>
                 <input
                   type="text"
                   list="catch-calc-specific-route-list"
                   value={specificRouteSearch}
                   onChange={(event) => handleSpecificRoutePick(event.target.value)}
-                  placeholder="Optional: type and select route"
+                  placeholder="可选：输入并选择地点"
                 />
                 <datalist id="catch-calc-specific-route-list">
                   {filteredSpecificRouteOptions.map((route) => (
@@ -2141,7 +2183,7 @@ export default function CatchingCalculator() {
               </label>
 
               <label className={styles.controlField}>
-                <span>Pokemon Level</span>
+                <span>宝可梦等级</span>
                 <input
                   type="number"
                   min="1"
@@ -2152,10 +2194,10 @@ export default function CatchingCalculator() {
               </label>
 
               <label className={styles.controlField}>
-                <span>Variant</span>
+                <span>个体类型</span>
                 <select value={specificAlpha ? 'alpha' : 'normal'} onChange={(event) => setSpecificAlpha(event.target.value === 'alpha')}>
-                  <option value="normal">Normal</option>
-                  <option value="alpha">Alpha (catch rate 10)</option>
+                  <option value="normal">普通</option>
+                  <option value="alpha">头目（捕获率 10）</option>
                 </select>
               </label>
             </>
@@ -2163,7 +2205,7 @@ export default function CatchingCalculator() {
 
           {mode === MODE_EGG && (
             <label className={styles.controlField}>
-              <span>Gender Priority</span>
+              <span>性别优先</span>
               <select
                 value={genderPriority}
                 onChange={(event) => {
@@ -2171,57 +2213,57 @@ export default function CatchingCalculator() {
                   setShowMoreCount(1)
                 }}
               >
-                <option value={GENDER_MALE}>Male Priority</option>
-                <option value={GENDER_FEMALE}>Female Priority</option>
-                <option value={GENDER_IGNORE}>Ignore Gender</option>
+                <option value={GENDER_MALE}>优先雄性</option>
+                <option value={GENDER_FEMALE}>优先雌性</option>
+                <option value={GENDER_IGNORE}>不考虑性别</option>
               </select>
             </label>
           )}
 
           <label className={styles.controlField}>
-            <span>Recommendation Priority</span>
+            <span>推荐优先级</span>
             <select value={priority} onChange={(event) => setPriority(event.target.value)}>
-              <option value={PRIORITY_OVERALL}>Best Overall</option>
-              <option value={PRIORITY_CHEAPEST}>Cheapest</option>
-              <option value={PRIORITY_FASTEST}>Fastest</option>
-              <option value={PRIORITY_HIGHEST}>Highest Catch Chance</option>
+              <option value={PRIORITY_OVERALL}>综合最优</option>
+              <option value={PRIORITY_CHEAPEST}>最低成本</option>
+              <option value={PRIORITY_FASTEST}>最快捕捉</option>
+              <option value={PRIORITY_HIGHEST}>最高捕获率</option>
             </select>
           </label>
         </div>
 
         {mode === MODE_SPECIFIC && (
           <p className={styles.controlGridNote}>
-            Leave Route Location blank to auto-pick the best route for this Pokemon.
+            留空“捕捉地点”将自动选择最适合该宝可梦的地点。
           </p>
         )}
 
         {mode === MODE_ROUTE && (
           <p className={styles.controlGridNote}>
-            Select one of the suggested routes to load calculations.
+            请从建议列表中选择一个地点以载入计算结果。
           </p>
         )}
 
         <div className={styles.toggleGrid}>
-          <label><input type="checkbox" checked={ironmanMode} onChange={(e) => setIronmanMode(e.target.checked)} /> Ironman Mode (cost-first, apricorn disabled)</label>
-          <label><input type="checkbox" checked={effectiveForceNight} onChange={(e) => handleForceDuskToggle(e.target.checked)} /> Force Dusk Ball</label>
+          <label><input type="checkbox" checked={ironmanMode} onChange={(e) => setIronmanMode(e.target.checked)} /> 铁人模式（成本优先，禁用柑果球）</label>
+          <label><input type="checkbox" checked={effectiveForceNight} onChange={(e) => handleForceDuskToggle(e.target.checked)} /> 强制启用黑暗球夜晚加成</label>
           <details className={styles.apricornDropdown}>
             <summary className={styles.apricornDropdownSummary}>
-              Apricorn Balls
+              柑果球
               <span className={styles.apricornDropdownCount}>
-                {apricornEnabled.size}/{APRICORN_BALL_IDS.length} enabled
+                已启用 {apricornEnabled.size}/{APRICORN_BALL_IDS.length}
               </span>
             </summary>
             <div className={styles.apricornDropdownPanel}>
               <div className={styles.apricornDropdownHeader}>
                 <p className={styles.apricornDropdownHint}>
-                  Choose which Apricorn Balls can be considered by the calculator.
+                  选择允许计算器纳入比较的柑果球。
                 </p>
                 <div className={styles.apricornButtonRow}>
                   <button type="button" onClick={enableAllApricornBalls} disabled={ironmanMode} className={styles.apricornActionButton}>
-                    Enable All
+                    全部启用
                   </button>
                   <button type="button" onClick={disableAllApricornBalls} disabled={ironmanMode} className={styles.apricornActionButton}>
-                    Disable All
+                    全部禁用
                   </button>
                 </div>
               </div>
@@ -2242,7 +2284,7 @@ export default function CatchingCalculator() {
                           setApricornEnabled(next)
                         }}
                       />
-                      <span>Enable {ballMeta?.name}</span>
+                      <span>启用 {translateBallName(ballMeta?.name)}</span>
                     </label>
                   )
                 })}
@@ -2252,43 +2294,43 @@ export default function CatchingCalculator() {
         </div>
 
         <p className={styles.helperText}>
-          Current in-game period: <strong>{period}</strong>. Quick Ball is only considered at 90%+ turn-1 chance, Timer Balls are the last resort. At night, Force Dusk Ball auto-enables; unchecking it treats the calculator as daytime.
+          当前游戏内时段：<strong>{formatPeriod(period)}</strong>。先机球仅在首回合捕获率达到 90% 以上时纳入推荐；计时球只会作为最后选择。夜晚会自动启用黑暗球加成，取消勾选则按白天计算。
         </p>
       </section>
 
       {mode === MODE_ROUTE && selectedRouteEntry && (
         <section className={styles.resultsSection}>
           <h2>{selectedRouteEntry.region} - {selectedRouteEntry.displayName}</h2>
-          <p className={styles.routeMeta}>Recommendations are weighted for expected cost per successful catch, expected time-to-success, and catch chance.</p>
+          <p className={styles.routeMeta}>推荐会综合单次成功捕捉的预期成本、预期耗时与捕获率。</p>
 
           {activeRouteBreakdown && (
             <article className={styles.breakdownOverlay}>
               <div className={styles.breakdownOverlayHeader}>
-                <h3>{formatPokemonDisplayName(activeRouteBreakdown.pokemonName)} Ball Breakdown</h3>
-                <button type="button" className={styles.closeBreakdownButton} onClick={() => setActiveBreakdownKey('')}>Close</button>
+                <h3>{formatPokemonDisplayName(activeRouteBreakdown.pokemonName)}：精灵球明细</h3>
+                <button type="button" className={styles.closeBreakdownButton} onClick={() => setActiveBreakdownKey('')}>关闭</button>
               </div>
               <p className={styles.routeMeta}>
-                Catch Formula: chance% = (min(255, floor(((300 - 2 x HP%) / 300) x BallMultiplier x CatchRate x StatusMod)) / 255) x 100
+                捕获公式：捕获率 = (min(255, floor(((300 - 2 × HP%) / 300) × 球种倍率 × 捕获度 × 状态倍率)) / 255) × 100
               </p>
               <p className={styles.routeMeta}>
-                Each ball is scored across 4 setups (100% HP, 1% HP, 100% HP + sleep, 1% HP + sleep). The best setup per ball is used for recommendations. {formatPokemonDisplayName(activeRouteBreakdown.pokemonName)} catch rate = {activeRouteBreakdown.catchRate}.
+                每种球都会测试四种条件（满 HP、1% HP、满 HP＋睡眠、1% HP＋睡眠），并采用其中最佳结果进行推荐。{formatPokemonDisplayName(activeRouteBreakdown.pokemonName)}的捕获度为 {activeRouteBreakdown.catchRate}。
               </p>
 
               <div className={styles.largeTableWrap}>
                 <table>
                   <thead>
                     <tr>
-                      <th>Ball</th>
-                      <th>Modifier</th>
-                      <th>Catch Value</th>
-                      <th>Catch %</th>
+                      <th>精灵球</th>
+                      <th>倍率</th>
+                      <th>捕获值</th>
+                      <th>捕获率</th>
                       <th>HP%</th>
-                      <th>Status</th>
-                      <th>Expected Throws</th>
-                      <th>Expected Turns</th>
-                      <th>Price</th>
-                      <th>Expected Cost</th>
-                      <th>Note</th>
+                      <th>状态</th>
+                      <th>预期投球数</th>
+                      <th>预期回合</th>
+                      <th>单价</th>
+                      <th>预期成本</th>
+                      <th>说明</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2302,9 +2344,9 @@ export default function CatchingCalculator() {
                         <td>{entry.statusMod.toFixed(1)}x</td>
                         <td>{formatTurns(entry.expectedThrows)}</td>
                         <td>{formatTurns(entry.expectedTurnsToSuccess)}</td>
-                        <td>{entry.price == null ? 'N/A' : formatMoney(entry.price)}</td>
+                        <td>{entry.price == null ? '不适用' : formatMoney(entry.price)}</td>
                         <td>{formatMoney(entry.expectedCost)}</td>
-                        <td>{entry.available ? entry.availabilityNote : `Not viable - ${entry.availabilityNote}`}</td>
+                        <td>{entry.available ? entry.availabilityNote : `不可用：${entry.availabilityNote}`}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -2325,8 +2367,8 @@ export default function CatchingCalculator() {
                   />
                   <div>
                     <h3>{formatPokemonDisplayName(result.pokemonName)}</h3>
-                    <p>Estimated level: {result.level}</p>
-                    <p>Catch rate: {result.catchRate}</p>
+                    <p>估算等级：{result.level}</p>
+                    <p>捕获度：{result.catchRate}</p>
                   </div>
                 </Link>
 
@@ -2349,16 +2391,16 @@ export default function CatchingCalculator() {
                       </div>
                       {result.isGhost && (
                         <div className={styles.soakNote}>
-                          ⚠️ Requires <strong>Soak</strong> before using <strong>False Swipe</strong>.
+                          ⚠️ 使用<strong>点到为止</strong>前，需要先使用<strong>浸水</strong>。
                         </div>
                       )}
                       <div className={styles.featuredRecommendationStats}>
                         <div>
-                          <span>Expected Cost</span>
+                          <span>预期成本</span>
                           <strong>{formatMoney(result.selected.expectedCost)}</strong>
                         </div>
                         <div>
-                          <span>Expected Turns</span>
+                          <span>预期回合</span>
                           <strong>{formatExpectedTurns(result.selected.expectedTurnsToSuccess)}</strong>
                         </div>
                       </div>
@@ -2372,8 +2414,8 @@ export default function CatchingCalculator() {
                     <p className={styles.explanation}>{result.explanation}</p>
                     {result.longTerm && (
                       <p className={styles.longTerm}>
-                        Long-term option: {result.longTerm.ball}
-                        {result.repeatThreshold ? ` (becomes top value after ${result.repeatThreshold} same-species catches).` : '.'}
+                        长期方案：{result.longTerm.ball}
+                        {result.repeatThreshold ? `（连续捕捉同种宝可梦 ${result.repeatThreshold} 次后成为性价比最优）。` : '。'}
                       </p>
                     )}
                     <button
@@ -2381,11 +2423,11 @@ export default function CatchingCalculator() {
                       className={styles.showBreakdownButton}
                       onClick={() => setActiveBreakdownKey(`${selectedRouteEntry.id}|${result.pokemonName}`)}
                     >
-                      Open Full Ball Breakdown
+                      查看完整精灵球明细
                     </button>
                   </>
                 ) : (
-                  <p className={styles.explanation}>No strategy could be evaluated with the current filters.</p>
+                  <p className={styles.explanation}>当前筛选条件下无法计算出捕捉方案。</p>
                 )}
               </article>
             ))}
@@ -2395,46 +2437,46 @@ export default function CatchingCalculator() {
 
       {mode === MODE_ROUTE && !selectedRouteEntry && (
         <section className={styles.resultsSection}>
-          <h2>Route Search</h2>
-          <p className={styles.routeMeta}>Type a route and click a suggested entry to view recommendations. Current method: {routeEncounterMethod}.</p>
+          <h2>地点搜索</h2>
+          <p className={styles.routeMeta}>输入地点并点击建议项，即可查看推荐。当前遭遇方式：{({ [METHOD_NORMAL]: '普通遭遇', [METHOD_FISHING]: '垂钓', [METHOD_SURFING]: '冲浪' })[routeEncounterMethod]}。</p>
         </section>
       )}
 
       {(mode === MODE_POKEMON || mode === MODE_EGG) && (
         <section className={styles.resultsSection}>
-          <h2>{mode === MODE_POKEMON ? 'Best Routes' : 'Egg Group Route Rankings'}</h2>
+          <h2>{mode === MODE_POKEMON ? '最佳地点' : '蛋组地点排行'}</h2>
 
           {activeRankedRouteBreakdown && (
             <article className={styles.breakdownOverlay}>
               <div className={styles.breakdownOverlayHeader}>
-                <h3>{formatPokemonDisplayName(activeRankedRouteBreakdown.pokemonName)} Ball Breakdown</h3>
-                <button type="button" className={styles.closeBreakdownButton} onClick={() => setActiveBreakdownKey('')}>Close</button>
+                <h3>{formatPokemonDisplayName(activeRankedRouteBreakdown.pokemonName)}：精灵球明细</h3>
+                <button type="button" className={styles.closeBreakdownButton} onClick={() => setActiveBreakdownKey('')}>关闭</button>
               </div>
               <p className={styles.routeMeta}>
                 Route: {activeRankedRouteBreakdown.routeEntry.region} - {activeRankedRouteBreakdown.routeEntry.displayName}
               </p>
               <p className={styles.routeMeta}>
-                Catch Formula: chance% = (min(255, floor(((300 - 2 x HP%) / 300) x BallMultiplier x CatchRate x StatusMod)) / 255) x 100
+                捕获公式：捕获率 = (min(255, floor(((300 - 2 × HP%) / 300) × 球种倍率 × 捕获度 × 状态倍率)) / 255) × 100
               </p>
               <p className={styles.routeMeta}>
-                Each ball is scored across 4 setups (100% HP, 1% HP, 100% HP + sleep, 1% HP + sleep). The best setup per ball is used for recommendations. {formatPokemonDisplayName(activeRankedRouteBreakdown.pokemonName)} catch rate = {activeRankedRouteBreakdown.catchRate}.
+                每种球都会测试四种条件（满 HP、1% HP、满 HP＋睡眠、1% HP＋睡眠），并采用其中最佳结果进行推荐。{formatPokemonDisplayName(activeRankedRouteBreakdown.pokemonName)}的捕获度为 {activeRankedRouteBreakdown.catchRate}。
               </p>
 
               <div className={styles.largeTableWrap}>
                 <table>
                   <thead>
                     <tr>
-                      <th>Ball</th>
-                      <th>Modifier</th>
-                      <th>Catch Value</th>
-                      <th>Catch %</th>
+                      <th>精灵球</th>
+                      <th>倍率</th>
+                      <th>捕获值</th>
+                      <th>捕获率</th>
                       <th>HP%</th>
-                      <th>Status</th>
-                      <th>Expected Throws</th>
-                      <th>Expected Turns</th>
-                      <th>Price</th>
-                      <th>Expected Cost</th>
-                      <th>Note</th>
+                      <th>状态</th>
+                      <th>预期投球数</th>
+                      <th>预期回合</th>
+                      <th>单价</th>
+                      <th>预期成本</th>
+                      <th>说明</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2448,9 +2490,9 @@ export default function CatchingCalculator() {
                         <td>{entry.statusMod.toFixed(1)}x</td>
                         <td>{formatTurns(entry.expectedThrows)}</td>
                         <td>{formatTurns(entry.expectedTurnsToSuccess)}</td>
-                        <td>{entry.price == null ? 'N/A' : formatMoney(entry.price)}</td>
+                        <td>{entry.price == null ? '不适用' : formatMoney(entry.price)}</td>
                         <td>{formatMoney(entry.expectedCost)}</td>
-                        <td>{entry.available ? entry.availabilityNote : `Not viable - ${entry.availabilityNote}`}</td>
+                        <td>{entry.available ? entry.availabilityNote : `不可用：${entry.availabilityNote}`}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -2460,7 +2502,7 @@ export default function CatchingCalculator() {
           )}
 
           {rankedRoutes.length === 0 ? (
-            <p className={styles.routeMeta}>No routes found for the current search.</p>
+            <p className={styles.routeMeta}>当前搜索条件下未找到地点。</p>
           ) : (
             <div className={styles.routeRankList}>
               {visibleRankedRoutes.map((entry, index) => {
@@ -2472,55 +2514,55 @@ export default function CatchingCalculator() {
                     <div className={styles.routeRankHeader}>
                       <h3>{index + 1}. {entry.routeEntry.region} - {entry.routeEntry.displayName}</h3>
                       <div className={styles.routeScoreTooltip}>
-                        <span className={styles.routeRankStars} tabIndex={0} aria-label={`Route rating ${starLabel}. Hover for score details.`}>
+                        <span className={styles.routeRankStars} tabIndex={0} aria-label={`地点评分 ${starLabel}。悬停查看评分细节。`}>
                           {starLabel}
                         </span>
                         <div className={styles.routeScoreTooltipPanel} role="tooltip">
-                          <p><strong>Route rating:</strong> {entry.score.toFixed(1)}/100 ({starLabel})</p>
+                          <p><strong>地点评分：</strong>{entry.score.toFixed(1)}/100（{starLabel}）</p>
                           <p>
-                            <strong>Formula:</strong>{' '}
+                            <strong>公式：</strong>{' '}
                             {breakdown.encounterIncluded
-                              ? '34% cost + 28% catch + 20% turns + 18% encounter (Lure = fixed 4%).'
-                              : 'Cost, catch, and turns only (encounter excluded for non-Lure).'}
+                              ? '34% 成本 + 28% 捕获率 + 20% 回合 + 18% 遭遇率（引虫香水固定为 4%）。'
+                              : '仅计入成本、捕获率与回合数（非引虫香水不计遭遇率）。'}
                           </p>
-                          <p>Cost: {breakdown.costScore.toFixed(1)} × 34% = {breakdown.costContribution.toFixed(1)}</p>
-                          <p>Catch: {breakdown.chanceScore.toFixed(1)} × 28% = {breakdown.chanceContribution.toFixed(1)}</p>
-                          <p>Turns: {breakdown.turnsScore.toFixed(1)} × 20% = {breakdown.turnsContribution.toFixed(1)}</p>
+                          <p>成本：{breakdown.costScore.toFixed(1)} × 34% = {breakdown.costContribution.toFixed(1)}</p>
+                          <p>捕获率：{breakdown.chanceScore.toFixed(1)} × 28% = {breakdown.chanceContribution.toFixed(1)}</p>
+                          <p>回合：{breakdown.turnsScore.toFixed(1)} × 20% = {breakdown.turnsContribution.toFixed(1)}</p>
                           {breakdown.encounterIncluded && (
-                            <p>Encounter (Lure fixed 4%): {breakdown.encounterScore.toFixed(1)} × 18% = {breakdown.encounterContribution.toFixed(1)}</p>
+                            <p>遭遇率（引虫香水固定为 4%）：{breakdown.encounterScore.toFixed(1)} × 18% = {breakdown.encounterContribution.toFixed(1)}</p>
                           )}
                           {breakdown.genderMultiplier > 1 && (
-                            <p>Egg-group gender bonus: ×{breakdown.genderMultiplier.toFixed(2)} applied to base score.</p>
+                            <p>蛋组性别加成：基础评分 ×{breakdown.genderMultiplier.toFixed(2)}。</p>
                           )}
                         </div>
                       </div>
                     </div>
                     <div className={styles.routeSummaryGrid}>
-                      <p>Efficiency: <strong>{entry.score.toFixed(1)}/100</strong></p>
-                      <p>Expected Cost: <strong>{formatMoney(entry.summary?.avgCost || 0)}</strong></p>
-                      <p>Average Turns: <strong>{formatTurns(entry.summary?.avgTurns || 0)}</strong></p>
-                      <p>Average Catch: <strong>{formatPercent(entry.summary?.avgChance || 0)}</strong></p>
+                      <p>综合效率：<strong>{entry.score.toFixed(1)}/100</strong></p>
+                      <p>预期成本：<strong>{formatMoney(entry.summary?.avgCost || 0)}</strong></p>
+                      <p>平均回合：<strong>{formatTurns(entry.summary?.avgTurns || 0)}</strong></p>
+                      <p>平均捕获率：<strong>{formatPercent(entry.summary?.avgChance || 0)}</strong></p>
                     </div>
 
                     {topRec?.selected && (
                       <p className={styles.routeMeta}>
-                        Top strategy sample: {formatPokemonDisplayName(topRec.pokemonName)} with {topRec.selected.ball} ({formatPercent(topRec.selected.chance)}).
+                        方案示例：{formatPokemonDisplayName(topRec.pokemonName)}使用 {topRec.selected.ball}（{formatPercent(topRec.selected.chance)}）。
                       </p>
                     )}
 
                     <details className={styles.breakdown}>
-                      <summary>Show analyzed Pokemon on this route</summary>
+                      <summary>查看此地点已分析的宝可梦</summary>
                       <ul className={styles.inlineList}>
                         {entry.recommendations.map((result) => (
                           <li key={`${entry.routeEntry.id}-${result.pokemonName}`}>
-                            {formatPokemonDisplayName(result.pokemonName)}: {result.selected?.ball || 'No recommendation'} - {formatMoney(result.selected?.expectedCost || 0)} - {formatExpectedTurns(result.selected?.expectedTurnsToSuccess || 0)}
+                            {formatPokemonDisplayName(result.pokemonName)}：{result.selected?.ball || '无推荐'} · {formatMoney(result.selected?.expectedCost || 0)} · {formatExpectedTurns(result.selected?.expectedTurnsToSuccess || 0)} 回合
                             {result.analysis?.length > 0 && (
                               <button
                                 type="button"
                                 className={styles.showBreakdownButton}
                                 onClick={() => setActiveBreakdownKey(`${entry.routeEntry.id}|${result.pokemonName}`)}
                               >
-                                Open Full Ball Breakdown
+                                查看完整精灵球明细
                               </button>
                             )}
                           </li>
@@ -2533,7 +2575,7 @@ export default function CatchingCalculator() {
 
               {showMoreCount < rankedRoutes.length && (
                 <button type="button" className={styles.showMoreButton} onClick={() => setShowMoreCount((count) => count + 5)}>
-                  Show More Routes
+                  显示更多地点
                 </button>
               )}
             </div>
@@ -2543,8 +2585,8 @@ export default function CatchingCalculator() {
 
       {mode === MODE_SPECIFIC && (
         <section className={styles.resultsSection}>
-          <h2>Specific Mon Search</h2>
-          <p className={styles.routeMeta}>Pick a species, optional route, level, and alpha flag to run a direct recommendation. Alpha mode forces catch rate to 10.</p>
+          <h2>指定宝可梦</h2>
+          <p className={styles.routeMeta}>选择宝可梦、可选地点、等级与头目状态，直接计算推荐方案。头目模式会将捕获度固定为 10。</p>
 
           {customPokemonResult?.selected ? (
             <article className={styles.pokemonCard}>
@@ -2557,13 +2599,13 @@ export default function CatchingCalculator() {
                 />
                 <div>
                   <h3>{formatPokemonDisplayName(customPokemonResult.pokemonName)}</h3>
-                  <p>Route: {customPokemonRouteEntry ? `${customPokemonRouteEntry.region} - ${customPokemonRouteEntry.displayName}` : 'N/A'}</p>
+                  <p>地点：{customPokemonRouteEntry ? `${customPokemonRouteEntry.region} - ${customPokemonRouteEntry.displayName}` : '不适用'}</p>
                   {customPokemonSelection?.routeWasAutoSelected && (
-                    <p>Location left blank, so this route was auto-selected as the best match.</p>
+                    <p>未指定地点，已自动选择最匹配的地点。</p>
                   )}
                   <p>{selectedPriorityLabel}: {customPokemonResult.selected.ball} ({formatPercent(customPokemonResult.selected.chance)})</p>
-                  <p>Catch Chance: {formatPercent(customPokemonResult.selected.chance)}</p>
-                  <p>Catch Rate: {customPokemonResult.catchRate}</p>
+                  <p>捕获率：{formatPercent(customPokemonResult.selected.chance)}</p>
+                  <p>捕获度：{customPokemonResult.catchRate}</p>
                 </div>
               </div>
 
@@ -2574,11 +2616,11 @@ export default function CatchingCalculator() {
                 </div>
                 <div className={styles.featuredRecommendationStats}>
                   <div>
-                    <span>Expected Cost</span>
+                    <span>预期成本</span>
                     <strong>{formatMoney(customPokemonResult.selected.expectedCost)}</strong>
                   </div>
                   <div>
-                    <span>Expected Turns</span>
+                    <span>预期回合</span>
                     <strong>{formatExpectedTurns(customPokemonResult.selected.expectedTurnsToSuccess)}</strong>
                   </div>
                 </div>
@@ -2591,22 +2633,22 @@ export default function CatchingCalculator() {
               ))}
 
               <details className={styles.breakdown}>
-                <summary>Show ball breakdown</summary>
+                <summary>查看精灵球明细</summary>
                 <p className={styles.routeMeta}>
-                  Catch Formula: chance% = (min(255, floor(((300 - 2 x HP%) / 300) x BallMultiplier x CatchRate x StatusMod)) / 255) x 100
+                  捕获公式：捕获率 = (min(255, floor(((300 - 2 × HP%) / 300) × 球种倍率 × 捕获度 × 状态倍率)) / 255) × 100
                 </p>
                 <div className={styles.tableWrap}>
                   <table>
                     <thead>
                       <tr>
-                        <th>Ball</th>
-                        <th>Modifier</th>
-                        <th>Catch Value</th>
-                        <th>Catch</th>
-                        <th>Turns</th>
-                        <th>Price</th>
-                        <th>Expected Cost</th>
-                        <th>Formula Inputs</th>
+                        <th>精灵球</th>
+                        <th>倍率</th>
+                        <th>捕获值</th>
+                        <th>捕获率</th>
+                        <th>回合</th>
+                        <th>单价</th>
+                        <th>预期成本</th>
+                        <th>公式参数</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -2617,9 +2659,9 @@ export default function CatchingCalculator() {
                           <td>{entry.catchValue}</td>
                           <td>{formatPercent(entry.chance)}</td>
                           <td>{formatTurns(entry.turns)}</td>
-                          <td>{entry.price == null ? 'N/A' : formatMoney(entry.price)}</td>
+                          <td>{entry.price == null ? '不适用' : formatMoney(entry.price)}</td>
                           <td>{formatMoney(entry.expectedCost)}</td>
-                          <td>{entry.available ? `HP%: ${entry.hpPercent} | CatchRate: ${entry.catchRate} | StatusMod: ${entry.statusMod}` : `Not viable - ${entry.availabilityNote}`}</td>
+                          <td>{entry.available ? `HP%：${entry.hpPercent}｜捕获度：${entry.catchRate}｜状态倍率：${entry.statusMod}` : `不可用：${entry.availabilityNote}`}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -2628,24 +2670,24 @@ export default function CatchingCalculator() {
               </details>
             </article>
           ) : (
-            <p className={styles.routeMeta}>Select a valid Pokemon to run specific analysis. Route is optional.</p>
+            <p className={styles.routeMeta}>请选择有效的宝可梦以进行指定分析；地点为可选项。</p>
           )}
         </section>
       )}
 
       {mode === MODE_CATCH_EVENTS && (
         <section className={styles.resultsSection}>
-          <h2>Catch Events</h2>
+          <h2>捕捉活动</h2>
           <p className={styles.routeMeta}>
-            Select a PvE catch event from Official Event Calendar. Only ongoing/upcoming events are listed. Valid entries are read directly from each event table.
+            从官方活动日历选择 PvE 捕捉活动。这里只列出进行中或即将开始的活动，合格条目直接读取自活动表格。
           </p>
 
           {isOfficialEventsLoading && (
-            <p className={styles.routeMeta}>Loading Official Event Calendar catch events...</p>
+            <p className={styles.routeMeta}>正在载入官方活动日历中的捕捉活动…</p>
           )}
 
           {!isOfficialEventsLoading && officialCatchEvents.length === 0 && (
-            <p className={styles.routeMeta}>No PvE catch events found in Official Event Calendar right now.</p>
+            <p className={styles.routeMeta}>官方活动日历目前没有可用的 PvE 捕捉活动。</p>
           )}
 
           {officialCatchEvents.length > 0 && (
@@ -2671,11 +2713,11 @@ export default function CatchingCalculator() {
                       <p>{event.localStartLabel}</p>
                       {event.link && (
                         <a href={event.link} target="_blank" rel="noopener noreferrer" className={styles.catchEventLink}>
-                          View forum event
+                          查看论坛活动
                         </a>
                       )}
                     </div>
-                    <p className={styles.routeMeta}>{isEnabled ? 'Selected' : 'Click to select event'}</p>
+                    <p className={styles.routeMeta}>{isEnabled ? '已选择' : '点击选择活动'}</p>
                   </article>
                 )
               })}
@@ -2685,23 +2727,23 @@ export default function CatchingCalculator() {
           {enabledOfficialCatchEvent && (
             <article className={styles.catchEventResultsCard}>
               <h3>{enabledOfficialCatchEvent.title}</h3>
-              <p className={styles.routeMeta}>Route: {enabledOfficialCatchEvent.location || 'Unknown'}</p>
+              <p className={styles.routeMeta}>地点：{translateLocationName(enabledOfficialCatchEvent.location || '未知')}</p>
 
               {catchEventRecommendations.length === 0 ? (
-                <p className={styles.routeMeta}>No accepted entries were found in this event table.</p>
+                <p className={styles.routeMeta}>该活动表格中未找到合格条目。</p>
               ) : (
                 <div className={styles.catchEventTableWrap}>
                   <table>
                     <thead>
                       <tr>
-                        <th>Sprite</th>
-                        <th>Pokemon</th>
-                        <th>Bonus</th>
-                        <th>Best Ball</th>
-                        <th>Best Catch Rate</th>
-                            <th>Turns</th>
-                            <th>Setup</th>
-                        <th>Expected Cost</th>
+                        <th>图像</th>
+                        <th>宝可梦</th>
+                        <th>加分</th>
+                        <th>推荐球种</th>
+                        <th>最高捕获率</th>
+                        <th>回合</th>
+                        <th>条件</th>
+                        <th>预期成本</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -2718,11 +2760,11 @@ export default function CatchingCalculator() {
                           </td>
                           <td>{formatPokemonDisplayName(entry.pokemonName)}</td>
                               <td className={entry.bonus > 0 ? styles.positiveBonus : ''}>{entry.bonus}</td>
-                          <td>{entry.result?.selected?.ball || 'Unavailable'}</td>
-                          <td>{entry.result?.selected ? formatPercent(entry.result.selected.chance) : 'N/A'}</td>
-                              <td>{entry.result?.selected ? formatTurnSummary(entry.result.selected.turns) : 'N/A'}</td>
-                              <td>{entry.result?.selected?.methodLabel || 'N/A'}</td>
-                          <td>{entry.result?.selected ? formatMoney(entry.result.selected.expectedCost) : 'N/A'}</td>
+                          <td>{entry.result?.selected?.ball || '不可用'}</td>
+                          <td>{entry.result?.selected ? formatPercent(entry.result.selected.chance) : '不适用'}</td>
+                          <td>{entry.result?.selected ? formatTurnSummary(entry.result.selected.turns) : '不适用'}</td>
+                          <td>{entry.result?.selected?.methodLabel || '不适用'}</td>
+                          <td>{entry.result?.selected ? formatMoney(entry.result.selected.expectedCost) : '不适用'}</td>
                         </tr>
                       ))}
                     </tbody>

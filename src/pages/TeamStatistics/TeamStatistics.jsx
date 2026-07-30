@@ -7,6 +7,7 @@ import { useDocumentHead } from '../../hooks/useDocumentHead'
 import { useTierData } from '../../hooks/useTierData'
 import { getAssetUrl } from '../../utils/assets'
 import { calculateShinyPoints } from '../../utils/points'
+import { translatePokemonName } from '../../utils/pokemonNamesZh'
 import {
   getStatisticsLeaderboards,
   getMostCommonPokemon,
@@ -19,172 +20,114 @@ function formatPlayerName(name, data) {
 }
 
 function formatPokemonName(name) {
-  if (!name) return 'N/A'
-
-  return String(name)
-    .split(' ')
-    .map((word) =>
-      word
-        .split('-')
-        .map((part) => (part ? `${part.charAt(0).toUpperCase()}${part.slice(1).toLowerCase()}` : part))
-        .join('-')
-    )
-    .join(' ')
+  if (!name) return '暂无'
+  return translatePokemonName(String(name))
 }
 
 const PLAYER_LEADERBOARD_SECTIONS = [
   {
     key: 'luckiest',
-    title: 'Luckiest Players',
-    subtitle: 'Get a lottery ticket (don`t sell it!)',
-    value: (entry) => `${entry.averageEncounter.toFixed(0)} avg encounters`,
+    title: '欧皇玩家', subtitle: '这手气，建议立刻买彩票。', value: (entry) => `平均 ${entry.averageEncounter.toFixed(0)} 次遇敌`,
   },
   {
     key: 'unluckiest',
-    title: 'Unluckiest Players',
-    subtitle: 'Alright one of you is lying. (↓)',
-    value: (entry) => `${entry.averageEncounter.toFixed(0)} avg encounters`,
+    title: '非酋玩家', subtitle: '总得有人把概率补回来。', value: (entry) => `平均 ${entry.averageEncounter.toFixed(0)} 次遇敌`,
   },
   {
     key: 'mostEncounters',
-    title: 'Most Encounters',
-    subtitle: 'Are you ok?',
-    value: (entry) => `${entry.totalEncounters.toLocaleString()} encounters`,
+    title: '遇敌次数最多', subtitle: '你还好吗？', value: (entry) => `${entry.totalEncounters.toLocaleString()} 次遇敌`,
   },
   {
     key: 'highestDryStreak',
-    title: 'Highest Dry Streaks',
-    subtitle: 'The amount of hours wasted on this Pokemon...',
-    value: (entry) => `${entry.maxEncounter.toLocaleString()} encounters`,
-    extra: (entry) => `Pokemon: ${formatPokemonName(entry.maxEncounterPokemon)}`,
+    title: '最长无闪记录', subtitle: '这些时光都献给了这一只。', value: (entry) => `${entry.maxEncounter.toLocaleString()} 次遇敌`, extra: (entry) => `宝可梦：${formatPokemonName(entry.maxEncounterPokemon)}`,
   },
   {
     key: 'leastEncounter',
-    title: 'Lowest Encounter Shinies',
-    subtitle: 'Silver Spoon',
-    value: (entry) => `${entry.minEncounter.toLocaleString()} encounters`,
-    extra: (entry) => `Pokemon: ${formatPokemonName(entry.minEncounterPokemon)}`,
+    title: '最少遇敌出闪', subtitle: '天选之人。', value: (entry) => `${entry.minEncounter.toLocaleString()} 次遇敌`, extra: (entry) => `宝可梦：${formatPokemonName(entry.minEncounterPokemon)}`,
   },
   {
     key: 'mostRares',
-    title: 'Most Rare Shinies',
-    subtitle: 'Most Tier 2/1/0 (and Alpha) shinies',
-    value: (entry) => `${entry.rareCount} rare shinies`,
-    extra: (entry) => entry.rarePokemons?.length ? `Pokemon: ${entry.rarePokemons.map(formatPokemonName).join(', ')}` : null,
+    title: '稀有闪光最多', subtitle: '第 0–2 阶与头目闪光最多。', value: (entry) => `${entry.rareCount} 只稀有闪光`, extra: (entry) => entry.rarePokemons?.length ? `宝可梦：${entry.rarePokemons.map(formatPokemonName).join('、')}` : null,
   },
   {
     key: 'mostPhases',
-    title: 'Most Phases',
-    subtitle: 'You know you can leave, right?',
-    value: (entry) => `${entry.phasesCount} shinies`,
-    extra: (entry) => `${entry.topRoute || 'N/A'}`,
+    title: '阶段闪光最多', subtitle: '你知道也可以换地方吧？', value: (entry) => `${entry.phasesCount} 只闪光`, extra: (entry) => `${entry.topRoute || '暂无'}`,
   },
   {
     key: 'mostInWeek',
-    title: 'Most Shinies in a Week',
-    subtitle: 'Mega Spooners',
-    value: (entry) => `${entry.mostInWeekCount} shinies`,
-    extra: (entry) => entry.mostInWeekPokemons?.length ? `Pokemon: ${entry.mostInWeekPokemons.map(formatPokemonName).join(', ')}` : null,
+    title: '单周闪光最多', subtitle: '本周欧气爆棚。', value: (entry) => `${entry.mostInWeekCount} 只闪光`, extra: (entry) => entry.mostInWeekPokemons?.length ? `宝可梦：${entry.mostInWeekPokemons.map(formatPokemonName).join('、')}` : null,
   },
   {
     key: 'mostSingleEncounters',
-    title: 'Most Singled Encounters',
-    subtitle: 'Left, Right, Left, Right',
-    value: (entry) => `${entry.singleEncounterCount} singles`,
+    title: '单遇次数最多', subtitle: '左、右、左、右。', value: (entry) => `${entry.singleEncounterCount} 次单遇`,
   },
   {
     key: 'most5xHordes',
-    title: 'Most 5x Hordes',
-    subtitle: 'Sweet Scent Salies',
-    value: (entry) => `${entry.horde5xCount} shinies`,
+    title: '5 只群聚闪光最多', subtitle: '甜甜香气大师。', value: (entry) => `${entry.horde5xCount} 只闪光`,
   },
   {
     key: 'mostFishingShinies',
-    title: 'Most Fishing Shinies',
-    subtitle: 'I`m Chumming!',
-    value: (entry) => `${entry.fishingCount} shinies`,
+    title: '钓鱼闪光最多', subtitle: '鱼饵已备好！', value: (entry) => `${entry.fishingCount} 只闪光`,
   },
   {
     key: 'mostFossilShinies',
-    title: 'Most Fossil Shinies',
-    subtitle: 'Certified museum supplier',
-    value: (entry) => `${entry.fossilCount} shinies`,
+    title: '化石闪光最多', subtitle: '认证博物馆供货商。', value: (entry) => `${entry.fossilCount} 只闪光`,
   },
   {
     key: 'mostSwarmShinies',
-    title: 'Most Swarm Shinies',
-    subtitle: 'Swarm enthusiasts',
-    value: (entry) => `${entry.swarmCount} shinies`,
+    title: '群聚闪光最多', subtitle: '群聚爱好者。', value: (entry) => `${entry.swarmCount} 只闪光`,
   },
   {    
     key: 'mostHeadbuttShinies',
-    title: 'Most Headbutt Shinies',
-    subtitle: 'KaiDonos Category',
-    value: (entry) => `${entry.headbuttCount} shinies`,
+    title: '头锤树闪光最多', subtitle: '树上也能出奇迹。', value: (entry) => `${entry.headbuttCount} 只闪光`,
   },
   {
     key: 'mostSafariCatches',
-    title: 'Most Safari Catches',
-    subtitle: 'It was meant to be!',
-    value: (entry) => `${entry.safariCatchCount} catches`,
+    title: '狩猎地带捕获最多', subtitle: '命中注定！', value: (entry) => `${entry.safariCatchCount} 次捕获`,
   },
   {
     key: 'mostSafariFlees',
-    title: 'Most Safari Flees',
-    subtitle: 'It wasnt meant to be...',
-    value: (entry) => `${entry.safariFleeCount} safari flees`,
+    title: '狩猎地带逃跑最多', subtitle: '终究是错付了。', value: (entry) => `${entry.safariFleeCount} 次逃跑`,
   },
   {
     key: 'mostBountiesClaimed',
-    title: 'Most Bounties Claimed',
-    subtitle: 'Bring me my money!',
-    value: (entry) => `${entry.bountyClaimCount} claimed`,
+    title: '悬赏领取最多', subtitle: '该结账啦！', value: (entry) => `${entry.bountyClaimCount} 次领取`,
   },
   {
     key: 'contributors',
-    title: 'Contributors',
-    subtitle: 'Most events + bounties hosted, does not include Flash events or events/bounties not listed on the website.',
-    value: (entry) => `${entry.contributorCount} hosted`,
+    title: '社群贡献者', subtitle: '举办活动与悬赏最多（不含未收录的活动）。', value: (entry) => `${entry.contributorCount} 次主办`,
   },
   {
     key: 'mostTeamDexEntrys',
-    title: 'Most Team Dex Entrys',
-    subtitle: 'Most species-line entries only that player owns',
-    value: (entry) => `${entry.teamDexEntryCount} dex entries`,
+    title: '公会图鉴独有条目最多', subtitle: '仅统计该玩家独有的进化家族条目。', value: (entry) => `${entry.teamDexEntryCount} 条图鉴记录`,
     extra: (entry) => entry.teamDexPokemon?.length
-      ? `Pokemon: ${entry.teamDexPokemon.map(formatPokemonName).join(', ')}`
+      ? `宝可梦：${entry.teamDexPokemon.map(formatPokemonName).join('、')}`
       : null,
   },
   {
     key: 'newLivingDexEntry',
-    title: 'New Living Dex Entry',
-    subtitle: 'Most unique shiny species owned by only one player.',
-    value: (entry) => `${entry.newLivingDexEntryCount} entries`,
+    title: '独有活体图鉴条目', subtitle: '仅由一位玩家拥有的独特闪光种类最多。', value: (entry) => `${entry.newLivingDexEntryCount} 条记录`,
     extra: (entry) => entry.newLivingDexEntries?.length
-      ? `Pokemon: ${entry.newLivingDexEntries.map(formatPokemonName).join(', ')}`
+      ? `宝可梦：${entry.newLivingDexEntries.map(formatPokemonName).join('、')}`
       : null,
   },
   {
     key: 'highestWildIvShiny',
-    title: 'Highest Wild IV Shiny',
-    subtitle: 'Highest total IV shiny from wild encounters (egg method excluded).',
-    value: (entry) => `IVs: ${entry.highestWildIvTotal}`,
+    title: '野生闪光个体值最高', subtitle: '野外遇敌获得的总个体值最高闪光（不含孵化）。', value: (entry) => `个体值：${entry.highestWildIvTotal}`,
     extra: (entry) => entry.highestWildIvPokemon
-      ? `Pokemon: ${formatPokemonName(entry.highestWildIvPokemon)}${entry.highestWildIvSpread ? ` (${entry.highestWildIvSpread})` : ''}`
+      ? `宝可梦：${formatPokemonName(entry.highestWildIvPokemon)}${entry.highestWildIvSpread ? `（${entry.highestWildIvSpread}）` : ''}`
       : null,
   },
 ]
 
 const ALL_TIME_TAB = {
   key: 'allTimePoints',
-  title: 'All-Time Point Leaderboards',
-  subtitle: 'All players ranked by total points',
+  title: '历史总积分榜', subtitle: '按总积分排列的全部玩家',
 }
 
 const MOST_COMMON_POKEMON_TAB = {
   key: 'mostCommonPokemon',
-  title: 'Most Common Pokemon',
-  subtitle: 'Top 25 most commonly caught shiny Pokemon',
+  title: '最常见的宝可梦', subtitle: '捕获数量最多的 25 种闪光宝可梦',
 }
 
 export default function TeamStatistics() {
@@ -192,13 +135,11 @@ export default function TeamStatistics() {
   const [searchQuery, setSearchQuery] = useState('')
 
   const breadcrumbs = [
-    { name: 'Home', url: '/' },
-    { name: 'Team Statistics', url: '/team-statistics' }
+    { name: '首页', url: '/' }, { name: '公会统计', url: '/team-statistics' }
   ]
 
   useDocumentHead({
-    title: 'Team Statistics - PokeMMO Leaderboards | Team Synergy',
-    description: 'View Team Synergy player statistics, top 3 leaderboard categories, a full searchable statistics index, and top common shiny Pokemon.',
+    title: '公会统计｜PokeMMO 排行榜', description: '查看 Team Synergy 玩家统计、各类前三排行榜、可搜索统计索引与常见闪光宝可梦。',
     canonicalPath: '/team-statistics/',
     breadcrumbs,
   })
@@ -274,7 +215,7 @@ export default function TeamStatistics() {
       .map(([player, points], index) => ({
         rank: index + 1,
         name: player,
-        value: `${points.toLocaleString()} pts`,
+        value: `${points.toLocaleString()} 分`,
         extra: null,
         isPlayer: true,
       }))
@@ -299,7 +240,7 @@ export default function TeamStatistics() {
       return commonPokemon.map((entry, index) => ({
         rank: index + 1,
         name: formatPokemonName(entry.pokemon),
-        value: `${entry.count.toLocaleString()} catches`,
+        value: `${entry.count.toLocaleString()} 次捕获`,
         extra: null,
         isPlayer: false,
       }))
@@ -327,22 +268,20 @@ export default function TeamStatistics() {
   }, [activeIndexEntries, data, searchQuery])
 
   const searchPlaceholder = activeCategory.key === MOST_COMMON_POKEMON_TAB.key
-    ? 'Search pokemon...'
-    : 'Search username...'
+    ? '搜索宝可梦…' : '搜索用户名…'
 
-  if (isLoading) return <div className="message">Loading...</div>
-  if (error) return <div className="message">Error loading team statistics</div>
+  if (isLoading) return <div className="message">加载中…</div>
+  if (error) return <div className="message">公会统计加载失败</div>
 
   return (
     <div className={styles.page}>
-      <h1>Team Statistics</h1>
-      <img src={getAssetUrl('images/pagebreak.png')} alt="Page Break" className="pagebreak" />
+      <h1>公会统计</h1>
+      <img src={getAssetUrl('images/pagebreak.png')} alt="分隔线" className="pagebreak" />
 
       <section className={styles.section}>
-        <h2>Player Leaderboards (Top 3)</h2>
+        <h2>玩家排行榜（前 3 名）</h2>
         <p className={styles.requirements}>
-          For tabs that require encounter data, It is only showing Players with at least {MINIMUM_STATS_REQUIREMENTS.totalEncounters.toLocaleString()} total encounters,
-          {' '}{MINIMUM_STATS_REQUIREMENTS.dataCompleteness}% data completeness, and {MINIMUM_STATS_REQUIREMENTS.shinyCount}+ shinies. if you meet these requirements and do not see yourself here, you will need to update your statistics on ShinyBoard.net. DM Hyper for more information
+          需要遇敌数据的榜单，仅展示总遇敌至少 {MINIMUM_STATS_REQUIREMENTS.totalEncounters.toLocaleString()} 次、数据完整度至少 {MINIMUM_STATS_REQUIREMENTS.dataCompleteness}%、且拥有 {MINIMUM_STATS_REQUIREMENTS.shinyCount}+ 只闪光的玩家。如符合条件却未上榜，请在 ShinyBoard.net 更新数据；详情可私信 Hyper。
         </p>
         <div className={styles.grid}>
           {PLAYER_LEADERBOARD_SECTIONS.map((section) => (
@@ -374,8 +313,8 @@ export default function TeamStatistics() {
       </section>
 
       <section className={styles.section}>
-        <h2>Statistics Index</h2>
-        <div className={styles.tabs} role="tablist" aria-label="All statistics index categories">
+        <h2>统计索引</h2>
+        <div className={styles.tabs} role="tablist" aria-label="全部统计索引类别">
           {indexTabs.map((tab) => (
             <button
               key={tab.key}
@@ -421,11 +360,10 @@ export default function TeamStatistics() {
             ))}
           </ol>
           {!filteredIndexEntries.length && (
-            <p className={styles.empty}>No entries match that search.</p>
+            <p className={styles.empty}>没有符合搜索条件的条目。</p>
           )}
         </article>
       </section>
     </div>
   )
 }
-

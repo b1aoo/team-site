@@ -10,19 +10,26 @@ export default function Autocomplete({ id, value, onChange, onSelect, getOptions
 
   useEffect(() => () => { if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current) }, [])
 
+  const getValue = (option) => (typeof option === 'string' ? option : option?.value || '')
+  const getLabel = (option) => (typeof option === 'string' ? option : option?.label || option?.value || '')
+
   function handleInput(val) {
     onChange(val)
     const lower = val.toLowerCase()
     if (!lower) { setSuggestions([]); setShow(false); return }
-    const opts = getOptions().filter(o => o.toLowerCase().includes(lower))
+    const opts = getOptions().filter((option) => (
+      getLabel(option).toLowerCase().includes(lower) ||
+      getValue(option).toLowerCase().includes(lower)
+    ))
     setSuggestions(opts)
     setShow(opts.length > 0)
     setFocusIdx(-1)
   }
 
-  function handleSelect(val) {
-    onChange(val)
-    if (onSelect) onSelect(val)
+  function handleSelect(option) {
+    const nextValue = getValue(option)
+    onChange(nextValue)
+    if (onSelect) onSelect(nextValue)
     setShow(false)
   }
 
@@ -60,11 +67,11 @@ export default function Autocomplete({ id, value, onChange, onSelect, getOptions
         <div className={styles.suggestions}>
           {suggestions.map((s, i) => (
             <div
-              key={s}
+              key={getValue(s)}
               className={`${styles.suggestion} ${i === focusIdx ? styles.suggestionActive : ''}`}
               onMouseDown={() => handleSelect(s)}
             >
-              {s}
+              {getLabel(s)}
             </div>
           ))}
         </div>

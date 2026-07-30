@@ -5,8 +5,9 @@ import RoamingLegendaries from '../../components/RoamingLegendaries/RoamingLegen
 import { getAssetUrl } from '../../utils/assets'
 import styles from './Home.module.css'
 import { useInGameClock } from '../../hooks/useInGameClock'
-const IN_GAME_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const IN_GAME_DAYS = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
 const DAY_OFFSET = 5;
+const PERIOD_LABELS = { Morning: '清晨', Day: '白天', Night: '夜晚' };
 
 function InGameClockDisplay() {
   const state = useInGameClock(DAY_OFFSET, IN_GAME_DAYS);
@@ -14,8 +15,8 @@ function InGameClockDisplay() {
   const timeStr = `${String(state.hours).padStart(2,'0')}:${String(state.mins).padStart(2,'0')}`;
   const realMins = state.realMinsLeft;
   const countdownStr = realMins >= 60
-    ? `${Math.floor(realMins / 60)}h ${realMins % 60}m`
-    : `${realMins}m`;
+    ? `${Math.floor(realMins / 60)}小时 ${realMins % 60}分钟`
+    : `${realMins}分钟`;
   
   return (
     <div className={styles.clockContainer}>
@@ -24,7 +25,7 @@ function InGameClockDisplay() {
         <div className={styles.clockDetails}>
           <span className={styles.clockDay}>{state.day}</span>
           <span className={styles.clockDay}>{state.season}</span>
-          <span className={`${styles.clockPeriod} ${styles[`period${state.period}`]}`}>{state.period}</span>
+          <span className={`${styles.clockPeriod} ${styles[`period${state.period}`]}`}>{PERIOD_LABELS[state.period] || state.period}</span>
           <span className={styles.clockCountdown}>距离下个时段还有 {countdownStr}</span>
         </div>
       </div>
@@ -67,7 +68,7 @@ export default function Home() {
         <h2>欢迎来到 Team Synergy</h2>
         <img
           src={getAssetUrl('images/teamsyn.gif')}
-          alt="Team Synergy"
+          alt="Team Synergy 公会"
           className={styles.teamSynGif}
         />
         <p>
@@ -83,7 +84,7 @@ export default function Home() {
         <div className={styles.featuresGrid}>
           <Link to="/shiny-showcase/" className={styles.featureCard}>
             <div className={styles.featureIcon}>
-              <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/reuniclus.gif" alt="Reuniclus" />
+              <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/reuniclus.gif" alt="人造细胞卵" />
             </div>
             <h3>闪光收藏展示</h3>
             <p>浏览 140 多位成员的闪光收藏，并查看排名</p>
@@ -91,7 +92,7 @@ export default function Home() {
 
           <Link to="/pokedex/" className={styles.featureCard}>
             <div className={styles.featureIcon}>
-              <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/pikachu.gif" alt="Pikachu" />
+              <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/pikachu.gif" alt="皮卡丘" />
             </div>
             <h3>宝可梦图鉴</h3>
             <p>查询刷闪地点、头目宝可梦与详尽的宝可梦资料</p>
@@ -99,7 +100,7 @@ export default function Home() {
 
           <Link to="/streamers/" className={styles.featureCard}>
             <div className={styles.featureIcon}>
-              <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/rotom.gif" alt="Rotom" />
+              <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/rotom.gif" alt="洛托姆" />
             </div>
             <h3>主播</h3>
             <p>观看 Team Synergy 成员的 Twitch 直播</p>
@@ -107,7 +108,7 @@ export default function Home() {
 
           <Link to="/resources/" className={styles.featureCard}>
             <div className={styles.featureIcon}>
-              <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/porygon.gif" alt="Porygon" />
+              <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/porygon.gif" alt="多边兽" />
             </div>
             <h3>资料库</h3>
             <p>查阅实用的 PokeMMO 攻略与资料</p>
@@ -115,7 +116,7 @@ export default function Home() {
 
           <Link to="/safari-zones/" className={styles.featureCard}>
             <div className={styles.featureIcon}>
-              <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/riolu.gif" alt="Riolu" />
+              <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/riolu.gif" alt="利欧路" />
             </div>
             <h3>狩猎地带</h3>
             <p>查看各地区狩猎地带的详细资料</p>
@@ -123,7 +124,7 @@ export default function Home() {
 
           <Link to="/roaming-legendaries/" className={styles.featureCard}>
             <div className={styles.featureIcon}>
-              <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/suicune.gif" alt="Suicune" />
+              <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/suicune.gif" alt="水君" />
             </div>
             <h3>游走传说宝可梦</h3>
             <p>追踪游走传说宝可梦的出现周期</p>
@@ -156,145 +157,145 @@ export default function Home() {
         </p>
       </section>
 
-      <img src={getAssetUrl('images/pagebreak.png')} alt="Page Break" className="pagebreak" />
+      <img src={getAssetUrl('images/pagebreak.png')} alt="分隔线" className="pagebreak" />
 
       <section className={styles.changelogSection}>
-        <h2>Changelog</h2>
+        <h2>更新日志</h2>
         <div className={styles.changelog}>
           <div className={styles.changelogEntry}>
-            <h3>April 20, 2026</h3>
+            <h3>2026 年 4 月 20 日</h3>
             <ul>
-              <li><strong>Route Finder</strong> - Added a new tool for finding PokeMMO routes and location details</li>
-              <li><strong>Region Maps</strong> - Added interactive region maps for browsing routes, spawns, and points of interest</li>
+              <li><strong>路线查找器</strong>－新增 PokeMMO 路线与地点详情查询工具</li>
+              <li><strong>地区地图</strong>－新增互动地区地图，可浏览路线、出没点与兴趣点</li>
             </ul>
           </div>
           <div className={styles.changelogEntry}>
-            <h3>February 23, 2026</h3>
+            <h3>2026 年 2 月 23 日</h3>
             <ul>
-              <li><strong>Shiny Odds Page</strong> - New Coping method that lets you track how lucky or unlucky you are in your current hunt</li>
+              <li><strong>闪光概率页面</strong>－新增追踪当前刷闪运气走势的工具</li>
             </ul>
           </div>
           <div className={styles.changelogEntry}>
-            <h3>February 17, 2026</h3>
+            <h3>2026 年 2 月 17 日</h3>
             <ul>
-              <li><strong>Safari Zone</strong> - Added page for detailed Safari Zone Information for all 4 regions *Mitchell*</li>
-              <li>Removed About Page and merged into new Home/Index screen</li>
-              <li>Merged relative tabs to clear tab space</li>
-              <li><strong>Resource Page!</strong> - Added new Resource Page for PokeMMO guides and information</li>
+              <li><strong>狩猎地带</strong>－新增四个地区的狩猎地带详细资料页（感谢 Mitchell）</li>
+              <li>移除“关于”页面，内容并入新的首页</li>
+              <li>合并相关分页，释放导航栏空间</li>
+              <li><strong>资源中心</strong>－新增 PokeMMO 攻略与资料页面</li>
             </ul>
           </div>
           <div className={styles.changelogEntry}>
-            <h3>February 14, 2026</h3>
+            <h3>2026 年 2 月 14 日</h3>
             <ul>
-              <li><strong>Statistics Page Now Shows Partial Data</strong> - No longer requires all data types at once</li>
-              <li>If you have 50% encounter data, you'll see General Statistics, Encounter Analysis, and Tier Distribution</li>
-              <li>If you have 50% location data, you'll see Region Distribution</li>
-              <li>If you have 50% hunting method data, you'll see Hunting Methods</li>
-              <li>Shiny Wars pokemon are now clickable links to their PokeDex pages</li>
-              <li>About page styling made consistent with the rest of the site</li>
-              <li><strong>Pokédex Filter Panel Redesigned</strong> - Improved layout matching reference design with Moves, Essentials, and Base Stats sections</li>
-              <li>Alpha Filter - Added ability to filter Pokémon by Alpha status</li>
-              <li>Egg Group Selection - Now allows selecting up to 2 egg groups with "Any" or "Both" matching options</li>
-              <li>Ability to see Alpha variants only</li>
+              <li><strong>统计页现支持部分数据</strong>－不再要求一次拥有全部数据类型</li>
+              <li>遭遇数据达到 50% 时，可查看总体统计、遭遇分析与分级分布</li>
+              <li>地点数据达到 50% 时，可查看地区分布</li>
+              <li>刷闪方式数据达到 50% 时，可查看刷闪方式</li>
+              <li>闪光大战中的宝可梦现可点击前往对应图鉴页面</li>
+              <li>“关于”页面样式与全站统一</li>
+              <li><strong>图鉴筛选面板重制</strong>－优化布局，加入招式、基础信息与种族值分区</li>
+              <li>头目筛选－可按头目状态筛选宝可梦</li>
+              <li>蛋组选择－现可选择最多两个蛋组，并使用“任一”或“两者皆是”匹配</li>
+              <li>支持仅查看头目形态</li>
             </ul>
           </div>
           <div className={styles.changelogEntry}>
-            <h3>February 13, 2026</h3>
+            <h3>2026 年 2 月 13 日</h3>
             <ul>
-              <li><strong>Shiny Data Merge System Added</strong> - New NPM scripts for syncing ShinyBoard API data</li>
-              <li>Configurable field merging (IVs, nature, location, encounter method, date caught, encounter count, nickname, variant)</li>
-              <li>Grabs information using the API, Users must match the evolutions and names for Pokemon to match correctly.</li>
-              <li>Fixed info box display on hover - shows pokemon that are not included</li>
-              <li>Pokemon variant forms like frillish-f and gastrodon-east now merge correctly</li>
-              <li>Player statistics threshold increased to 65% data completeness for leaderboards</li>
-              <li>Added click-away functionality to Player Leaderboards dropdown</li>
+              <li><strong>新增闪光数据合并系统</strong>－提供同步 ShinyBoard API 数据的 NPM 脚本</li>
+              <li>可配置字段合并：个体值、性格、地点、遭遇方式、获得日期、遭遇次数、昵称与形态</li>
+              <li>通过 API 获取资料；宝可梦的名称与进化链必须一致才能正确匹配</li>
+              <li>修正悬浮信息框显示，现会显示未收录的宝可梦</li>
+              <li>如雌性轻飘飘、东海无壳海兔等形态现在能正确合并</li>
+              <li>排行榜的训练家统计数据完整度门槛提升至 65%</li>
+              <li>训练家排行榜下拉菜单新增点击空白处关闭功能</li>
             </ul>
           </div>
           <div className={styles.changelogEntry}>
-            <h3>February 12, 2026</h3>
+            <h3>2026 年 2 月 12 日</h3>
             <ul>
-              <li>New Rare Pokemon section in location search</li>
-              <li>Fixed sprite rendering issues</li>
-              <li>Mobile layouts no longer overlapping (finally)</li>
-              <li>"Special" Pokemon forms (Tornadus, Thundurus, Landorus) now working</li>
-              <li>Fixed Meloetta and Keldeo forms</li>
-              <li>Wormadam display fixed</li>
-              <li>Mobile responsiveness improvements across the board</li>
-              <li>Added About page</li>
-              <li>Added EV Yields to Pokemon Pages</li>
-              <li>Fixed Pokemon Pages displaying incorrectly on Mobile Devices</li>
+              <li>地点搜索新增稀有宝可梦分区</li>
+              <li>修正精灵图渲染问题</li>
+              <li>移动端布局不再重叠</li>
+              <li>“特殊”形态的龙卷云、雷电云与土地云现已正常显示</li>
+              <li>修正美洛耶塔与凯路迪欧的形态</li>
+              <li>修正结草贵妇的显示</li>
+              <li>全面改善移动端适配</li>
+              <li>新增“关于”页面</li>
+              <li>宝可梦页面新增努力值产出</li>
+              <li>修正移动设备上宝可梦页面显示错误的问题</li>
             </ul>
           </div>
           <div className={styles.changelogEntry}>
-            <h3>February 11, 2026</h3>
+            <h3>2026 年 2 月 11 日</h3>
             <ul>
-              <li>Rewrote sprite system with better JSON data</li>
-              <li>Added form and gender selector</li>
-              <li>Pokedex now matches SHOTM style</li>
-              <li>Fixed Pokemon GIF scaling issues</li>
-              <li>Added Quick Ball to the catch calculator</li>
-              <li>Mobile filter menu is now collapsible</li>
-              <li>Stat bars look way better</li>
-              <li>Pokemon time display with seasons</li>
-              <li>Evolution lines and ability tooltips added</li>
-              <li>Branch evolutions actually work now</li>
-              <li>Click location cards to filter the Pokedex</li>
+              <li>使用更完善的 JSON 数据重写精灵图系统</li>
+              <li>新增形态与性别选择器</li>
+              <li>图鉴样式现与月度闪光猎人页面统一</li>
+              <li>修正宝可梦 GIF 缩放问题</li>
+              <li>捕捉计算器新增先机球</li>
+              <li>移动端筛选菜单现可折叠</li>
+              <li>大幅优化能力值条表现</li>
+              <li>宝可梦时间显示加入季节</li>
+              <li>新增进化链与特性说明浮窗</li>
+              <li>分支进化现已正常运作</li>
+              <li>点击地点卡片即可筛选图鉴</li>
             </ul>
           </div>
           <div className={styles.changelogEntry}>
-            <h3>February 10, 2026</h3>
+            <h3>2026 年 2 月 10 日</h3>
             <ul>
-              <li>Dropped the Pokemon Detail Pages!</li>
-              <li>Search by location and encounters</li>
-              <li>Type effectiveness and stat search tools</li>
-              <li>Full Pokedex redesign with way better filtering</li>
-              <li>Legendaries and special encounters now tracked</li>
-              <li>Genderless Pokemon handling fixed</li>
-              <li>Female-only Pokemon now showing up correctly</li>
-              <li>Gender ratios and ordering added</li>
-              <li>Fossil Pokemon tracking</li>
-              <li>Pokedex pages added to sitemap</li>
+              <li>推出宝可梦详情页面！</li>
+              <li>支持按地点与遭遇方式搜索</li>
+              <li>新增属性克制与能力值搜索工具</li>
+              <li>全面重制图鉴，筛选功能大幅增强</li>
+              <li>追踪传说宝可梦与特殊遭遇</li>
+              <li>修正无性别宝可梦处理</li>
+              <li>仅雌性宝可梦现可正确显示</li>
+              <li>新增性别比例与排序</li>
+              <li>新增化石宝可梦追踪</li>
+              <li>将图鉴页面加入站点地图</li>
             </ul>
           </div>
           <div className={styles.changelogEntry}>
-            <h3>February 9, 2026</h3>
+            <h3>2026 年 2 月 9 日</h3>
             <ul>
-              <li>Trophy Pages are here</li>
-              <li>Shiny Wars 2025 page with all the results of the 2025 OSW</li>
-              <li>Secret shiny glow effect on hover</li>
-              <li>New Streamers page for the team</li>
-              <li>Embedded links everywhere for easy navigation</li>
-              <li>Custom info boxes for events and achievements</li>
-              <li>Fixed deployment crashes</li>
-              <li>Sold/fled Pokemon now show on SHOTM, but do not add points</li>
-              <li>Mobile live preview working again</li>
+              <li>奖杯页面上线</li>
+              <li>新增 2025 闪光大战页面，收录 2025 OSW 的完整战果</li>
+              <li>鼠标悬停时，隐藏闪光会显示发光效果</li>
+              <li>新增公会主播页面</li>
+              <li>全站加入嵌入式链接，导航更方便</li>
+              <li>活动与成就新增自定义信息框</li>
+              <li>修正发布时的崩溃问题</li>
+              <li>已出售／逃跑的宝可梦现在显示在月度闪光猎人中，但不计入积分</li>
+              <li>移动端实时预览恢复正常</li>
             </ul>
           </div>
           <div className={styles.changelogEntry}>
-            <h3>February 8, 2026</h3>
+            <h3>2026 年 2 月 8 日</h3>
             <ul>
-              <li>Events system</li>
-              <li>Switched to Puppeteer for prerendering</li>
-              <li>Faster prerendering overall</li>
-              <li>Event type settings added for different event type creation (obviously)</li>
+              <li>新增活动系统</li>
+              <li>改用 Puppeteer 进行预渲染</li>
+              <li>整体预渲染速度更快</li>
+              <li>新增活动类型设置，便于创建不同类型的活动</li>
             </ul>
           </div>
           <div className={styles.changelogEntry}>
-            <h3>February 6-7, 2026</h3>
+            <h3>2026 年 2 月 6－7 日</h3>
             <ul>
-              <li>Streamers page now using Twitch directly</li>
-              <li>Fixed admin streamers tab issues</li>
-              <li>Counter Generator button styling fixed</li>
-              <li>Admin tabs now wrap on mobile</li>
-              <li>Reduced crazy hover scales on mobile</li>
-              <li>Better touch interactions overall</li>
-              <li>InfoBox positioning fixed on mobile</li>
+              <li>主播页面现直接使用 Twitch 数据</li>
+              <li>修正后台主播分页的问题</li>
+              <li>修正计数器生成器按钮样式</li>
+              <li>后台分页现可在移动端自动换行</li>
+              <li>降低移动端过大的悬停缩放效果</li>
+              <li>整体触控交互更流畅</li>
+              <li>修正移动端信息框位置</li>
             </ul>
           </div>
         </div>
         <div className={styles.metadata}>
-          <p><strong>Last Updated:</strong> April 20, 2026</p>
-          <p><strong>Contact:</strong> oHypers on Discord</p>
+          <p><strong>最后更新：</strong>2026 年 4 月 20 日</p>
+          <p><strong>联系方式：</strong>Discord 上的 oHypers</p>
         </div>
       </section>
     </div>

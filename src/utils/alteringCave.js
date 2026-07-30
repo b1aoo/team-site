@@ -1,45 +1,45 @@
 export const ALTERING_CAVE_ROTATION_ONE_INGAME_DAY = 82342
 export const REAL_MS_PER_INGAME_DAY = 6 * 60 * 60 * 1000
-export const IN_GAME_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+export const IN_GAME_DAYS = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日']
 export const DAY_OFFSET = 5
 export const ALTERING_CAVE_MOVE_WARNINGS = {
-  pineco: 'SELF DESTRUCT / TAKE DOWN',
-  mareep: 'TAKE DOWN',
-  smeargle: 'STRUGGLE',
-  snubbull: 'ROAR',
-  shuppet: 'CURSE',
-  absol: 'LIFE ORB',
-  aron: 'ROAR',
+  pineco: '会使用自爆 / 猛撞',
+  mareep: '会使用猛撞',
+  smeargle: '可能挣扎',
+  snubbull: '会使用吼叫',
+  shuppet: '会使用诅咒',
+  absol: '可能携带生命宝珠',
+  aron: '会使用吼叫',
 }
 
 export const ALTERING_CAVE_MOVE_SUMMARY = [
   {
     pokemon: 'Pineco',
-    summary: 'Pineco has Self-Destruct (Level 19 or below), Take Down (Lvl 19 or below). Bring a Damp mon. Do not False Swipe.',
+    summary: '榛果球在 Lv.19 及以下会使用自爆和猛撞。请携带湿气特性的宝可梦，不要使用点到为止。',
   },
   {
     pokemon: 'Mareep',
-    summary: "Mareep has Take Down. Don't False Swipe.",
+    summary: '咩利羊会使用猛撞；请勿使用点到为止。',
   },
   {
     pokemon: 'Smeargle',
-    summary: 'Smeargle has Sketch. Use a move before switching, otherwise it will begin to Struggle.',
+    summary: '图图犬会使用写生。换上捕捉手前先使用一次招式，否则它会开始挣扎。',
   },
   {
     pokemon: 'Snubbull',
-    summary: 'Snubbull learns Roar at lvl 25. Make sure to swap to a Pokemon higher level so it does not end the battle.',
+    summary: '布鲁在 Lv.25 学会吼叫。请换上等级更高的宝可梦，避免它强制结束战斗。',
   },
   {
     pokemon: 'Aron',
-    summary: 'Aron learns Roar at lvl 23 or below. Make sure to swap to a Pokemon higher level so it does not end the battle.',
+    summary: '可可多拉在 Lv.23 及以下会使用吼叫。请换上等级更高的宝可梦，避免它强制结束战斗。',
   },
   {
     pokemon: 'Shuppet',
-    summary: 'Shuppet has Curse at lvl 26+. Soak it so it is not Ghost type, or catch it before it dies.',
+    summary: '怨影娃娃在 Lv.26 及以上会使用诅咒。可先用浸水使其不再是幽灵属性，或在它倒下前捕获。',
   },
   {
     pokemon: 'Absol',
-    summary: 'Absol has a small chance to hold a Life Orb. Do not False Swipe it if it does.',
+    summary: '阿勃梭鲁有小概率携带生命宝珠；若携带，请勿使用点到为止。',
   },
 ]
 
@@ -80,8 +80,8 @@ export function formatRotationDuration(ms) {
   const seconds = totalSeconds % 60
 
   if (hours > 0) {
-    return `${hours}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`
+    return `${hours}小时 ${String(minutes).padStart(2, '0')}分 ${String(seconds).padStart(2, '0')}秒`
   }
 
-  return `${minutes}m ${String(seconds).padStart(2, '0')}s`
+  return `${minutes}分 ${String(seconds).padStart(2, '0')}秒`
 }

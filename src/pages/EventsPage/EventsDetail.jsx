@@ -5,6 +5,8 @@ import styles from './EventsDetail.module.css'
 import BackButton from '../../components/BackButton/BackButton'
 import { useDocumentHead } from '../../hooks/useDocumentHead'
 import { slugify } from '../../utils/slugify'
+import { translatePokemonName } from '../../utils/pokemon'
+import { translateLocationName } from '../../utils/pokemonTermsZh'
 
 export default function EventsDetail() {
   const { slug } = useParams()
@@ -12,9 +14,9 @@ export default function EventsDetail() {
   const [loading, setLoading] = useState(true)
 
   const breadcrumbs = [
-    { name: 'Home', url: '/' },
-    { name: 'Events', url: '/events' },
-    { name: event?.title || 'Event', url: `/event/${slug}` }
+    { name: '首页', url: '/' },
+    { name: '活动', url: '/events' },
+    { name: event?.title || '活动', url: `/event/${slug}` }
   ];
 
   const eventSchema = event ? {
@@ -24,23 +26,23 @@ export default function EventsDetail() {
     "description": event.description,
     "startDate": event.startDate,
     "endDate": event.endDate,
-    "url": `https://synergymmo.com/event/${slug}`,
-    "image": event.imageLink || "https://synergymmo.com/images/openGraph.jpg",
+    "url": `https://b1aoo.github.io/team-site/event/${slug}`,
+    "image": event.imageLink || "https://b1aoo.github.io/team-site/images/openGraph.jpg",
     "organizer": {
       "@type": "Organization",
       "name": "Team Synergy",
-      "url": "https://synergymmo.com"
+      "url": "https://b1aoo.github.io/team-site/"
     },
     "eventStatus": "https://schema.org/EventScheduled",
     "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode"
   } : null;
 
   useDocumentHead({
-    title: event?.title ? `${event.title} - PokeMMO Event | Team Synergy` : 'Loading event...',
-    description: event?.description || 'Join Team Synergy events in PokeMMO. Shiny hunting competitions, tournaments, and team challenges.',
+    title: event?.title ? `${event.title}｜PokeMMO 活动` : '正在加载活动…',
+    description: event?.description || '参加 Team Synergy 的 PokeMMO 活动：闪光狩猎竞赛、比赛与公会挑战。',
     canonicalPath: `/event/${slug}/`,
-    url: `https://synergymmo.com/event/${slug}/`,
-    ogImage: event?.imageLink || 'https://synergymmo.com/images/openGraph.jpg',
+    url: `https://b1aoo.github.io/team-site/event/${slug}/`,
+    ogImage: event?.imageLink || 'https://b1aoo.github.io/team-site/images/openGraph.jpg',
     twitterCard: 'summary_large_image',
     breadcrumbs: breadcrumbs,
     structuredData: eventSchema
@@ -81,21 +83,18 @@ export default function EventsDetail() {
       year: 'numeric',
       hour: 'numeric',
       minute: 'numeric',
-      hour12: true,
+      hour12: false,
     }
-    return new Intl.DateTimeFormat(undefined, options).format(date).replace(
-      day,
-      `${day}${daySuffix(day)}`
-    )
+    return new Intl.DateTimeFormat('zh-CN', options).format(date)
   }
 
-  if (loading) return <div className="message">Loading event...</div>
-  if (!event) return <div className="message">Event not found.</div>
+  if (loading) return <div className="message">正在加载活动…</div>
+  if (!event) return <div className="message">未找到该活动。</div>
 
 
   return (
     <div className={styles.container}>
-      <BackButton to="/events/" label="&larr; Return to Events" />
+      <BackButton to="/events/" label="← 返回活动列表" />
       <h1 className={styles.title}>{event.title}</h1>
 
       {event.imageLink && (
@@ -109,7 +108,7 @@ export default function EventsDetail() {
         <>
           {event.hideAndSeekDescription && (
             <div className={styles.listSection}>
-              <h3>Description</h3>
+              <h3>活动说明</h3>
               <div>
                 {event.hideAndSeekDescription.split(/\r?\n/).map((line, idx) => (
                   <span key={idx}>
@@ -123,20 +122,20 @@ export default function EventsDetail() {
           <div className={styles.info}>
             {event.startDate && (
               <div className={styles.infoItem}>
-                <span>Date/Time:</span>
+                <span>时间：</span>
                 <div>{formatEventDate(event.startDate)}</div>
               </div>
             )}
             {event.location && (
               <div className={styles.infoItem}>
-                <span>{event.eventType === "hideandseek" ? "Meet up Location:" : "Location:"}</span>
-                <div>{event.location}</div>
+                <span>{event.eventType === "hideandseek" ? '集合地点：' : '地点：'}</span>
+                <div>{translateLocationName(event.location)}</div>
               </div>
             )}
           </div>
           {event.hideAndSeekRounds?.length > 0 && (
             <div className={styles.listSection}>
-              <h3>Rounds</h3>
+              <h3>回合</h3>
               <div className={styles.roundsCardGrid}>
                 {event.hideAndSeekRounds.map((round, i) => {
                   let hostImg = null;
@@ -146,19 +145,19 @@ export default function EventsDetail() {
                   }
                   return (
                     <div key={i} className={styles.roundCard}>
-                      <div className={styles.roundPrize}><b>Prize:</b> {round.prize}</div>
+                      <div className={styles.roundPrize}><b>奖品：</b> {round.prize}</div>
                       {round.prizeImage && (
                         <div className={styles.roundPrizeImage}>
                           <img
                             src={round.prizeImage}
-                            alt="Prize"
+                            alt="奖品"
                             className={styles.prizeImg}
                             onError={e => { e.currentTarget.style.display = 'none'; }}
                           />
                         </div>
                       )}
                       <div className={styles.roundHost}>
-                        <b>Host:</b> {round.host}
+                        <b>主办：</b> {round.host}
                         {hostImg && (
                           <img
                             src={hostImg}
@@ -168,7 +167,7 @@ export default function EventsDetail() {
                           />
                         )}
                       </div>
-                      <div className={styles.roundWinner}><b>Winner:</b> {round.winner}</div>
+                      <div className={styles.roundWinner}><b>获胜者：</b> {round.winner}</div>
                     </div>
                   );
                 })}
@@ -177,7 +176,7 @@ export default function EventsDetail() {
           )}
           {event.hideAndSeekRules && (
             <div className={styles.listSection}>
-              <h3>Rules</h3>
+              <h3>规则</h3>
               <div>
                 {event.hideAndSeekRules.split(/\r?\n/).map((line, idx) => (
                   <span key={idx}>
@@ -193,29 +192,29 @@ export default function EventsDetail() {
         <>
           <div className={styles.info}>
             <div className={styles.infoItem}>
-              <span>Start:</span>
+              <span>开始：</span>
               <div>{formatEventDate(event.startDate)}</div>
             </div>
             <div className={styles.infoItem}>
-              <span>End:</span>
+              <span>结束：</span>
               <div>{formatEventDate(event.endDate)}</div>
             </div>
             {/* Only show location if not a Group Hunt */}
             {event.eventType !== 'grouphunt' && event.location && (
               <div className={styles.infoItem}>
-                <span>Location:</span>
-                <div>{event.location}</div>
+                <span>地点：</span>
+                <div>{translateLocationName(event.location)}</div>
               </div>
             )}
             {event.duration && (
               <div className={styles.infoItem}>
-                <span>Duration:</span>
+                <span>持续时间：</span>
                 <div>{event.duration}</div>
               </div>
             )}
             {event.scoring && (
               <div className={styles.infoItem}>
-                <span>Scoring:</span>
+                <span>计分方式：</span>
                 <div>{event.scoring}</div>
               </div>
             )}
@@ -226,7 +225,7 @@ export default function EventsDetail() {
       {/* Nature Bonus */}
       {event.natureBonus?.length > 0 && (
         <div className={styles.listSection}>
-          <h3>Nature Bonus</h3>
+          <h3>性格加成</h3>
           <div className={styles.natureColumn}>
             {event.natureBonus.map((n, i) => {
               const bonus = Number(n.bonus)
@@ -251,7 +250,7 @@ export default function EventsDetail() {
       {/* Valid Pokémon */}
       {event.validPokemon?.length > 0 && (
         <div className={styles.listSection}>
-          <h3>Valid Pokémon</h3>
+          <h3>有效宝可梦</h3>
           <div
             className={`${styles.pokemonColumn} ${event.validPokemon.length === 1 ? styles.singlePokemonColumn : ''}`}
           >
@@ -265,7 +264,7 @@ export default function EventsDetail() {
               return (
                 <div key={i} className={styles.pokemonCard}>
                   <div className={styles.pokemonHeader}>
-                    <span className={styles.pokemonName}>{name}</span>
+                    <span className={styles.pokemonName}>{translatePokemonName(name)}</span>
                     {bonus !== 0 && (
                       <span
                         className={styles.pokemonBonus}
@@ -293,7 +292,7 @@ export default function EventsDetail() {
       {/* Target Pokémon for Group Hunt */}
         {event.eventType === 'grouphunt' && event.targetPokemon?.length > 0 && (
           <div className={styles.listSection}>
-            <h3>Target Pokémon</h3>
+          <h3>目标宝可梦</h3>
             <div
               className={`${styles.pokemonColumn} ${event.targetPokemon.length === 1 ? styles.singlePokemonColumn : ''}`}
             >
@@ -308,8 +307,8 @@ export default function EventsDetail() {
                       className={styles.pokemonImg}
                       onError={(e) => { e.currentTarget.style.display = 'none' }}
                     />
-                    <span className={styles.pokemonName}>{name}</span>
-                    {t.location && <span className={styles.pokemonLocation}>Location: {t.location}</span>}
+                    <span className={styles.pokemonName}>{translatePokemonName(name)}</span>
+                    {t.location && <span className={styles.pokemonLocation}>地点：{translateLocationName(t.location)}</span>}
                     {t.duration && <span className={styles.pokemonDuration}> {t.duration}</span>}
                   </div>
                 )
@@ -322,7 +321,7 @@ export default function EventsDetail() {
       {/* Participating Staff */}
       {event.participatingStaff?.length > 0 && (
         <div className={styles.listSection}>
-          <h3>Participating Staff</h3>
+          <h3>参与工作人员</h3>
           <div className={styles.staffColumn}>
             {event.participatingStaff.map((staff, i) => (
               <div key={i} className={styles.staffCard}>
@@ -341,11 +340,11 @@ export default function EventsDetail() {
         (event.fourthPlacePrize?.filter(p => p?.trim())?.length ?? 0) > 0
       ) && (
         <div className={styles.listSection}>
-          <h3>Prizes</h3>
+          <h3>奖品</h3>
 
           {(event.firstPlacePrize?.filter(p => p?.trim())?.length ?? 0) > 0 && (
             <div className={`${styles.prizeGroup} ${styles.firstPlace}`}>
-              <div className={styles.prizeTitle}>🏆 1st Place!</div>
+              <div className={styles.prizeTitle}>🏆 第一名</div>
               {event.firstPlacePrize.filter(p => p?.trim()).map((prize, i) => (
                 <div key={`first-${i}`} className={styles.prizeItem}>{prize}</div>
               ))}
@@ -354,7 +353,7 @@ export default function EventsDetail() {
 
           {(event.secondPlacePrize?.filter(p => p?.trim())?.length ?? 0) > 0 && (
             <div className={`${styles.prizeGroup} ${styles.secondPlace}`}>
-              <div className={styles.prizeTitle}>🥈 2nd Place!</div>
+              <div className={styles.prizeTitle}>🥈 第二名</div>
               {event.secondPlacePrize.filter(p => p?.trim()).map((prize, i) => (
                 <div key={`second-${i}`} className={styles.prizeItem}>{prize}</div>
               ))}
@@ -363,7 +362,7 @@ export default function EventsDetail() {
 
           {(event.thirdPlacePrize?.filter(p => p?.trim())?.length ?? 0) > 0 && (
             <div className={`${styles.prizeGroup} ${styles.thirdPlace}`}>
-              <div className={styles.prizeTitle}>🥉 3rd Place!</div>
+              <div className={styles.prizeTitle}>🥉 第三名</div>
               {event.thirdPlacePrize.filter(p => p?.trim()).map((prize, i) => (
                 <div key={`third-${i}`} className={styles.prizeItem}>{prize}</div>
               ))}
@@ -372,7 +371,7 @@ export default function EventsDetail() {
 
           {(event.fourthPlacePrize?.filter(p => p?.trim())?.length ?? 0) > 0 && (
             <div className={`${styles.prizeGroup} ${styles.fourthPlace}`}>
-              <div className={styles.prizeTitle}>🏅 4th Place!</div>
+              <div className={styles.prizeTitle}>🏅 第四名</div>
               {event.fourthPlacePrize.filter(p => p?.trim()).map((prize, i) => (
                 <div key={`fourth-${i}`} className={styles.prizeItem}>{prize}</div>
               ))}
@@ -384,19 +383,19 @@ export default function EventsDetail() {
       {/* Rules for Catch Events */}
       {event.eventType === "catchevent" && (
         <div className={styles.listSection}>
-          <h3>Rules and Registration</h3>
+          <h3>规则与报名</h3>
           <ul className={styles.rulesList}>
-            <li>To win 1st-3rd places that are sorted by high to low, you need to submit an entry that scores the highest</li>
-            <li>To win 4th place you need to submit an entry that scores the lowest</li>
-            <li>You can only submit one entry</li>
-            <li>Players can enter the event with only one account/character</li>
-            <li>All Pokémon must be caught within the event time and at the event location</li>
-            <li>All Pokémon must remain unevolved</li>
-            <li>Evolved or unevolved forms of the listed Pokémon will not be accepted as a valid entry</li>
-            <li>You must be the OT of the Pokémon</li>
-            <li>In the event of a tie, the winner will be determined by earliest catch time</li>
-            <li>Any player with access to the event location can participate, there are no prior registration or sign-up required</li>
-            <li>You must link your entry to any participating staff member via whisper to submit it and keep the Pokémon in your party until the results are announced</li>
+            <li>按由高到低排序的第 1 至第 3 名，需要提交得分最高的参赛宝可梦。</li>
+            <li>第四名需提交得分最低的参赛宝可梦。</li>
+            <li>每位玩家只能提交一次。</li>
+            <li>每位玩家只能使用一个账号或角色参赛。</li>
+            <li>所有参赛宝可梦必须在活动时间内、活动地点内捕获。</li>
+            <li>所有参赛宝可梦必须保持未进化状态。</li>
+            <li>目标宝可梦的进化形或未进化形均不作为有效参赛对象。</li>
+            <li>你必须是该宝可梦的原训练家（OT）。</li>
+            <li>若出现同分，以最早的捕获时间决定名次。</li>
+            <li>能够进入活动地点的玩家均可参加，无需提前报名。</li>
+            <li>通过私聊将参赛宝可梦链接发送给任意参与工作人员；结果公布前请将其保留在队伍中。</li>
           </ul>
         </div>
       )}
@@ -409,11 +408,11 @@ export default function EventsDetail() {
         (event.fourthPlaceWinners?.filter(w => w?.trim())?.length ?? 0) > 0
       ) && (
         <div className={styles.listSection}>
-          <h3>Winners</h3>
+          <h3>获胜者</h3>
 
           {(event.firstPlaceWinners?.filter(w => w?.trim())?.length ?? 0) > 0 && (
             <div className={`${styles.prizeGroup} ${styles.firstPlace}`}>
-              <div className={styles.prizeTitle}>🏆 1st Place!</div>
+              <div className={styles.prizeTitle}>🏆 第一名</div>
               {event.firstPlaceWinners.filter(w => w?.trim()).map((winner, i) => (
                 <div key={`first-${i}`} className={styles.prizeItem}>{winner}</div>
               ))}
@@ -422,7 +421,7 @@ export default function EventsDetail() {
 
           {(event.secondPlaceWinners?.filter(w => w?.trim())?.length ?? 0) > 0 && (
             <div className={`${styles.prizeGroup} ${styles.secondPlace}`}>
-              <div className={styles.prizeTitle}>🥈 2nd Place!</div>
+              <div className={styles.prizeTitle}>🥈 第二名</div>
               {event.secondPlaceWinners.filter(w => w?.trim()).map((winner, i) => (
                 <div key={`second-${i}`} className={styles.prizeItem}>{winner}</div>
               ))}
@@ -431,7 +430,7 @@ export default function EventsDetail() {
 
           {(event.thirdPlaceWinners?.filter(w => w?.trim())?.length ?? 0) > 0 && (
             <div className={`${styles.prizeGroup} ${styles.thirdPlace}`}>
-              <div className={styles.prizeTitle}>🥉 3rd Place!</div>
+              <div className={styles.prizeTitle}>🥉 第三名</div>
               {event.thirdPlaceWinners.filter(w => w?.trim()).map((winner, i) => (
                 <div key={`third-${i}`} className={styles.prizeItem}>{winner}</div>
               ))}
@@ -440,7 +439,7 @@ export default function EventsDetail() {
 
           {(event.fourthPlaceWinners?.filter(w => w?.trim())?.length ?? 0) > 0 && (
             <div className={`${styles.prizeGroup} ${styles.fourthPlace}`}>
-              <div className={styles.prizeTitle}>🏅 4th Place!</div>
+              <div className={styles.prizeTitle}>🏅 第四名</div>
               {event.fourthPlaceWinners.filter(w => w?.trim()).map((winner, i) => (
                 <div key={`fourth-${i}`} className={styles.prizeItem}>{winner}</div>
               ))}

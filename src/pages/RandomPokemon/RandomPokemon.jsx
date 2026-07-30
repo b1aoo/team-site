@@ -17,6 +17,11 @@ const NATURES = [
   'Timid','Hasty','Jolly','Naive','Modest','Mild','Quiet','Rash',
   'Calm','Gentle','Sassy','Careful','Hardy','Docile','Serious','Bashful','Quirky',
 ]
+const NATURE_NAMES_ZH = {
+  Lonely: '孤独', Brave: '勇敢', Adamant: '固执', Naughty: '顽皮', Bold: '大胆', Relaxed: '悠闲', Impish: '淘气', Lax: '乐天',
+  Timid: '胆小', Hasty: '急躁', Jolly: '爽朗', Naive: '天真', Modest: '内敛', Mild: '慢吞吞', Quiet: '冷静', Rash: '马虎',
+  Calm: '沉着', Gentle: '温和', Sassy: '自大', Careful: '慎重', Hardy: '勤奋', Docile: '坦率', Serious: '认真', Bashful: '害羞', Quirky: '浮躁',
+}
 
 const normalizedTiers = {
   'Tier 0': randomizerTiers['Tier 0'] || [],
@@ -30,13 +35,11 @@ const normalizedTiers = {
 
 export default function RandomPokemon() {
   const breadcrumbs = [
-    { name: 'Home', url: '/' },
-    { name: 'Random Pokémon Generator', url: '/random-pokemon-generator' }
+    { name: '首页', url: '/' }, { name: '随机宝可梦生成器', url: '/random-pokemon-generator' }
   ];
 
   useDocumentHead({
-    title: 'PokeMMO Random Pokémon Generator & Shiny Bingo',
-    description: 'Ultimate PokeMMO random Pokémon generator and shiny bingo tool. Generate hunt targets, play bingo with multiple board sizes, filter by tier, randomize natures and IVs for shiny hunting.',
+    title: 'PokeMMO 随机宝可梦生成器与闪光宾果', description: '生成刷闪目标、创建不同尺寸的闪光宾果板、按分层筛选并随机加入性格和个体值任务。',
     canonicalPath: '/random-pokemon-generator/',
     breadcrumbs: breadcrumbs
   })
@@ -269,7 +272,7 @@ export default function RandomPokemon() {
   }
 
   function showBingoOverlay(milestone) {
-    const messages = ['', '1st Line!', '2nd Line!', 'Bingo!!']
+    const messages = ['', '完成第 1 条线！', '完成第 2 条线！', '宾果！']
     setOverlayMessage(messages[milestone])
     setShowOverlay(true)
     fireFireworks()
@@ -316,7 +319,7 @@ export default function RandomPokemon() {
     if (currentTab === 'single') {
       if (!enabledTiers.length) return;
       if (!enableShiny && !allowNormal && !allowNature && !allowIV) {
-        showWarning('Please select at least one mode (Shiny, Non-Shiny, Nature, or IV)!');
+        showWarning('请至少选择一种模式（闪光、非闪光、性格或个体值）！');
         return;
       }
 
@@ -329,7 +332,7 @@ export default function RandomPokemon() {
       }
 
       if (!pool.length) {
-        showWarning('No eligible Pokemon left for this tier!');
+        showWarning('该分层没有符合条件的宝可梦！');
         return;
       }
 
@@ -361,7 +364,7 @@ export default function RandomPokemon() {
 
       const totalPoolSize = Object.values(flattenedPool).reduce((sum, arr) => sum + arr.length, 0);
       if (totalPoolSize < size * size) {
-        showWarning('Not enough eligible Pokemon to generate a full bingo card!');
+        showWarning('符合条件的宝可梦不足，无法生成完整宾果卡！');
         return;
       }
 
@@ -380,7 +383,7 @@ export default function RandomPokemon() {
       }
 
       if (card.length < size * size) {
-        showWarning('Could not fill the bingo card with enough Pokemon!');
+        showWarning('没有足够的宝可梦填满宾果卡！');
         return;
       }
 
@@ -445,12 +448,12 @@ export default function RandomPokemon() {
 
   return (
     <div className={styles.page}>
-      <h1>{currentTab === 'bingo' ? 'Random Bingo Card Generator' : 'Random Pokemon Generator'}</h1>
+      <h1>{currentTab === 'bingo' ? '随机宾果卡生成器' : '随机宝可梦生成器'}</h1>
 
       <div className={styles.usernameContainer}>
-        <div>(This uses either the Synergy Database or Shinyboard.net)</div>
+        <div>数据来自 Synergy 数据库或 Shinyboard.net</div>
         <label>
-          Filter your shinies{' '}
+          筛选你的闪光宝可梦：
           <input
             type="text"
             value={username}
@@ -459,7 +462,7 @@ export default function RandomPokemon() {
             placeholder=""
           />
         </label>
-        <button className={styles.loadBtn} onClick={handleLoadShinies}>Pre-load Shinies</button>
+        <button className={styles.loadBtn} onClick={handleLoadShinies}>预加载闪光收藏</button>
         {loadResult && <div className={styles.result}>{loadResult}</div>}
       </div>
 
@@ -468,34 +471,34 @@ export default function RandomPokemon() {
           className={`${styles.tabBtn} ${currentTab === 'single' ? styles.tabActive : ''}`}
           onClick={() => setCurrentTab('single')}
         >
-          Random Pokemon
+          随机宝可梦
         </button>
         <button
           className={`${styles.tabBtn} ${currentTab === 'bingo' ? styles.tabActive : ''}`}
           onClick={() => setCurrentTab('bingo')}
         >
-          Bingo Card
+          宾果卡
         </button>
 
         <button
           className={`${styles.tabBtn} ${currentTab === 'custom' ? styles.tabActive : ''}`}
           onClick={() => setCurrentTab('custom')}
         >
-          Custom Card
+          自定义卡片
         </button>
       </div>
 
       {currentTab === 'bingo' && (
         <div className={styles.checkBoxes}>
-          <label><input type="checkbox" checked={enableShiny} onChange={e => setEnableShiny(e.target.checked)} /> Enable Shiny Pokemon</label><br />
-          <label><input type="checkbox" checked={allowNormal} onChange={e => setAllowNormal(e.target.checked)} /> Allow Non-Shiny Pokemon</label><br />
-          <label><input type="checkbox" checked={allowNature} onChange={e => setAllowNature(e.target.checked)} /> Allow Random Nature Tasks</label><br />
-          <label><input type="checkbox" checked={allowIV} onChange={e => setAllowIV(e.target.checked)} /> Allow Random IV Tasks</label>
+          <label><input type="checkbox" checked={enableShiny} onChange={e => setEnableShiny(e.target.checked)} /> 启用闪光宝可梦</label><br />
+          <label><input type="checkbox" checked={allowNormal} onChange={e => setAllowNormal(e.target.checked)} /> 允许非闪光宝可梦</label><br />
+          <label><input type="checkbox" checked={allowNature} onChange={e => setAllowNature(e.target.checked)} /> 允许随机性格任务</label><br />
+          <label><input type="checkbox" checked={allowIV} onChange={e => setAllowIV(e.target.checked)} /> 允许随机个体值任务</label>
         </div>
       )}
       {currentTab != 'custom' && (
       <div className={styles.tierFilters}>
-        <h3>Shiny Tier Filter</h3>
+        <h3>闪光分层筛选</h3>
         <div className={styles.tierCheckboxes}>
           {Object.keys(normalizedTiers).map(tier => (
             <div key={tier} className={styles.tierRow}>
@@ -520,7 +523,7 @@ export default function RandomPokemon() {
       </div>
       )}
       {currentTab === 'single' && (
-        <button className={styles.generateBtn} onClick={handleGenerate}>Generate</button>
+        <button className={styles.generateBtn} onClick={handleGenerate}>生成</button>
       )}
 
 
@@ -528,19 +531,18 @@ export default function RandomPokemon() {
         <>
           {checkedCount >= 2 && (
             <div className={styles.modeSettings}>
-              <h4>Mode Weights</h4>
-              <p>Low number = low chance, high number = high chance</p>
+              <h4>模式权重</h4><p>数值越低，出现概率越低；数值越高，出现概率越高。</p>
               {enableShiny && (
-                <label>Shiny: <input type="number" min={1} max={100} value={pctShiny} onChange={e => setPctShiny(parseInt(e.target.value) || 0)} className={styles.weightInput} /></label>
+                <label>闪光：<input type="number" min={1} max={100} value={pctShiny} onChange={e => setPctShiny(parseInt(e.target.value) || 0)} className={styles.weightInput} /></label>
               )}
               {allowNormal && (
-                <label>Non-Shiny: <input type="number" min={1} max={100} value={pctNormal} onChange={e => setPctNormal(parseInt(e.target.value) || 0)} className={styles.weightInput} /></label>
+                <label>非闪光：<input type="number" min={1} max={100} value={pctNormal} onChange={e => setPctNormal(parseInt(e.target.value) || 0)} className={styles.weightInput} /></label>
               )}
               {allowNature && (
-                <label>Nature: <input type="number" min={1} max={100} value={pctNature} onChange={e => setPctNature(parseInt(e.target.value) || 0)} className={styles.weightInput} /></label>
+                <label>性格：<input type="number" min={1} max={100} value={pctNature} onChange={e => setPctNature(parseInt(e.target.value) || 0)} className={styles.weightInput} /></label>
               )}
               {allowIV && (
-                <label>Random IV: <input type="number" min={1} max={100} value={pctIV} onChange={e => setPctIV(parseInt(e.target.value) || 0)} className={styles.weightInput} /></label>
+                <label>随机个体值：<input type="number" min={1} max={100} value={pctIV} onChange={e => setPctIV(parseInt(e.target.value) || 0)} className={styles.weightInput} /></label>
               )}
             </div>
           )}
@@ -558,7 +560,7 @@ export default function RandomPokemon() {
             </label>
           </div>
 
-          <button className={styles.generateBtn} onClick={handleGenerate}>Generate</button>
+          <button className={styles.generateBtn} onClick={handleGenerate}>生成</button>
         </>
       )}
 
@@ -566,8 +568,8 @@ export default function RandomPokemon() {
       {currentTab === 'single' && (
         <>
           <div className={styles.randomResult}>
-            <p>Tier: <span>{singleTier}</span></p>
-            <p>Pokemon: {singlePokemon ? (
+            <p>分层：<span>{singleTier}</span></p>
+            <p>宝可梦：{singlePokemon ? (
               <>
                 <strong>{formatPokemonName(singlePokemon.name)}</strong>
                 <br />
@@ -583,7 +585,7 @@ export default function RandomPokemon() {
             ) : '---'}</p>
           </div>
           <div className={styles.previousLog}>
-            <h3>Previously Selected Pokemon:</h3>
+            <h3>此前生成的宝可梦：</h3>
             <ul className={styles.previousList}>
               {history.map((entry, i) => <li key={i}>{entry}</li>)}
             </ul>
@@ -606,13 +608,13 @@ export default function RandomPokemon() {
               className={`${styles.teamOption} ${activeTeam === 'team1' ? styles.active : ''}`}
               onClick={() => handleTeamToggle('team1')}
             >
-              Team 1
+              队伍 1
             </span>
             <span
               className={`${styles.teamOption} ${activeTeam === 'team2' ? styles.active : ''}`}
               onClick={() => handleTeamToggle('team2')}
             >
-              Team 2
+              队伍 2
             </span>
           </div>
         </div>
@@ -644,10 +646,10 @@ export default function RandomPokemon() {
                 onError={onGifError(entry.name, entry.type === 'shiny')}
               />
 
-              {entry.type === 'nature' && <div className={styles.bingoText}>Nature: {entry.nature}</div>}
-              {entry.type === 'shiny' && <div className={styles.bingoText}>Shiny</div>}
-              {entry.type === 'iv' && <div className={styles.bingoText}>IV {entry.iv.target} than {entry.iv.roll}</div>}
-              {entry.type === 'normal' && <div className={styles.bingoText}>Non-Shiny</div>}
+              {entry.type === 'nature' && <div className={styles.bingoText}>性格：{NATURE_NAMES_ZH[entry.nature] || entry.nature}</div>}
+              {entry.type === 'shiny' && <div className={styles.bingoText}>闪光</div>}
+              {entry.type === 'iv' && <div className={styles.bingoText}>个体值 {entry.iv.target === 'HIGHER' ? '高于' : '低于'} {entry.iv.roll}</div>}
+              {entry.type === 'normal' && <div className={styles.bingoText}>非闪光</div>}
             </div>
 
           ))}
@@ -660,7 +662,7 @@ export default function RandomPokemon() {
     {/* Card Size Selector */}
     <div className={styles.bingoSettings}>
       <label>
-        Card Size:{' '}
+        卡片尺寸：
         <select
           value={bingoSize}
           onChange={e => setBingoSize(parseInt(e.target.value))}
@@ -725,7 +727,7 @@ export default function RandomPokemon() {
                       textAlign: 'center',
                     }}
                   >
-                    Shiny
+                    闪光
                   </div>
                 )}
                 {committed.type === 'normal' && (
@@ -738,7 +740,7 @@ export default function RandomPokemon() {
                       textAlign: 'center',
                     }}
                   >
-                    Non-Shiny
+                    非闪光
                   </div>
                 )}
                 {committed.type === 'nature' && (
@@ -751,7 +753,7 @@ export default function RandomPokemon() {
                       textAlign: 'center',
                     }}
                   >
-                    Nature: {committed.nature}
+                    性格：{NATURE_NAMES_ZH[committed.nature] || committed.nature}
                   </div>
                 )}
                 {committed.type === 'iv' && (
@@ -764,7 +766,7 @@ export default function RandomPokemon() {
                       textAlign: 'center',
                     }}
                   >
-                    IV {committed.iv.target} than {committed.iv.roll}
+                    个体值 {committed.iv.target === 'HIGHER' ? '高于' : '低于'} {committed.iv.roll}
                   </div>
                 )}
               </>
@@ -773,7 +775,7 @@ export default function RandomPokemon() {
             {/* Input Field */}
             <input
               className={styles.customBingoInput}
-              placeholder="Pokemon name (-nature/-iv/-nonshiny)"
+              placeholder="宝可梦英文名（-nature/-iv/-nonshiny）"
               value={entry.name}
               onChange={e => {
                 const val = e.target.value;
@@ -825,7 +827,7 @@ export default function RandomPokemon() {
         const incomplete = filledEntries.some(e => !e.name.trim());
 
         if (incomplete) {
-          showWarning('Please fill every square!');
+          showWarning('请填满每个格子！');
           return;
         }
 
@@ -843,7 +845,7 @@ export default function RandomPokemon() {
         setCurrentTab('bingo');
       }}
     >
-      Start Custom Card
+      开始自定义卡片
     </button>
   </>
 )}

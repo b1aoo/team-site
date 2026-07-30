@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 
-const DEFAULT_SITE_NAME = 'Team Synergy - PokeMMO';
+const DEFAULT_SITE_NAME = 'Team Synergy｜PokeMMO';
 const DEFAULT_BASE_URL = 'https://b1aoo.github.io/team-site';
 const DEFAULT_IMAGE = `${DEFAULT_BASE_URL}/images/openGraph.jpg`;
 const DEFAULT_DESCRIPTION =
-  'Team Synergy is a PokeMMO shiny hunting team. Browse our shiny dex, view shiny collections, watch our streamers, and generate encounter counter themes.';
+  'Team Synergy 是 PokeMMO 闪光狩猎公会。浏览闪光图鉴、成员收藏、主播与遇敌计数器主题。';
 
 function setMeta(name, content, attr = 'name') {
   let el = document.querySelector(`meta[${attr}="${name}"]`);

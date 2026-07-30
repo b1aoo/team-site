@@ -80,7 +80,7 @@ const sortedShinies = Object.fromEntries(
 
   return (
     <div>
-      <label>Select Player:</label>
+      <label>选择训练家：</label>
       <Autocomplete
         id="editPlayerSelect"
         value={searchInput}
@@ -98,41 +98,41 @@ const sortedShinies = Object.fromEntries(
           setEditingData(null)
         }}
         getOptions={() => playerNames}
-        placeholder="Search player..."
+        placeholder="搜索训练家…"
       />
 
       {!selectedPlayer && (
-        <p className={styles.hintText}>Search and select a player to view and edit their shinies.</p>
+        <p className={styles.hintText}>搜索并选择训练家，以查看和编辑其闪光宝可梦。</p>
       )}
 
       {selectedPlayer && (
         <>
           {editingId ? (
             <div className={styles.editSection}>
-              <h3>Editing #{editingId} - {editingData?.Pokemon}</h3>
+              <h3>正在编辑 #{editingId}－{editingData?.Pokemon}</h3>
               <ShinyForm
                 initialData={editingData}
                 onSubmit={handleSaveEdit}
-                submitLabel="Save Changes"
+                submitLabel="保存修改"
                 allPokemonNames={allPokemonNames}
                 isMutating={isMutating}
                 isEditMode
               />
               <button onClick={handleCancelEdit} style={{ backgroundColor: '#555', marginTop: 10 }}>
-                Cancel Edit
+                取消编辑
               </button>
             </div>
           ) : (
             <>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16 }}>
                 <h3 style={{ margin: 0 }}>
-                  {selectedPlayer}'s Shinies ({Object.keys(shinies).length})
+                  {selectedPlayer} 的闪光宝可梦（{Object.keys(shinies).length}）
                 </h3>
                 <button
                   className={styles.dangerBtn}
                   onClick={() => setConfirmDeletePlayer(true)}
                 >
-                  Delete Entire Player
+                  删除整个训练家记录
                 </button>
               </div>
               <ShinyTable
@@ -148,9 +148,9 @@ const sortedShinies = Object.fromEntries(
 
       {confirmDelete && (
         <ConfirmDialog
-          title="Delete Shiny"
-          message={`Are you sure you want to delete ${confirmDelete.pokemon} (#${confirmDelete.id}) from ${selectedPlayer}?`}
-          confirmLabel="Delete"
+          title="删除闪光宝可梦"
+          message={`确定要从 ${selectedPlayer} 的记录中删除 ${confirmDelete.pokemon}（#${confirmDelete.id}）吗？`}
+          confirmLabel="删除"
           onConfirm={handleConfirmDelete}
           onCancel={() => setConfirmDelete(null)}
         />
@@ -158,9 +158,9 @@ const sortedShinies = Object.fromEntries(
 
       {confirmDeletePlayer && (
         <ConfirmDialog
-          title="Delete Entire Player"
-          message={`This will permanently delete ALL data for ${selectedPlayer}, including all ${Object.keys(shinies).length} shinies. This cannot be undone without restoring from a backup.`}
-          confirmLabel="Delete Player"
+          title="删除整个训练家记录"
+          message={`这将永久删除 ${selectedPlayer} 的全部数据，包括 ${Object.keys(shinies).length} 只闪光宝可梦。除非从备份恢复，否则无法撤销。`}
+          confirmLabel="删除训练家"
           typeToConfirm={selectedPlayer}
           onConfirm={handleConfirmDeletePlayer}
           onCancel={() => setConfirmDeletePlayer(false)}

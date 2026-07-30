@@ -4,7 +4,8 @@ import { API } from '../../api/endpoints'
 import { useDocumentHead } from '../../hooks/useDocumentHead'
 import { useEncounterPercents } from '../../hooks/useEncounterPercents'
 import { getAssetUrl } from '../../utils/assets'
-import { getLocalPokemonGif, normalizePokemonName, onGifError } from '../../utils/pokemon'
+import { getLocalPokemonGif, normalizePokemonName, onGifError, translatePokemonName } from '../../utils/pokemon'
+import { translateEncounterTerm, translateLocationName, translateRegionName } from '../../utils/pokemonTermsZh'
 import generationData from '../../data/generation.json'
 import pokemonData from '../../data/pokemmo_data/pokemon-data.json'
 import { allRegions as regionMapData } from '../../data/region_maps'
@@ -28,15 +29,15 @@ const ENCOUNTER_CATEGORY_MAP = {
   'repel-trick': 'repelTrick',
 }
 const UNROUTED_CATEGORIES = [
-  { key: 'singles', label: 'Single Encounter' },
-  { key: 'surfing', label: 'Surfing' },
-  { key: 'fishing', label: 'Fish' },
-  { key: 'horde', label: 'Hordes' },
-  { key: 'headbutt', label: 'Headbutt' },
-  { key: 'rockSmash', label: 'Rock Smash' },
+  { key: 'singles', label: '单只遭遇' },
+  { key: 'surfing', label: '冲浪' },
+  { key: 'fishing', label: '垂钓' },
+  { key: 'horde', label: '群聚' },
+  { key: 'headbutt', label: '头锤树' },
+  { key: 'rockSmash', label: '碎岩' },
 ]
 const UNROUTED_CATEGORY_OPTIONS = [
-  { value: 'all', label: 'All Categories' },
+  { value: 'all', label: '全部类别' },
   ...UNROUTED_CATEGORIES.map(category => ({ value: category.key, label: category.label })),
 ]
 const INFO_DROPDOWN_CLOSED_KEY = 'routeFinderInfoClosed'
@@ -78,6 +79,16 @@ function normalizePokemonKey(value) {
     .replace(/\s+/g, '-')
 }
 
+function resolvePokemonSearch(value) {
+  const normalized = normalizePokemonKey(value)
+  if (!normalized) return ''
+  const match = Object.values(pokemonData).find((pokemon) => (
+    normalizePokemonKey(pokemon.name) === normalized
+    || normalizePokemonKey(translatePokemonName(pokemon.name)) === normalized
+  ))
+  return normalizePokemonKey(match?.name || value)
+}
+
 function formatPercent(encounters, total) {
   if (!total) return '0%'
   const percent = (encounters / total) * 100
@@ -96,10 +107,10 @@ function getTier(pokemon) {
 
 function formatEncounterTimeLabel(time) {
   return String(time || '')
-    .replace(/SEASON0/g, 'Summer')
-    .replace(/SEASON1/g, 'Spring')
-    .replace(/SEASON2/g, 'Autumn')
-    .replace(/SEASON3/g, 'Winter')
+    .replace(/SEASON0/g, '夏季')
+    .replace(/SEASON1/g, '春季')
+    .replace(/SEASON2/g, '秋季')
+    .replace(/SEASON3/g, '冬季')
 }
 
 function collapseSeasonalTimes(times = []) {
@@ -600,8 +611,8 @@ function TopContributorsDropdown({ contributors }) {
   return (
     <details className={styles.topContributors}>
       <summary className={styles.topContributorsSummary}>
-        <span>Top Contributors</span>
-        <small>{totalRoutes.toLocaleString()} route credits</small>
+        <span>贡献者排行</span>
+        <small>{totalRoutes.toLocaleString()} 条地点记录</small>
       </summary>
       <ol className={styles.topContributorsList}>
         {contributors.map((contributor, index) => (
@@ -609,7 +620,7 @@ function TopContributorsDropdown({ contributors }) {
             <span className={styles.contributorRank}>#{index + 1}</span>
             <span className={styles.contributorName}>{contributor.name}</span>
             <span className={styles.contributorStats}>
-              {contributor.routes.toLocaleString()} {contributor.routes === 1 ? 'route' : 'routes'}
+              {contributor.routes.toLocaleString()} 条地点
             </span>
           </li>
         ))}
@@ -619,27 +630,27 @@ function TopContributorsDropdown({ contributors }) {
 }
 
 function PokemonPill({ mon, role }) {
-  const tierLabel = mon.tier !== null ? `Tier ${mon.tier}` : null
+  const tierLabel = mon.tier !== null ? `闪光阶级 ${mon.tier}` : null
 
   return (
     <Link to={`/pokemon/${normalizePokemonName(mon.name)}/`} className={`${styles.monPill} ${role === 'target' ? styles.targetPill : styles.phasePill}`}>
       <img
         src={getLocalPokemonGif(mon.name)}
-        alt={mon.name}
+        alt={translatePokemonName(mon.name)}
         className={styles.monSprite}
         onError={onGifError(mon.name)}
         loading="lazy"
       />
-      <span className={styles.monName}>{mon.name}</span>
+      <span className={styles.monName}>{translatePokemonName(mon.name)}</span>
       <span className={styles.monPercent}>{mon.percentLabel}</span>
-      <span className={styles.monEncounters}>{mon.encounters.toLocaleString()} encounters</span>
+      <span className={styles.monEncounters}>{mon.encounters.toLocaleString()} 次遭遇</span>
       {tierLabel && <span className={styles.tierBadge}>{tierLabel}</span>}
     </Link>
   )
 }
 
 function RouteCard({ route, pokemonFilter, pokemonFamilyKeys, sortMode }) {
-  const pokemonNeedle = normalizePokemonKey(pokemonFilter)
+  const pokemonNeedle = resolvePokemonSearch(pokemonFilter)
   const displayTargetTiers = (sortMode === 'best' || sortMode === 'worst') ? BEST_ROUTE_TIERS : TARGET_TIERS
   const targetPokemon = route.pokemon.filter(mon => {
     const monKey = normalizePokemonKey(mon.name)
@@ -651,19 +662,19 @@ function RouteCard({ route, pokemonFilter, pokemonFamilyKeys, sortMode }) {
   })
   const targetNames = new Set(targetPokemon.map(mon => normalizePokemonKey(mon.name)))
   const phasePokemon = route.pokemon.filter(mon => !targetNames.has(normalizePokemonKey(mon.name)))
-  const targetHeading = (sortMode === 'best' || sortMode === 'worst') ? 'Tier 0-2 Targets' : 'Target Mons'
+  const targetHeading = (sortMode === 'best' || sortMode === 'worst') ? '阶级 0–2 目标' : '目标宝可梦'
 
   return (
     <article className={styles.routeCard}>
       <header className={styles.routeHeader}>
         <div>
-          <p className={styles.regionLabel}>{route.region}</p>
-          <h2>{route.displayName}</h2>
+          <p className={styles.regionLabel}>{translateRegionName(route.region)}</p>
+          <h2>{translateLocationName(route.displayName)}</h2>
         </div>
         <div className={styles.routeMeta}>
-          <span>Total Encounters Tracked: {route.total.toLocaleString()}</span>
-          <span>Total Rare %: {route.rarePercentLabel}</span>
-          {route.credit && <span>Credit: {route.credit}</span>}
+          <span>已记录遭遇：{route.total.toLocaleString()}</span>
+          <span>稀有总占比：{route.rarePercentLabel}</span>
+          {route.credit && <span>记录者：{route.credit}</span>}
         </div>
       </header>
 
@@ -679,7 +690,7 @@ function RouteCard({ route, pokemonFilter, pokemonFamilyKeys, sortMode }) {
       )}
 
       <section className={styles.monSection}>
-        <h3>{targetPokemon.length > 0 ? 'Phases' : 'Pokemon Percentages'}</h3>
+        <h3>{targetPokemon.length > 0 ? '陪跑宝可梦' : '宝可梦出现率'}</h3>
         <div className={styles.monGrid}>
           {phasePokemon.map((mon, index) => (
             <PokemonPill key={`${route.id}-phase-${mon.name}-${index}`} mon={mon} role="phase" />
@@ -695,8 +706,8 @@ function UnroutedChecklist({ route, pokemonNeedle, pokemonFamilyKeys }) {
     <article className={styles.unroutedCard}>
       <header className={styles.unroutedHeader}>
         <div>
-          <p className={styles.regionLabel}>{route.region}</p>
-          <h2>{route.routeName}</h2>
+          <p className={styles.regionLabel}>{translateRegionName(route.region)}</p>
+          <h2>{translateLocationName(route.routeName)}</h2>
         </div>
         <div className={styles.routeMeta}>
           {route.kinds.map(kind => <span key={kind}>{kind}</span>)}
@@ -709,9 +720,9 @@ function UnroutedChecklist({ route, pokemonNeedle, pokemonFamilyKeys }) {
           const isComplete = trackedTotal >= MIN_CATEGORY_TRACKED_ENCOUNTERS
           return (
             <li key={category.key} className={`${styles.checklistItem} ${isComplete ? styles.checklistComplete : styles.checklistMissing}`}>
-              <span className={styles.checkIcon} aria-hidden="true">{isComplete ? 'Y' : 'N'}</span>
+              <span className={styles.checkIcon} aria-hidden="true">{isComplete ? '✓' : '×'}</span>
               <span>{category.label}</span>
-              <strong>{isComplete ? 'Yes' : `${trackedTotal.toLocaleString()}/${MIN_CATEGORY_TRACKED_ENCOUNTERS.toLocaleString()}`}</strong>
+              <strong>{isComplete ? '已完成' : `${trackedTotal.toLocaleString()}/${MIN_CATEGORY_TRACKED_ENCOUNTERS.toLocaleString()}`}</strong>
             </li>
           )
         })}
@@ -734,20 +745,20 @@ function UnroutedChecklist({ route, pokemonNeedle, pokemonFamilyKeys }) {
                   >
                     <img
                       src={getLocalPokemonGif(mon.name)}
-                      alt={mon.name}
+                      alt={translatePokemonName(mon.name)}
                       onError={onGifError(mon.name)}
                       loading="lazy"
                     />
-                    <span>{mon.name}</span>
+                    <span>{translatePokemonName(mon.name)}</span>
                     <small>
                       {[
-                        mon.meta.rarities.join(', '),
-                        mon.meta.methods.join(', '),
-                        mon.meta.levels.length > 0 ? `Lv. ${mon.meta.levels.join(', ')}` : '',
+                        mon.meta.rarities.map(translateEncounterTerm).join(', '),
+                        mon.meta.methods.map(translateEncounterTerm).join(', '),
+                        mon.meta.levels.length > 0 ? `等级 ${mon.meta.levels.join(', ')}` : '',
                         collapseSeasonalTimes(mon.meta.times).map(formatEncounterTimeLabel).join(', '),
                       ].filter(Boolean).join(' - ')}
                     </small>
-                    {isPriorityTarget(mon) && <strong className={styles.priorityBadge}>Tier {getTier(mon.name)}</strong>}
+                    {isPriorityTarget(mon) && <strong className={styles.priorityBadge}>阶级 {getTier(mon.name)}</strong>}
                   </Link>
                 ))}
               </div>
@@ -793,12 +804,12 @@ export default function RouteFinder() {
   })
 
   useDocumentHead({
-    title: 'Route Finder',
-    description: 'Search tracked PokeMMO route encounter percentages by Pokemon or route.',
+    title: '地点查找器｜PokeMMO',
+    description: '按宝可梦或地点查询社区记录的 PokeMMO 遭遇率。',
     canonicalPath: '/route-finder/',
     breadcrumbs: [
-      { name: 'Home', url: '/' },
-      { name: 'Route Finder', url: '/route-finder' },
+      { name: '首页', url: '/' },
+      { name: '地点查找器', url: '/route-finder' },
     ],
   })
 
@@ -826,7 +837,7 @@ export default function RouteFinder() {
     ])].sort((a, b) => a.localeCompare(b))
   ), [expectedRouteCoverage, routes])
 
-  const pokemonNeedle = normalizePokemonKey(pokemonFilter)
+  const pokemonNeedle = resolvePokemonSearch(pokemonFilter)
   const routeNeedle = normalizeSearch(routeFilter)
   const shouldGroupByRegion = !pokemonNeedle && sortMode === 'default'
   const pokemonFamilyKeys = useMemo(() => {
@@ -906,7 +917,7 @@ export default function RouteFinder() {
     }
 
     if (!TURNSTILE_SITE_KEY) {
-      setTurnstileError('Captcha is not configured yet. Please try again later.')
+      setTurnstileError('验证码尚未配置，请稍后再试。')
       return
     }
 
@@ -926,15 +937,15 @@ export default function RouteFinder() {
       },
       'error-callback': () => {
         setTurnstileToken('')
-        setTurnstileError('Captcha verification failed. Please try again.')
+        setTurnstileError('验证码校验失败，请重试。')
       },
       'expired-callback': () => {
         setTurnstileToken('')
-        setTurnstileError('Captcha expired. Please complete it again.')
+        setTurnstileError('验证码已过期，请重新完成验证。')
       },
       'timeout-callback': () => {
         setTurnstileToken('')
-        setTurnstileError('Captcha timed out. Please complete it again.')
+        setTurnstileError('验证码超时，请重新完成验证。')
       },
     })
 
@@ -943,7 +954,9 @@ export default function RouteFinder() {
 
   const filteredRoutes = routes
     .filter(route => {
-      const routeMatches = !routeNeedle || route.routeSearch.includes(routeNeedle)
+      const routeMatches = !routeNeedle
+        || route.routeSearch.includes(routeNeedle)
+        || normalizeSearch(translateLocationName(route.routeName)).includes(routeNeedle)
       const pokemonMatches = !pokemonNeedle || route.pokemon.some(mon => {
         const monKey = normalizePokemonKey(mon.name)
         return monKey.includes(pokemonNeedle) || pokemonFamilyKeys.has(monKey)
@@ -998,7 +1011,7 @@ export default function RouteFinder() {
   }, [filteredRoutes, shouldGroupByRegion])
   const filteredUnroutedRoutes = useMemo(() => {
     return unroutedRoutes.map((route) => {
-      if (routeNeedle && !route.routeSearch.includes(routeNeedle)) return false
+      if (routeNeedle && !route.routeSearch.includes(routeNeedle) && !normalizeSearch(translateLocationName(route.routeName)).includes(routeNeedle)) return false
       if (unroutedRegionFilter !== 'all' && route.region !== unroutedRegionFilter) return false
 
       const expectedCategories = route.expectedCategories.filter((category) => {
@@ -1056,11 +1069,11 @@ export default function RouteFinder() {
 
   let emptyText = ''
   if (pokemonNeedle && !pokemonHasData) {
-    emptyText = `Unfortunately ${pokemonFilter.trim()} has no tracked data currently, if you would like to help and track this data for the website, please contact Hyper on discord! ohypers`
+    emptyText = `很遗憾，${pokemonFilter.trim()}目前没有已记录的数据。若你愿意协助记录并提交数据，请通过 Discord 联系 Hyper（ohypers）。`
   } else if (routeNeedle && !routeHasData) {
-    emptyText = `Unfortunately ${routeFilter.trim()} has no tracked data currently, if you would like to help and track this data for the website, please contact Hyper on discord! ohypers`
+    emptyText = `很遗憾，${routeFilter.trim()}目前没有已记录的数据。若你愿意协助记录并提交数据，请通过 Discord 联系 Hyper（ohypers）。`
   } else if ((pokemonNeedle || routeNeedle) && filteredRoutes.length === 0) {
-    emptyText = 'No tracked route currently matches both filters.'
+    emptyText = '没有已记录的地点同时符合这两个筛选条件。'
   }
 
   const handleSubmitFormChange = (field) => (event) => {
@@ -1122,13 +1135,13 @@ export default function RouteFinder() {
     const mergedFiles = mergeScreenshotFiles(screenshotFiles, selectedFiles)
 
     if (mergedFiles.length > MAX_SCREENSHOT_FILES) {
-      setSubmitError(`You can upload up to ${MAX_SCREENSHOT_FILES} screenshots per submission.`)
+      setSubmitError(`每次最多可上传 ${MAX_SCREENSHOT_FILES} 张截图。`)
       clearScreenshotInput()
       return
     }
 
     if (getTotalFileBytes(mergedFiles) > MAX_TOTAL_SCREENSHOT_BYTES) {
-      setSubmitError(`The total screenshot upload size must be ${MAX_TOTAL_SCREENSHOT_MB} MB or less.`)
+      setSubmitError(`截图总大小不能超过 ${MAX_TOTAL_SCREENSHOT_MB} MB。`)
       clearScreenshotInput()
       return
     }
@@ -1149,39 +1162,39 @@ export default function RouteFinder() {
     event.preventDefault()
 
     if (cooldownRemaining > 0) {
-      setSubmitError(`Please wait ${formatCooldown(cooldownRemaining)} before sending another submission.`)
+      setSubmitError(`请等待 ${formatCooldown(cooldownRemaining)} 后再提交。`)
       return
     }
 
     const trimmedRoute = submitForm.route.trim()
     const trimmedCredit = submitForm.credit.trim()
     if (!trimmedRoute || !trimmedCredit) {
-      setSubmitError('Please add at least a route and credit before submitting.')
+      setSubmitError('提交前请至少填写地点与署名。')
       return
     }
 
     if (!TURNSTILE_SITE_KEY) {
-      setSubmitError('Captcha is not configured yet. Please try again later.')
+      setSubmitError('验证码尚未配置，请稍后再试。')
       return
     }
 
     if (!turnstileToken) {
-      setSubmitError(turnstileError || 'Please complete the captcha verification before sending.')
+      setSubmitError(turnstileError || '提交前请完成验证码校验。')
       return
     }
 
     if (screenshotFiles.length === 0) {
-      setSubmitError('Please attach at least one screenshot before sending.')
+      setSubmitError('提交前请至少附上一张截图。')
       return
     }
 
     if (screenshotFiles.length > MAX_SCREENSHOT_FILES) {
-      setSubmitError(`You can upload up to ${MAX_SCREENSHOT_FILES} screenshots per submission.`)
+      setSubmitError(`每次最多可上传 ${MAX_SCREENSHOT_FILES} 张截图。`)
       return
     }
 
     if (getTotalFileBytes(screenshotFiles) > MAX_TOTAL_SCREENSHOT_BYTES) {
-      setSubmitError(`The total screenshot upload size must be ${MAX_TOTAL_SCREENSHOT_MB} MB or less.`)
+      setSubmitError(`截图总大小不能超过 ${MAX_TOTAL_SCREENSHOT_MB} MB。`)
       return
     }
 
@@ -1211,13 +1224,13 @@ export default function RouteFinder() {
 
       const result = await response.json().catch(() => ({}))
       if (!response.ok || !result.success) {
-        throw new Error(result.error || 'The form could not be sent right now.')
+        throw new Error(result.error || '暂时无法发送表单。')
       }
 
       const nextCooldownUntil = Date.now() + SUBMISSION_COOLDOWN_MS
       window.localStorage.setItem(SUBMISSION_COOLDOWN_KEY, String(nextCooldownUntil))
       setCooldownRemaining(SUBMISSION_COOLDOWN_MS)
-      setSubmitSuccess(`Submission sent successfully. Please wait ${formatCooldown(SUBMISSION_COOLDOWN_MS)} before sending another one.`)
+      setSubmitSuccess(`数据已成功提交。请等待 ${formatCooldown(SUBMISSION_COOLDOWN_MS)} 后再提交下一份。`)
       setSubmitForm({
         region: REGION_ORDER[0],
         route: '',
@@ -1231,7 +1244,7 @@ export default function RouteFinder() {
       clearScreenshotInput()
       resetTurnstile()
     } catch (error) {
-      setSubmitError(error.message || 'The form could not be sent right now.')
+      setSubmitError(error.message || '暂时无法发送表单。')
       resetTurnstile()
     } finally {
       setIsSubmitting(false)
@@ -1240,30 +1253,30 @@ export default function RouteFinder() {
 
   return (
     <div className={styles.page}>
-      <h1 className="page-title">Route Finder</h1>
+      <h1 className="page-title">地点查找器</h1>
       <img src={getAssetUrl('images/pagebreak.png')} alt="" className="pagebreak" />
 
       <div className={styles.topControls}>
         <TopContributorsDropdown contributors={topContributors} />
         <button type="button" className={styles.submitButton} onClick={openSubmitForm}>
-          Submit your own data!
+          提交你的数据
         </button>
       </div>
 
       <details className={styles.infoDropdown} open={isInfoDropdownOpen} onToggle={handleInfoDropdownToggle}>
-        <summary>Page Information / Learn More!</summary>
+        <summary>页面说明／了解更多</summary>
         <p>
-          This page is a WORK IN PROGRESS, and there is not much data currently, but the goal is to have as many routes tracked as possible, with as many encounters at that route as possible! If you plan on sitting at a route for a long period of time, consider starting a trip and tracking your encounters!  
+          本页面仍在持续建设中，目前收录的数据有限。目标是尽可能记录更多地点、更多遭遇样本。如果你准备长期在某个地点刷闪，欢迎开启一次计数行程并记录遭遇数据。
         </p>
         <p>
-          This is a page designed to help you pick the best route for your favourite shiny! All this information has been hand tracked by volunteers and is not official data, some information may be inaccurate, as routes may change based on seasons or time of day, I'd advise using these numbers as examples, but some numbers is better than no numbers!
+          本页面用于帮助你为心仪的闪光宝可梦挑选地点。所有信息均由志愿者手工记录，并非官方数据；季节、时段等因素可能造成偏差，请将数值作为参考。
         </p>
         <p>
-          If you wish to help with this project please contact ohypers on discord.
+          如愿协助本项目，请通过 Discord 联系 ohypers。
         </p>
       </details>
 
-      <div className={styles.tabList} role="tablist" aria-label="Route Finder sections">
+      <div className={styles.tabList} role="tablist" aria-label="地点查找器分页">
         <button
           type="button"
           role="tab"
@@ -1271,7 +1284,7 @@ export default function RouteFinder() {
           className={`${styles.tabButton} ${activeTab === 'tracked' ? styles.tabButtonActive : ''}`}
           onClick={() => setActiveTab('tracked')}
         >
-          Tracked
+          已记录
         </button>
         <button
           type="button"
@@ -1280,70 +1293,70 @@ export default function RouteFinder() {
           className={`${styles.tabButton} ${activeTab === 'unrouted' ? styles.tabButtonActive : ''}`}
           onClick={() => setActiveTab('unrouted')}
         >
-          Unrouted
+          待记录
         </button>
       </div>
 
       {activeTab === 'unrouted' && (
         <p className={styles.unroutedIntro}>
-          Wish to help out? These are the untracked routes we still need! Please take these with a grain of salt, as some routes are specific and may need to be handled seperately, such as Altering Cave, Safari zones etc.
+          想参与协作吗？这里列出了仍缺少记录的地点。部分特殊地点（如变化洞窟、狩猎地带）需要单独处理，请以实际游戏内容为准。
         </p>
       )}
 
-      <section className={styles.searchPanel} aria-label="Route Finder filters">
+      <section className={styles.searchPanel} aria-label="地点查找筛选">
         {(activeTab === 'tracked' || activeTab === 'unrouted') && (
           <label>
-            <span>Pokemon</span>
+            <span>宝可梦</span>
             <input
               type="search"
               value={pokemonFilter}
               onChange={event => setPokemonFilter(event.target.value)}
-              placeholder="Search Pokemon..."
+              placeholder="搜索宝可梦…"
               list="route-finder-pokemon"
             />
           </label>
         )}
         <label>
-          <span>Routes</span>
+          <span>地点</span>
           <input
             type="search"
             value={routeFilter}
             onChange={event => setRouteFilter(event.target.value)}
-            placeholder="Search routes..."
+            placeholder="搜索地点…"
             list="route-finder-routes"
           />
         </label>
         {activeTab === 'tracked' && (
           <label>
-            <span>Order</span>
+            <span>排序</span>
             <select value={sortMode} onChange={event => setSortMode(event.target.value)}>
-              <option value="default">{pokemonNeedle ? 'Best match for Pokemon' : 'Region order'}</option>
-              <option value="best">Best Routes (Tier 0-2 %)</option>
-              <option value="worst">Worst Routes (Tier 0-2 %)</option>
-              <option value="encounters-desc">Most Encounters Tracked</option>
-              <option value="encounters-asc">Least Encounters Tracked</option>
+              <option value="default">{pokemonNeedle ? '最匹配该宝可梦' : '按地区排列'}</option>
+              <option value="best">最佳地点（阶级 0–2 占比）</option>
+              <option value="worst">最差地点（阶级 0–2 占比）</option>
+              <option value="encounters-desc">已记录遭遇数：从高到低</option>
+              <option value="encounters-asc">已记录遭遇数：从低到高</option>
             </select>
           </label>
         )}
         <datalist id="route-finder-pokemon">
-          {pokemonOptions.map(name => <option value={name} key={name} />)}
+          {pokemonOptions.map(name => <option value={name} label={translatePokemonName(name)} key={name} />)}
         </datalist>
         <datalist id="route-finder-routes">
-          {routeOptions.map(name => <option value={name} key={name} />)}
+          {routeOptions.map(name => <option value={name} label={translateLocationName(name)} key={name} />)}
         </datalist>
       </section>
 
       {activeTab === 'unrouted' && (
-        <section className={styles.unroutedFilterPanel} aria-label="Unrouted filters">
+        <section className={styles.unroutedFilterPanel} aria-label="待记录地点筛选">
           <label>
-            <span>Region</span>
+            <span>地区</span>
             <select value={unroutedRegionFilter} onChange={event => setUnroutedRegionFilter(event.target.value)}>
-              <option value="all">All Regions</option>
-              {REGION_ORDER.map(region => <option key={region} value={region}>{region}</option>)}
+              <option value="all">全部地区</option>
+              {REGION_ORDER.map(region => <option key={region} value={region}>{translateRegionName(region)}</option>)}
             </select>
           </label>
           <label>
-            <span>Missing Category</span>
+            <span>缺少的类别</span>
             <select value={unroutedCategoryFilter} onChange={event => setUnroutedCategoryFilter(event.target.value)}>
               {UNROUTED_CATEGORY_OPTIONS.map(option => (
                 <option key={option.value} value={option.value}>{option.label}</option>
@@ -1356,23 +1369,23 @@ export default function RouteFinder() {
               checked={unroutedRaresOnly}
               onChange={event => setUnroutedRaresOnly(event.target.checked)}
             />
-            <span>Only routes with Tier 2-Tier0 targets</span>
+            <span>仅显示含阶级 0–2 目标的地点</span>
           </label>
         </section>
       )}
 
       {activeTab === 'tracked' && pokemonNeedle && pokemonHasData && (
         <section className={styles.activeTarget}>
-          <span>Target Mon</span>
-          <strong>{pokemonFilter.trim()}</strong>
+          <span>目标宝可梦</span>
+          <strong>{translatePokemonName(pokemonFilter.trim())}</strong>
         </section>
       )}
 
       {activeTab === 'tracked' ? (
         <>
           <p className={styles.resultCount}>
-            {filteredRoutes.length.toLocaleString()} tracked {filteredRoutes.length === 1 ? 'route' : 'routes'}
-            <span>{filteredTotalEncounters.toLocaleString()} Total Encounters</span>
+            已记录 {filteredRoutes.length.toLocaleString()} 个地点
+            <span>合计 {filteredTotalEncounters.toLocaleString()} 次遭遇</span>
           </p>
 
           {emptyText ? (
@@ -1391,8 +1404,8 @@ export default function RouteFinder() {
                 ))
               ) : (
                 routesByRegion.map(([region, regionRoutes]) => (
-                  <section key={region} aria-label={`${region} routes`}>
-                    <h2>{region}</h2>
+                  <section key={region} aria-label={`${translateRegionName(region)}地点`}>
+                    <h2>{translateRegionName(region)}</h2>
                     {regionRoutes.map(route => (
                       <RouteCard
                         key={route.id}
@@ -1411,12 +1424,12 @@ export default function RouteFinder() {
       ) : (
         <>
           <p className={styles.resultCount}>
-            {filteredUnroutedRoutes.length.toLocaleString()} incomplete {filteredUnroutedRoutes.length === 1 ? 'route' : 'routes'}
-            <span>{missingChecklistTotal.toLocaleString()} missing checklist {missingChecklistTotal === 1 ? 'item' : 'items'}</span>
+            {filteredUnroutedRoutes.length.toLocaleString()} 个地点尚未完成
+            <span>缺少 {missingChecklistTotal.toLocaleString()} 项记录</span>
           </p>
 
           {filteredUnroutedRoutes.length === 0 ? (
-            <p className={styles.emptyState}>Every matching route has tracked data for its available encounter types.</p>
+            <p className={styles.emptyState}>所有匹配地点的可用遭遇类别均已有记录。</p>
           ) : (
             <div className={styles.routeList}>
               {unroutedRoutesByRegion.map(([region, regionRoutes]) => (
@@ -1427,8 +1440,8 @@ export default function RouteFinder() {
                   onToggle={event => handleUnroutedRegionToggle(region, event.currentTarget.open)}
                 >
                   <summary>
-                    <span>{region}</span>
-                    <strong>{regionRoutes.length.toLocaleString()} {regionRoutes.length === 1 ? 'route' : 'routes'}</strong>
+                    <span>{translateRegionName(region)}</span>
+                    <strong>{regionRoutes.length.toLocaleString()} 个地点</strong>
                   </summary>
                   <div className={styles.unroutedRegionList}>
                     {regionRoutes.map(route => (
@@ -1458,85 +1471,85 @@ export default function RouteFinder() {
           >
             <div className={styles.submitModalHeader}>
               <div>
-                <p className={styles.submitEyebrow}>Community submissions</p>
-                <h2 id="route-finder-submit-title">Send route data for review</h2>
+                <p className={styles.submitEyebrow}>社区数据投稿</p>
+                <h2 id="route-finder-submit-title">提交地点数据供审核</h2>
               </div>
               <button
                 type="button"
                 className={styles.closeButton}
                 onClick={closeSubmitForm}
-                aria-label="Close submission form"
+                aria-label="关闭投稿表单"
               >
                 x
               </button>
             </div>
 
             <p className={styles.submitDescription}>
-              Fill out the form if you wish to submit your encounter data to the site, the data will be reviewed to ensure it remains accurate and will be added to the site if confirmed. We appreciate anyone who wishes to help with this project! If you have access to a discord account, we would rather you DM oHypers personally to ensure your data is accurate and you understand the criteria, although if you do not wish to do that, this form is good too!
+              如果你想向网站提交遭遇数据，请填写本表。数据会先经过审核，确认无误后才会收录。感谢每一位愿意协助记录的训练家！若方便，建议直接在 Discord 私信 oHypers，以便核对数据与提交标准；当然也可以使用此表单投稿。
             </p>
 
             <form className={styles.submitForm} onSubmit={handleSubmitData}>
               <label>
-                <span>Region</span>
+                <span>地区</span>
                 <select value={submitForm.region} onChange={handleSubmitFormChange('region')}>
-                  {REGION_ORDER.map(region => <option key={region} value={region}>{region}</option>)}
+                  {REGION_ORDER.map(region => <option key={region} value={region}>{translateRegionName(region)}</option>)}
                 </select>
               </label>
 
               <label>
-                <span>Route</span>
+                <span>地点</span>
                 <input
                   type="text"
                   value={submitForm.route}
                   onChange={handleSubmitFormChange('route')}
-                  placeholder="Route 1"
+                  placeholder="如：1号道路"
                   required
                 />
               </label>
 
               <label>
-                <span>Variation</span>
+                <span>变体／条件</span>
                 <input
                   type="text"
                   value={submitForm.variation}
                   onChange={handleSubmitFormChange('variation')}
-                  placeholder="Lures, Hordes, Time of Day etc"
+                  placeholder="如：引虫香水、群聚、时段等"
                 />
               </label>
 
               <label>
-                <span>Credit</span>
+                <span>署名</span>
                 <input
                   type="text"
                   value={submitForm.credit}
                   onChange={handleSubmitFormChange('credit')}
-                  placeholder="Your name / IGN"
+                  placeholder="你的名字／游戏 ID"
                   required
                 />
               </label>
 
               <label>
-                <span>Your Discord</span>
+                <span>你的 Discord</span>
                 <input
                   type="text"
                   value={submitForm.discord}
                   onChange={handleSubmitFormChange('discord')}
-                  placeholder="if you are happy with being contacted"
+                  placeholder="如愿意被联系，请填写"
                 />
               </label>
 
               <label className={styles.fullWidthField}>
-                <span>Encounter data</span>
+                <span>遭遇数据</span>
                 <textarea
                   value={submitForm.encounterData}
                   onChange={handleSubmitFormChange('encounterData')}
-                  placeholder={`Pikachu - 120\nPidgey - 80\nRattata - 40`}
+                  placeholder={`皮卡丘 - 120\n波波 - 80\n小拉达 - 40`}
                   rows={7}
                 />
               </label>
 
               <label className={styles.fullWidthField}>
-                <span>Screenshot upload</span>
+                <span>上传截图</span>
                 <input
                   ref={screenshotInputRef}
                   type="file"
@@ -1545,7 +1558,7 @@ export default function RouteFinder() {
                   onChange={handleScreenshotChange}
                 />
                 <small className={styles.fieldHint}>
-                  Please attach between 1 and {MAX_SCREENSHOT_FILES} screenshots of your encounter counter trip, with {MAX_TOTAL_SCREENSHOT_MB} MB total across all files.
+                  请附上 1 至 {MAX_SCREENSHOT_FILES} 张遭遇计数行程截图，所有文件总计不超过 {MAX_TOTAL_SCREENSHOT_MB} MB。
                 </small>
                 {screenshotFiles.length > 0 && (
                   <div className={styles.fileList}>
@@ -1557,25 +1570,25 @@ export default function RouteFinder() {
               </label>
 
               <label className={styles.fullWidthField}>
-                <span>Extra notes</span>
+                <span>补充说明</span>
                 <textarea
                   value={submitForm.notes}
                   onChange={handleSubmitFormChange('notes')}
-                  placeholder="Mention here if you think this data might be inaccurate, or if there is something Hyper should know when reviewing the data. For example if this route has very different spawns during a certain time of day, or if there was an event that might have skewed the data such as swarms or alphas etc."
+                  placeholder="如认为数据可能有误，或审核者需要注意特别条件，请在此说明。例如不同游戏时段出现率差异很大，或曾有群聚、头目等活动可能影响数据。"
                   rows={4}
                 />
               </label>
 
               <div className={styles.fullWidthField}>
-            <div className={styles.submitLimits} aria-label="Submission limits">
-              <strong>Submission limits</strong>
-              <p>Upload up to {MAX_SCREENSHOT_FILES} screenshots per submission, with {MAX_TOTAL_SCREENSHOT_MB} MB total across all files.</p>
-              <p>You can send {SHORT_WINDOW_SUBMISSION_LIMIT} submission every {SHORT_WINDOW_SUBMISSION_MINUTES} minutes, and up to {DAILY_SUBMISSION_LIMIT} submissions per day. This is to prevent spam, if you would like to submit more please contact ohypers on discord</p>
+            <div className={styles.submitLimits} aria-label="投稿限制">
+              <strong>投稿限制</strong>
+              <p>每次最多上传 {MAX_SCREENSHOT_FILES} 张截图，所有文件总计不超过 {MAX_TOTAL_SCREENSHOT_MB} MB。</p>
+              <p>每 {SHORT_WINDOW_SUBMISSION_MINUTES} 分钟可提交 {SHORT_WINDOW_SUBMISSION_LIMIT} 次，每日最多 {DAILY_SUBMISSION_LIMIT} 次。这是为了避免垃圾投稿；如需提交更多数据，请通过 Discord 联系 ohypers。</p>
             </div>
             </div>
 
               <div className={styles.fullWidthField}>
-                <span className={styles.turnstileLabel}>Captcha verification</span>
+                <span className={styles.turnstileLabel}>验证码校验</span>
                 <div id={TURNSTILE_CONTAINER_ID} className={styles.turnstileWrap} />
               </div>
 
@@ -1586,17 +1599,17 @@ export default function RouteFinder() {
               {turnstileError && <p className={styles.submitError}>{turnstileError}</p>}
               {cooldownRemaining > 0 && (
                 <p className={styles.submitCooldown}>
-                  Submission cooldown active: {formatCooldown(cooldownRemaining)} remaining.
+                  投稿冷却中：剩余 {formatCooldown(cooldownRemaining)}。
                 </p>
               )}
               
 
               <div className={styles.submitActions}>
                 <button type="button" className={styles.secondaryButton} onClick={closeSubmitForm}>
-                  Cancel
+                  取消
                 </button>
                 <button type="submit" className={styles.primaryButton} disabled={isSubmitting}>
-                  {isSubmitting ? 'Sending...' : cooldownRemaining > 0 ? `Wait ${formatCooldown(cooldownRemaining)}` : 'Send Data'}
+                  {isSubmitting ? '发送中…' : cooldownRemaining > 0 ? `等待 ${formatCooldown(cooldownRemaining)}` : '提交数据'}
                 </button>
               </div>
               

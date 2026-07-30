@@ -3,7 +3,7 @@ import styles from './OfficialEventCalendar.module.css'
 import { useDocumentHead } from '../../hooks/useDocumentHead'
 import { useOfficialEvents } from '../../hooks/useOfficialEvents'
 import pokemonSprites from "../../data/pokemmo_data/pokemon-sprites.json";
-import { normalizePokemonName } from '../../utils/pokemon';
+import { normalizePokemonName, translatePokemonName } from '../../utils/pokemon';
 import generationData from '../../data/generation.json';
 import { useState } from "react";
 
@@ -97,9 +97,9 @@ function getCountdownLabel(eventDate, utcTime) {
     const elapsedMs = now - eventDateTime;
 
     if (elapsedMs < 60 * 60 * 1000) {
-      return "Ongoing";
+      return '进行中';
     } else {
-      return "Ended";
+      return '已结束';
     }
   }
 
@@ -108,7 +108,7 @@ function getCountdownLabel(eventDate, utcTime) {
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
 
-  return `${hours}h ${minutes}m`;
+  return `${hours}小时 ${minutes}分`;
 }
 
 
@@ -300,17 +300,17 @@ function getPokemonSprite(reward) {
 
 
 function convertUtcToLocalLabel(date, utcTime) {
-  if (!utcTime) return 'Start: Time not listed'
+  if (!utcTime) return '开始时间：待公布'
   const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), utcTime.hours, utcTime.minutes))
-  return `Start: ${new Intl.DateTimeFormat(undefined, {
+  return `开始时间：${new Intl.DateTimeFormat('zh-CN', {
     weekday: 'short', month: 'short', day: 'numeric',
     hour: '2-digit', minute: '2-digit', timeZoneName: 'short',
   }).format(utcDate)}`
 }
 
 function getTag(eventDate, today, tomorrow) {
-  if (eventDate.getTime() === today.getTime()) return 'Today'
-  if (eventDate.getTime() === tomorrow.getTime()) return 'Tomorrow'
+  if (eventDate.getTime() === today.getTime()) return '今天'
+  if (eventDate.getTime() === tomorrow.getTime()) return '明天'
   return ''
 }
 
@@ -326,7 +326,7 @@ function buildRows(events) {
 
 function EventCell({ event, now }) {
   if (!event) return <td className={styles.emptyCell}></td>;
-  const countdown = (event?.tag === 'Today' || event?.tag === 'Tomorrow')
+  const countdown = (event?.tag === '今天' || event?.tag === '明天')
   ? getCountdownLabel(event.eventDate, event.utcTime)
   : null;
 
@@ -347,9 +347,9 @@ function EventCell({ event, now }) {
       <div className={styles.timeLabel}>{event.localStartLabel}</div>
       {countdown && (
         <div className={styles.countdown}>
-          {countdown === "Ongoing" || countdown === "Ended"
+          {countdown === '进行中' || countdown === '已结束'
             ? countdown
-            : `Starts in: ${countdown}`}
+            : `距开始还有：${countdown}`}
         </div>
       )}
 
@@ -357,7 +357,7 @@ function EventCell({ event, now }) {
       {/* Details section */}
       {event.details?.length > 0 && (
         <div className={styles.detailsSection}>
-          <strong>Details:</strong>
+          <strong>详情：</strong>
           <ul>
             {event.details.map((line, index) => (
               <li key={index}>{line}</li>
@@ -369,7 +369,7 @@ function EventCell({ event, now }) {
       {/* Participating staff */}
       {event.participatingStaff?.length > 0 && (
         <div className={styles.staffList}>
-          <strong>Participating Staff:</strong>
+          <strong>参与工作人员：</strong>
           <ul>
             {event.participatingStaff.map(name => (
               <li key={name}>{name}</li>
@@ -380,18 +380,18 @@ function EventCell({ event, now }) {
 
       {event.rewards && event.rewards.length > 0 && event.rewards[0].pokemon && (
         <div className={styles.firstPlaceReward}>
-          <strong>1st Place:</strong>
+          <strong>第一名：</strong>
           <div className={styles.rewardList}>
             {event.rewards.map((r, idx) => (
               <span key={`${r.pokemon}-${idx}`} className={styles.rewardItem}>
-                <span className={styles.rewardLabel}>{r.shiny ? 'Shiny' : 'Non Shiny'}</span>
+                <span className={styles.rewardLabel}>{r.shiny ? '闪光' : '非闪光'}</span>
                 <img
                   src={getPokemonSprite(r)}
-                  alt={r.pokemon}
+                  alt={translatePokemonName(r.pokemon)}
                   className={styles.pokemonGif}
                 />
                 {idx < event.rewards.length - 1 && (
-                  <span className={styles.orSeparator}>OR</span>
+                  <span className={styles.orSeparator}>或</span>
                 )}
               </span>
             ))}
@@ -415,8 +415,8 @@ function EventTable({ rows, now }) {
     <table className={styles.table}>
       <thead>
         <tr>
-          <th>PvP Events</th>
-          <th>Catch (PvE) Events</th>
+          <th>PvP 对战活动</th>
+          <th>捕捉（PvE）活动</th>
         </tr>
       </thead>
       <tbody>
@@ -503,23 +503,23 @@ export default function OfficialEventCalendar() {
 
 
   useDocumentHead({
-    title: 'Official Event Calendar - Team Synergy',
-    description: 'Upcoming official PokeMMO events split into PvP and Catch (PvE) categories with local start times.',
+    title: '官方活动日历｜PokeMMO',
+    description: '按本地时区显示即将开始的 PokeMMO 官方 PvP 与捕捉（PvE）活动。',
     canonicalPath: '/official-event-calendar/',
     breadcrumbs: [
-      { name: 'Home', url: '/' },
-      { name: 'Official Event Calendar', url: '/official-event-calendar/' },
+      { name: '首页', url: '/' },
+      { name: '官方活动日历', url: '/official-event-calendar/' },
     ],
   })
 
-  if (isLoading) return <div className="message">Loading official event calendar...</div>
+  if (isLoading) return <div className="message">正在载入官方活动日历…</div>
   if (error) return <div className="message">{error.message}</div>
 
   return (
     <section className={styles.page}>
-      <h1 className={styles.title}>Official Event Calendar</h1>
-      <p className={styles.subtitle}>Source: official PokeMMO Forums | Inspired by PokeMMOHelp</p>
-      <p className={styles.subtitle}>All events converted into your timezone</p>
+      <h1 className={styles.title}>官方活动日历</h1>
+      <p className={styles.subtitle}>来源：PokeMMO 官方论坛｜参考 PokeMMOHelp 制作</p>
+      <p className={styles.subtitle}>所有活动均已转换为你的本地时区</p>
 
     <div className={styles.toggleContainer}>
       <label className={styles.customCheckboxLabel}>
@@ -530,7 +530,7 @@ export default function OfficialEventCalendar() {
     className={styles.customCheckboxInput}
   />
   <span className={styles.customCheckbox}></span>
-  Show Shiny Only
+  仅显示闪光奖励
 </label>
 
     </div>
@@ -539,7 +539,7 @@ export default function OfficialEventCalendar() {
       <EventTable rows={upcomingRows} />
 
       <details className={styles.pastEvents}>
-        <summary>Past Events</summary>
+        <summary>往期活动</summary>
         <EventTable rows={pastRows} />
       </details>
     </section>

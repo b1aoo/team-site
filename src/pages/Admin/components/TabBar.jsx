@@ -1,15 +1,15 @@
 import styles from '../Admin.module.css'
 
 const TABS = [
-  { key: 'add', label: 'Add Pokemon', shortLabel: 'Add' },
-  { key: 'edit', label: 'Edit Player', shortLabel: 'Edit' },
-  { key: 'current_members', label: 'Current Members', shortLabel: 'Members' },
-  { key: 'streamers', label: 'Streamers' },
-  { key: 'events', label: 'Events' },
-  { key: 'bounties', label: 'Bounties', shortLabel: 'Bounties' },
-  { key: 'themes', label: 'Themes', shortLabel: 'Themes' },
-  { key: 'log', label: 'Admin Log', shortLabel: 'Log' },
-  { key: 'json', label: 'Advanced (JSON)', shortLabel: 'Advanced' },
+  { key: 'add', label: '添加宝可梦', shortLabel: '添加' },
+  { key: 'edit', label: '编辑训练家', shortLabel: '编辑' },
+  { key: 'current_members', label: '当前成员', shortLabel: '成员' },
+  { key: 'streamers', label: '主播' },
+  { key: 'events', label: '活动' },
+  { key: 'bounties', label: '悬赏', shortLabel: '悬赏' },
+  { key: 'themes', label: '主题' },
+  { key: 'log', label: '管理日志', shortLabel: '日志' },
+  { key: 'json', label: '高级（JSON）', shortLabel: '高级' },
 ]
 
 export default function TabBar({ activeTab, onTabChange }) {

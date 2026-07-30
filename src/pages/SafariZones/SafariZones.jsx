@@ -2,12 +2,13 @@ import { useState, useMemo, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useDocumentHead } from '../../hooks/useDocumentHead'
 import { getAssetUrl } from '../../utils/assets'
-import { getLocalPokemonGif, onGifError, getRemoteFallbackUrl, normalizePokemonName } from '../../utils/pokemon'
+import { getLocalPokemonGif, onGifError, getRemoteFallbackUrl, normalizePokemonName, translatePokemonName } from '../../utils/pokemon'
+import { translateEncounterTerm, translateLocationName, translateRegionName } from '../../utils/pokemonTermsZh'
 import safariData from '../../data/safari_zones.json'
 import styles from './SafariZones.module.css'
 
 const REGIONS = ['kanto', 'johto', 'hoenn', 'sinnoh']
-const REGION_LABELS = { kanto: 'Kanto', johto: 'Johto', hoenn: 'Hoenn', sinnoh: 'Sinnoh' }
+const REGION_LABELS = { kanto: '关都', johto: '城都', hoenn: '丰缘', sinnoh: '神奥' }
 
 const ROTATION_COLORS = {
   Carnivine: styles.rotationCarnivine,
@@ -16,6 +17,8 @@ const ROTATION_COLORS = {
 }
 
 const IN_GAME_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+const DAY_NAMES_ZH = { Monday: '星期一', Tuesday: '星期二', Wednesday: '星期三', Thursday: '星期四', Friday: '星期五', Saturday: '星期六', Sunday: '星期日' }
+const PERIOD_NAMES_ZH = { Morning: '早晨', Day: '白天', Night: '夜晚' }
 const DAY_OFFSET = 5
 
 function getInGameState() {
@@ -74,17 +77,17 @@ function InGameClock({ region }) {
   const timeStr = `${String(state.hours).padStart(2, '0')}:${String(state.mins).padStart(2, '0')}`
   const realMins = state.realMinsLeft
   const countdownStr = realMins >= 60
-    ? `${Math.floor(realMins / 60)}h ${realMins % 60}m`
-    : `${realMins}m`
+    ? `${Math.floor(realMins / 60)}小时 ${realMins % 60}分`
+    : `${realMins}分`
 
   return (
     <div className={styles.clockContainer}>
       <div className={styles.clockMain}>
         <div className={styles.clockTime}>{timeStr}</div>
         <div className={styles.clockDetails}>
-          <span className={styles.clockDay}>{state.day}</span>
-          <span className={`${styles.clockPeriod} ${styles[`period${state.period}`]}`}>{state.period}</span>
-          <span className={styles.clockCountdown}>{countdownStr} until next period</span>
+          <span className={styles.clockDay}>{DAY_NAMES_ZH[state.day] || state.day}</span>
+          <span className={`${styles.clockPeriod} ${styles[`period${state.period}`]}`}>{PERIOD_NAMES_ZH[state.period] || state.period}</span>
+          <span className={styles.clockCountdown}>距下一时段还有 {countdownStr}</span>
         </div>
       </div>
     </div>
@@ -98,19 +101,19 @@ function getOddsClass(odds) {
 }
 
 const ENCOUNTER_LABELS = {
-  standard: 'Always',
-  day: 'Day',
-  night: 'Night',
-  rotation: 'Rotation',
-  water: 'Water',
-  grass: 'Grass',
-  lure: 'Lure',
+  standard: '全天',
+  day: '白天',
+  night: '夜晚',
+  rotation: '轮换',
+  water: '水域',
+  grass: '草丛',
+  lure: '引虫香水',
 }
 
 const STRATEGY_LABELS = {
-  ballsOnly: 'Balls Only',
-  oneBait: 'One Bait',
-  oneMud: 'One Mud',
+  ballsOnly: '只投球',
+  oneBait: '先投 1 次诱饵',
+  oneMud: '先投 1 次泥巴',
 }
 
 function normalizeStrategy(strategy) {
@@ -160,12 +163,12 @@ function PokemonCard({ name, encounterType, catchData, boosted }) {
     <Link to={`/pokemon/${normalizePokemonName(name)}/`} className={cardClass}>
       <img
         src={getLocalPokemonGif(name)}
-        alt={name}
+        alt={translatePokemonName(name)}
         className={styles.pokemonGif}
         onError={onGifError(name, false)}
         loading="lazy"
       />
-      <span className={styles.pokemonName} title={name}>{name}</span>
+      <span className={styles.pokemonName} title={translatePokemonName(name)}>{translatePokemonName(name)}</span>
       {showStrategy && (
         <span className={`${styles.strategyBadge} ${getStrategyClass(data.bestStrategy)}`}>{normalizeStrategy(data.bestStrategy)}</span>
       )}
@@ -174,7 +177,7 @@ function PokemonCard({ name, encounterType, catchData, boosted }) {
           {data.bestOdds}%
         </span>
       )}
-      <span className={`${styles.encounterBadge} ${getEncounterClass(encounterType)}`}>{ENCOUNTER_LABELS[encounterType] || encounterType}{boosted ? ' (Boosted)' : ''}</span>
+      <span className={`${styles.encounterBadge} ${getEncounterClass(encounterType)}`}>{ENCOUNTER_LABELS[encounterType] || translateEncounterTerm(encounterType)}{boosted ? '（加成）' : ''}</span>
 
       </Link>
     );
@@ -189,7 +192,7 @@ function CatchDataTable({ catchData }) {
   const sorted = useMemo(() => {
     const entries = Object.entries(catchData).map(([name, d]) => ({ name, ...d }))
     const filtered = search
-      ? entries.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
+      ? entries.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || translatePokemonName(p.name).includes(search))
       : entries
     filtered.sort((a, b) => {
       const av = a[sortKey], bv = b[sortKey]
@@ -211,10 +214,10 @@ function CatchDataTable({ catchData }) {
 
   return (
     <div className={styles.tableSection}>
-      <h3>Full Catch Data</h3>
+      <h3>完整捕捉数据</h3>
       <input
         type="text"
-        placeholder="Search Pokemon..."
+        placeholder="搜索宝可梦…"
         value={search}
         onChange={e => setSearch(e.target.value)}
         className={styles.searchInput}
@@ -223,13 +226,13 @@ function CatchDataTable({ catchData }) {
         <table className={styles.catchTable}>
           <thead>
             <tr>
-              <th onClick={() => handleSort('name')}>Pokemon<span className={styles.sortIcon}>{sortIcon('name')}</span></th>
-              <th onClick={() => handleSort('catchRate')}>Catch Rate<span className={styles.sortIcon}>{sortIcon('catchRate')}</span></th>
-              <th onClick={() => handleSort('fleeRate')}>Flee Rate<span className={styles.sortIcon}>{sortIcon('fleeRate')}</span></th>
-              <th onClick={() => handleSort('ballsOnly')}>Balls Only<span className={styles.sortIcon}>{sortIcon('ballsOnly')}</span></th>
-              <th onClick={() => handleSort('oneBait')}>One Bait<span className={styles.sortIcon}>{sortIcon('oneBait')}</span></th>
-              <th onClick={() => handleSort('oneMud')}>One Mud<span className={styles.sortIcon}>{sortIcon('oneMud')}</span></th>
-              <th onClick={() => handleSort('bestOdds')}>Best Odds<span className={styles.sortIcon}>{sortIcon('bestOdds')}</span></th>
+              <th onClick={() => handleSort('name')}>宝可梦<span className={styles.sortIcon}>{sortIcon('name')}</span></th>
+              <th onClick={() => handleSort('catchRate')}>捕获度<span className={styles.sortIcon}>{sortIcon('catchRate')}</span></th>
+              <th onClick={() => handleSort('fleeRate')}>逃跑率<span className={styles.sortIcon}>{sortIcon('fleeRate')}</span></th>
+              <th onClick={() => handleSort('ballsOnly')}>只投球<span className={styles.sortIcon}>{sortIcon('ballsOnly')}</span></th>
+              <th onClick={() => handleSort('oneBait')}>先投 1 次诱饵<span className={styles.sortIcon}>{sortIcon('oneBait')}</span></th>
+              <th onClick={() => handleSort('oneMud')}>先投 1 次泥巴<span className={styles.sortIcon}>{sortIcon('oneMud')}</span></th>
+              <th onClick={() => handleSort('bestOdds')}>最佳成功率<span className={styles.sortIcon}>{sortIcon('bestOdds')}</span></th>
             </tr>
           </thead>
           <tbody>
@@ -239,12 +242,12 @@ function CatchDataTable({ catchData }) {
                   <Link to={`/pokemon/${normalizePokemonName(p.name)}/`} className={styles.pokemonCell}>
                     <img
                       src={getLocalPokemonGif(p.name)}
-                      alt={p.name}
+                      alt={translatePokemonName(p.name)}
                       className={styles.tableGif}
                       onError={onGifError(p.name, false)}
                       loading="lazy"
                     />
-                    {p.name}
+                    {translatePokemonName(p.name)}
                   </Link>
                 </td>
                 <td>{p.catchRate}</td>
@@ -267,7 +270,7 @@ function RotationSchedule({ schedule, currentDay }) {
 
   return (
     <div className={styles.rotationSection}>
-      <h3>Today's Rotation</h3>
+      <h3>今日轮换</h3>
       <div className={styles.rotationCards}>
         {schedule.pokemon.map(name => {
           const areas = todayData?.areas[name] || []
@@ -275,24 +278,24 @@ function RotationSchedule({ schedule, currentDay }) {
             <div key={name} className={`${styles.rotationCard} ${ROTATION_COLORS[name] || ''}`}>
               <img
                 src={getRemoteFallbackUrl(name, true)}
-                alt={`Shiny ${name}`}
+                alt={`闪光${translatePokemonName(name)}`}
                 className={styles.rotationGif}
               />
-              <span className={styles.rotationPokeName}>{name}</span>
+              <span className={styles.rotationPokeName}>{translatePokemonName(name)}</span>
               {areas.length > 0 ? (
                 <div className={styles.rotationAreas}>
                   {areas.map(a => (
-                    <span key={a} className={styles.rotationAreaPill}>Area {a}</span>
+                    <span key={a} className={styles.rotationAreaPill}>区域 {a}</span>
                   ))}
                 </div>
               ) : (
-                <span className={styles.rotationNone}>Not available today</span>
+                <span className={styles.rotationNone}>今日未出现</span>
               )}
             </div>
           )
         })}
       </div>
-      <p className={styles.rotationNote}>Rotates every in-game day (~6 real hours). Schedule repeats weekly.</p>
+      <p className={styles.rotationNote}>每个游戏内日期轮换一次（约 6 个现实小时），按周循环。</p>
     </div>
   )
 }
@@ -307,8 +310,8 @@ function RegionContent({ region, initialArea }) {
   if (!data) {
     return (
       <div className={styles.comingSoon}>
-        <h2>{REGION_LABELS[region]} Safari Zone</h2>
-        <p>Coming Soon — check back later!</p>
+        <h2>{REGION_LABELS[region]}狩猎地带</h2>
+        <p>即将推出，敬请期待！</p>
       </div>
     )
   }
@@ -356,7 +359,7 @@ function RegionContent({ region, initialArea }) {
 
   return (
     <div className={styles.regionContent}>
-      <p className={styles.regionGame}>{data.game}</p>
+      <p className={styles.regionGame}>{translateLocationName(data.game)}</p>
       <p className={styles.regionDescription}>{data.description}</p>
 
       <InGameClock region={region} />
@@ -366,7 +369,7 @@ function RegionContent({ region, initialArea }) {
         <div style={{ textAlign: 'center', margin: '1.5rem 0' }}>
           <img
             src={getAssetUrl('images/hoennareas.png')}
-            alt="Hoenn Safari Zone Areas Map"
+            alt="丰缘狩猎地带区域地图"
             style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
           />
         </div>
@@ -377,7 +380,7 @@ function RegionContent({ region, initialArea }) {
         <div style={{ textAlign: 'center', margin: '1.5rem 0' }}>
           <img
             src={getAssetUrl('images/sinnohareas.png')}
-            alt="Sinnoh Safari Zone Areas Map"
+            alt="神奥大湿原区域地图"
             style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
           />
         </div>
@@ -390,15 +393,15 @@ function RegionContent({ region, initialArea }) {
             className={`${styles.areaPill} ${i === selectedArea ? styles.areaPillActive : ''}`}
             onClick={() => setSelectedArea(i)}
           >
-            {a.name}
+            {translateLocationName(a.name)}
           </button>
         ))}
       </div>
 
       <div className={styles.infoBox}>
-        <p><strong>Encounters:</strong> <span className={styles.encounterDay} style={{fontSize:'0.8rem',padding:'1px 5px',borderRadius:'4px'}}>Day</span> = 4:00–21:00, <span className={styles.encounterNight} style={{fontSize:'0.8rem',padding:'1px 5px',borderRadius:'4px'}}>Night</span> = 21:00–4:00, <span className={styles.encounterRotation} style={{fontSize:'0.8rem',padding:'1px 5px',borderRadius:'4px'}}>Rotation</span> = changes every in-game day (~6 hrs, rotates at 0:00), <span className={styles.encounterWater} style={{fontSize:'0.8rem',padding:'1px 5px',borderRadius:'4px'}}>Water</span> = surfing/fishing.</p>
-        <p><strong>Shiny Hunting:</strong> Lure boosts encounter rate by 10→15%. Abilities like Illuminate, Swarm, and Arena Trap also increase encounters.</p>
-        <p><strong>Tips:</strong> Pokemon sometimes sleep at night, such as Riolu, sleeping Pokemon have their catch rates doubled.</p>
+        <p><strong>遭遇时段：</strong><span className={styles.encounterDay} style={{fontSize:'0.8rem',padding:'1px 5px',borderRadius:'4px'}}>白天</span> = 4:00–21:00，<span className={styles.encounterNight} style={{fontSize:'0.8rem',padding:'1px 5px',borderRadius:'4px'}}>夜晚</span> = 21:00–4:00，<span className={styles.encounterRotation} style={{fontSize:'0.8rem',padding:'1px 5px',borderRadius:'4px'}}>轮换</span> = 每个游戏内日期变化一次（约 6 小时，于 0:00 轮换），<span className={styles.encounterWater} style={{fontSize:'0.8rem',padding:'1px 5px',borderRadius:'4px'}}>水域</span> = 冲浪／垂钓。</p>
+        <p><strong>刷闪：</strong>引虫香水会把遭遇率从 10% 提升至 15%；发光、虫之预感与沙穴等特性也会增加遭遇次数。</p>
+        <p><strong>提示：</strong>部分宝可梦会在夜晚睡眠，例如利欧路；睡眠中的宝可梦捕获率翻倍。</p>
       </div>
 
       {data.rotationSchedule && <RotationSchedule schedule={data.rotationSchedule} currentDay={getInGameState().day} />}
@@ -415,7 +418,7 @@ function RegionContent({ region, initialArea }) {
         ))}
       </div>
 
-      <h3 className={styles.thanks}>Thanks to Immo for helping with the spawn pools</h3>
+      <h3 className={styles.thanks}>感谢 Immo 协助整理出现池</h3>
 
       <CatchDataTable catchData={data.catchData} />
     </div>
@@ -428,18 +431,18 @@ export default function SafariZones() {
   const [initialArea, setInitialArea] = useState(state?.area || null)
 
   useDocumentHead({
-    title: 'PokeMMO Safari Zone Guide - Catch Rates, Flee Rates & Best Strategies',
-    description: 'Complete PokeMMO Safari Zone guide with catch rates, flee rates, and optimal strategies for Johto and Sinnoh (Great Marsh). Find the best approach for every Safari Zone Pokemon.',
+    title: 'PokeMMO 狩猎地带指南｜捕获率与最佳策略',
+    description: 'PokeMMO 城都狩猎地带与神奥大湿原完整指南，收录捕获度、逃跑率和最优捕捉策略。',
     canonicalPath: '/safari-zones/',
     breadcrumbs: [
-      { name: 'Home', url: '/' },
-      { name: 'Safari Zone Guide', url: '/safari-zones' }
+      { name: '首页', url: '/' },
+      { name: '狩猎地带指南', url: '/safari-zones' }
     ]
   })
 
   return (
     <>
-      <h1 className="page-title">Safari Zone Guide</h1>
+      <h1 className="page-title">狩猎地带指南</h1>
       <img src={getAssetUrl('images/pagebreak.png')} alt="" className="pagebreak" />
 
       <div className={styles.regionTabs}>
@@ -453,7 +456,7 @@ export default function SafariZones() {
               disabled={isDisabled}
             >
               {REGION_LABELS[r]}
-              {isDisabled && ' (Soon)'}
+              {isDisabled && '（即将推出）'}
             </button>
           )
         })}

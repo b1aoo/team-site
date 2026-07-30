@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useDocumentHead } from '../../hooks/useDocumentHead'
+import { translateLocationName, translateRegionName } from '../../utils/pokemonTermsZh'
 import regionMapsData from '../../data/region_maps'
 import styles from './RegionMaps.module.css'
 import MapFilters from './components/MapFilters'
@@ -101,12 +102,12 @@ export default function RegionMaps() {
   const [isFullscreen, setIsFullscreen] = useState(false)
 
   useDocumentHead({
-    title: 'Interactive Region Maps - Pokemon Routes, Spawns, and POIs',
-    description: 'Explore interactive Pokemon region maps with pan/zoom overlays, spawn filters, and route details.',
+    title: '交互式地区地图｜宝可梦地点、出现池与地标',
+    description: '浏览可平移缩放的宝可梦地区地图，按出现池筛选地点并查看路线详情。',
     canonicalPath: '/region-maps/',
     breadcrumbs: [
-      { name: 'Home', url: '/' },
-      { name: 'Interactive Region Maps', url: '/region-maps/' },
+      { name: '首页', url: '/' },
+      { name: '交互式地区地图', url: '/region-maps/' },
     ],
   })
 
@@ -202,16 +203,16 @@ export default function RegionMaps() {
           type="button"
           className={styles.hiddenWorkButton}
           onClick={() => setShowAllRegions(true)}
-          aria-label="Reveal work in progress regions"
+          aria-label="显示建设中的地区"
         >
           WORK
         </button>
-        <span> IN PROGRESS</span>
+        <span> 建设中</span>
       </div>
-      <h1 className="page-title">Interactive Region Maps</h1>
+      <h1 className="page-title">交互式地区地图</h1>
       <p className={styles.heroDescription}>
-        Pan, zoom, and inspect area overlays while this section is being built.
-        Use filters to surface specific spawn pools and toggle annotation layers.
+        可平移、缩放并查看地图区域叠层；该功能仍在建设中。
+        使用筛选器查找特定出现池，或切换标注图层。
       </p>
 
       <div className={`${styles.regionSelector} ${isFullscreen ? styles.hiddenInFullscreen : ''}`}>
@@ -222,8 +223,8 @@ export default function RegionMaps() {
             className={`${styles.regionButton} ${activeRegionId === region.id ? styles.regionButtonActive : ''}`}
             onClick={() => handleRegionChange(region.id)}
           >
-            <span>{region.name}</span>
-            <small>{region.game}</small>
+            <span>{translateRegionName(region.name)}</span>
+            <small>{translateLocationName(region.game)}</small>
           </button>
         ))}
       </div>
@@ -266,7 +267,7 @@ export default function RegionMaps() {
           />
           <p className={styles.mapLegend}>
             <span className={styles.legendSwatch} />
-            Highlighted polygons represent areas matching your current filters.
+            高亮多边形表示符合当前筛选条件的区域。
           </p>
         </div>
       </div>

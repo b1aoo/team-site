@@ -22,7 +22,7 @@ export async function handleFiles(files, updateSwapHistoryDisplay) {
         if (nonGifImages.length > 0) {
             await loadImages(nonGifImages, updateSwapHistoryDisplay);
         } else {
-            alert('Please upload image files (PNG, JPG, WebP) or a GIF file.');
+            alert('请上传图片文件（PNG、JPG、WebP）或 GIF 文件。');
         }
     }
 }
@@ -96,8 +96,8 @@ export async function loadImages(files, updateSwapHistoryDisplay) {
         updateSelectionInfo();
 
     } catch (error) {
-        console.error('Error loading images:', error);
-        alert('Error loading images: ' + error.message);
+        console.error('图片加载失败：', error);
+        alert('图片加载失败：' + error.message);
         elements.loading.classList.add('hidden');
     }
 }
@@ -122,7 +122,7 @@ export async function loadGif(file, updateSwapHistoryDisplay) {
         const frames = decompressFrames(gif, true);
 
         if (frames.length === 0) {
-            alert('Could not parse GIF frames');
+            alert('无法解析 GIF 帧。');
             return;
         }
 
@@ -176,8 +176,8 @@ export async function loadGif(file, updateSwapHistoryDisplay) {
         updateSwapHistoryDisplay();
         updateSelectionInfo();
     } catch (error) {
-        console.error('Error loading GIF:', error);
-        alert('Error loading GIF: ' + error.message);
+        console.error('GIF 加载失败：', error);
+        alert('GIF 加载失败：' + error.message);
         elements.loading.classList.add('hidden');
     }
 }

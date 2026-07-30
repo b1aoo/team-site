@@ -11,6 +11,7 @@ import { rgbToHex } from "./utils.js";
 import { encodeGif } from "./gif-encoder.js";
 import generations from "../../data/generation.json";
 import pokemonSprites from "../../data/pokemmo_data/pokemon-sprites.json";
+import { translatePokemonName } from "../../utils/pokemon";
 import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm";
 import sparklesGif from "../../../public/images/sparkle.gif"; 
 
@@ -74,7 +75,7 @@ function parseHexColor(hex) {
   
   function generateInfoXML(textureName) {
     return `<?xml version="1.0" encoding="UTF-8"?>
-  <resource name="${textureName}" version="1.0" description="Animated Custom Pokemon Textures" author="Hyper" weblink="https://synergymmo.com/sprite-recolour/">
+  <resource name="${textureName}" version="1.0" description="Animated Custom Pokemon Textures" author="Hyper" weblink="https://b1aoo.github.io/team-site/sprite-recolour/">
   </resource>`;
   }
 
@@ -519,7 +520,7 @@ function SpriteCanvasPreview({ sprite, title, onPickColor, isPaused, selectedFra
     return (
       <div className={styles["mod-preview-placeholder"]}>
         <div className={styles["mod-preview-title"]}>{title}</div>
-        <div className={styles["helper-text"]}>Upload a sprite to preview it here.</div>
+        <div className={styles["helper-text"]}>上传精灵图后可在此预览。</div>
       </div>
     );
   }
@@ -551,7 +552,7 @@ function SpriteCanvasPreview({ sprite, title, onPickColor, isPaused, selectedFra
             onClick={handleClick}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            title={onPickColor ? "Click a colour to open it in the palette editor" : undefined}
+            title={onPickColor ? "点击颜色以在调色板编辑器中打开" : undefined}
             style={{
               width: displayWidth,
               height: displayHeight,
@@ -574,10 +575,7 @@ const pokemonOptions = Object.values(generations)
   .sort((a, b) => a.localeCompare(b))
   .map((name) => ({
     value: name,
-    label: name
-      .split("-")
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(" "),
+    label: translatePokemonName(name),
   }));
 
 
@@ -585,10 +583,7 @@ const pokemonLabelToValue = Object.fromEntries(
   pokemonOptions.map((option) => [option.label, option.value])
 );
 
-const formatPokemonLabel = (name) => name
-  .split("-")
-  .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-  .join(" ");
+const formatPokemonLabel = (name) => translatePokemonName(name);
 
 const modCreatorPokemonOptions = Object.values(pokemonSprites)
   .filter((entry) => {
@@ -647,22 +642,22 @@ export default function SpriteRecolour() {
   const previewDisplayHeight = Math.max(1, Math.round((state.gifHeight || 256) * previewScale));
   const activeFrameCount = modCreatorSprites.front?.currentFrames?.length || modCreatorSprites.back?.currentFrames?.length ||0;
   const breadcrumbs = [
-    { name: "Home", url: "/" },
-    { name: "Sprite Recolour Tool", url: "/sprite-recolour/" }
+    { name: "首页", url: "/" },
+    { name: "精灵图改色工具", url: "/sprite-recolour/" }
   ];
 
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "Sprite Recolour Tool",
+    "name": "精灵图改色工具",
     "applicationCategory": "DesignApplication",
     "operatingSystem": "Web",
-    "url": "https://synergymmo.com/sprite-recolour/",
-    "description": "Recolour Pokemon sprite GIFs in your browser with palette editing, click-to-pick colours, local Pokemon GIF search, and custom GIF uploads.",
+    "url": "https://b1aoo.github.io/team-site/sprite-recolour/",
+    "description": "在浏览器中为宝可梦精灵 GIF 改色：编辑调色板、点选颜色、搜索本地宝可梦 GIF，或上传自定义 GIF。",
     "creator": {
       "@type": "Organization",
       "name": "Team Synergy",
-      "url": "https://synergymmo.com"
+      "url": "https://b1aoo.github.io/team-site"
     },
     "offers": {
       "@type": "Offer",
@@ -670,19 +665,19 @@ export default function SpriteRecolour() {
       "priceCurrency": "USD"
     },
     "featureList": [
-      "Search and load Pokemon GIFs from the local library",
-      "Upload your own GIFs and images",
-      "Click colours directly on the preview to edit them",
-      "Export recoloured sprites as PNG or GIF"
+      "搜索并加载本地宝可梦 GIF",
+      "上传自定义 GIF 与图片",
+      "直接点击预览中的颜色进行编辑",
+      "将改色精灵图导出为 PNG 或 GIF"
     ]
   };
 
   useDocumentHead({
-    title: "Sprite Recolour Tool - Edit Pokemon GIF Palettes and Export them ready to use in PokeMMO",
-    description: "Recolour Pokemon sprite GIFs in your browser. Search the local Pokemon GIF library, upload your own GIFs, click colours directly on the preview, and export the result as PNG or GIF.",
+    title: "精灵图改色工具－编辑宝可梦 GIF 调色板并导出 PokeMMO 可用素材",
+    description: "在浏览器中为宝可梦精灵 GIF 改色。搜索本地宝可梦 GIF、上传自定义 GIF、直接点选预览颜色，并将结果导出为 PNG 或 GIF。",
     canonicalPath: "/sprite-recolour/",
-    ogImage: "https://synergymmo.com/images/pokemon_gifs/tier_0/charizard.gif",
-    imageAlt: "Animated Charizard sprite used for the Sprite Recolour Tool",
+    ogImage: "https://b1aoo.github.io/team-site/images/pokemon_gifs/tier_0/charizard.gif",
+    imageAlt: "用于精灵图改色工具的喷火龙动态精灵图",
     breadcrumbs,
     structuredData,
     author: "Team Synergy"
@@ -694,7 +689,7 @@ export default function SpriteRecolour() {
       !modCreatorSprites.front?.currentFrames?.length ||
       !modCreatorSprites.back?.currentFrames?.length
     ) {
-      alert("Front or back sprite missing.");
+      alert("缺少正面或背面精灵图。");
       return;
     }
 
@@ -1144,7 +1139,7 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
     const pokemonName = matchedOption?.value || modCreatorPokemonLabelToValue[selectionLabel];
 
     if (!pokemonName) {
-      alert("Choose a Pokemon from the autocomplete list, or upload front and back GIFs manually.");
+      alert("请从自动补全列表中选择宝可梦，或手动上传正面与背面 GIF。");
       return;
     }
 
@@ -1156,7 +1151,7 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
 
 
     if (!frontUrl || !backUrl) {
-      alert("That Pokemon does not have both front and back GIFs available.");
+      alert("该宝可梦没有同时提供正面与背面 GIF。");
       return;
     }
 
@@ -1222,8 +1217,8 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
       });
 
     } catch (error) {
-      console.error("Mod Creator GIF load failed:", error);
-      alert(error.message || "Failed to load Pokemon GIFs for the mod creator.");
+      console.error("模组制作器 GIF 加载失败：", error);
+      alert(error.message || "无法为模组制作器加载宝可梦 GIF。");
     } finally {
       setModLoadingKey("");
     }
@@ -1255,23 +1250,23 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
       document.body.removeChild(anchor);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("GIF generation failed:", error);
-      alert("Failed to generate GIF. See console for details.");
+      console.error("GIF 生成失败：", error);
+      alert("GIF 生成失败，请查看控制台了解详情。");
     }
   }
 
   const [textureName, setTextureName] = useState("MyTexture");
 
   const modPaletteSections = [
-    { key: "front", label: "Front palette", sprite: modCreatorSprites.front },
-    { key: "back", label: "Back palette", sprite: modCreatorSprites.back },
+    { key: "front", label: "正面调色板", sprite: modCreatorSprites.front },
+    { key: "back", label: "背面调色板", sprite: modCreatorSprites.back },
   ];
 
   return (
     <div className={styles["page-container"]}>
-      <h1>Sprite Recolour Tool</h1>
+      <h1>精灵图改色工具</h1>
 
-      <div className={styles["tab-list"]} role="tablist" aria-label="Sprite recolour modes">
+      <div className={styles["tab-list"]} role="tablist" aria-label="精灵图改色模式">
         <button
           type="button"
           role="tab"
@@ -1280,7 +1275,7 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
           aria-selected={activeTab === "sprite-recolourer"}
           onClick={() => setActiveTab("sprite-recolourer")}
         >
-          Sprite Recolourer
+          精灵图改色
         </button>
         <button
           type="button"
@@ -1290,25 +1285,25 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
           aria-selected={activeTab === "mod-creator"}
           onClick={() => setActiveTab("mod-creator")}
         >
-          Mod Creator
+          模组制作器
         </button>
       </div>
       {activeTab === "sprite-recolourer" && (
         <>
           <div className={styles["picker-panel"]}>
             <div className={styles["search-panel"]}>
-              <label className={styles["panel-label"]}>Choose a Pokemon GIF</label>
+              <label className={styles["panel-label"]}>选择宝可梦 GIF</label>
               <SearchBar
                 value={pokemonSearch}
                 onChange={setPokemonSearch}
-                placeholder="Search for a Pokemon..."
+                placeholder="搜索宝可梦…"
                 suggestions={pokemonOptions.map((option) => option.label)}
                 onSuggestionSelect={handlePokemonSelect}
               />
             </div>
 
             <div className={styles["upload-panel"]}>
-              <label className={styles["panel-label"]} htmlFor="fileInput">Or upload your own GIF</label>
+              <label className={styles["panel-label"]} htmlFor="fileInput">或上传自己的 GIF</label>
               <input
                 type="file"
                 accept="image/gif,image/png,image/jpeg,image/webp"
@@ -1326,7 +1321,7 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
               onChange={(e) => setShinySprite(e.target.checked)}
               style={{ marginRight: 6 }}
             />
-            Toggle shiny sprite
+            切换闪光精灵图
           </label>
           <label style={{ display: "block", margin: "10px 0" }}>
             <input
@@ -1335,13 +1330,13 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
               onChange={(e) => setIsPaused(e.target.checked)}
               style={{ marginRight: 6 }}
             />
-            Pause Animation
+            暂停动画
           </label>
 
 
           {selectedSourceLabel && (
             <div className={styles["selected-source"]}>
-              Loaded: <strong>{selectedSourceLabel}</strong>
+              已加载：<strong>{selectedSourceLabel}</strong>
             </div>
           )}
 
@@ -1353,7 +1348,7 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
               onClick={handlePreviewClick}
               onMouseEnter={handlePreviewMouseEnter}
               onMouseLeave={handlePreviewMouseLeave}
-              title="Hover to pause the preview, then click a colour to open it in the palette editor"
+              title="悬停可暂停预览；随后点击颜色即可在调色板编辑器中打开"
               style={{
                 border: "1px solid #ccc",
                 imageRendering: "pixelated",
@@ -1365,22 +1360,22 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
             {frameInfo && (
               <div style={{ marginTop: 8, fontSize: "0.95rem" }}>
                 {frameInfo}
-                <span> - hover to pause, then click a colour in the preview to open that colour in the palette editor.</span>
+                <span>－悬停可暂停，再点击预览中的颜色即可在调色板编辑器中打开。</span>
               </div>
             )}
           </div>
 
-          {loading && <div>Processing...</div>}
+          {loading && <div>处理中…</div>}
 
 
            {originalPalette.length > 0 && (
             <div style={{ margin: "1em 0" }}>
-              <button onClick={handleRandomizePalette}>Randomize Palette</button>
+              <button onClick={handleRandomizePalette}>随机调色板</button>
             </div>
           )}
           {originalPalette.length > 0 && (
             <div className={styles["palette-list"]}>
-              <h2>Palette</h2>
+              <h2>调色板</h2>
               {originalPalette.map(({ hex }) => (
                 <div
                   className={styles["palette-color"]}
@@ -1429,10 +1424,10 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
           {hasGif && (
             <>
               <button onClick={handleDownload} disabled={loading}>
-                Download Current Frame as PNG
+                下载当前帧为 PNG
               </button>
               <button onClick={handleDownloadGif} disabled={loading} style={{ marginLeft: 8 }}>
-                Download as GIF
+                下载为 GIF
               </button>
             </>
           )}
@@ -1443,18 +1438,18 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
         <div className={styles["mod-creator-layout"]}>
           <div className={styles["picker-panel"]}>
             <div className={styles["search-panel"]}>
-              <label className={styles["panel-label"]}>Choose a Pokemon</label>
+              <label className={styles["panel-label"]}>选择宝可梦</label>
               <SearchBar
                 value={modPokemonSearch}
                 onChange={setModPokemonSearch}
-                placeholder="Search for a Pokemon..."
+                placeholder="搜索宝可梦…"
                 suggestions={modCreatorPokemonOptions.map((option) => option.label)}
                 onSuggestionSelect={handleModPokemonSelect}
               />
             </div>
 
             <div className={styles["upload-panel"]}>
-              <label className={styles["panel-label"]} htmlFor="frontGifInput">Front gif</label>
+              <label className={styles["panel-label"]} htmlFor="frontGifInput">正面 GIF</label>
               <input
                 type="file"
                 accept="image/gif,image/png,image/jpeg,image/webp"
@@ -1465,7 +1460,7 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
             </div>
 
             <div className={styles["upload-panel"]}>
-              <label className={styles["panel-label"]} htmlFor="backGifInput">Back Gif</label>
+              <label className={styles["panel-label"]} htmlFor="backGifInput">背面 GIF</label>
               <input
                 type="file"
                 accept="image/gif,image/png,image/jpeg,image/webp"
@@ -1478,7 +1473,7 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
 
           {selectedModPokemonLabel && (
             <div className={styles["selected-source"]}>
-              Loaded for mod creator: <strong>{selectedModPokemonLabel}</strong>
+              已为模组制作器加载：<strong>{selectedModPokemonLabel}</strong>
             </div>
           )}
 
@@ -1490,7 +1485,7 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
               onChange={(e) => setIsShinyPreview(e.target.checked)}
               style={{ marginRight: 6 }}
             />
-            Toggle shiny sprites
+            切换闪光精灵图
           </label>
           <label style={{ display: "block", margin: "10px 0" }}>
             <input
@@ -1499,7 +1494,7 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
               onChange={(e) => setIsPaused(e.target.checked)}
               style={{ marginRight: 6 }}
             />
-            Pause Animation
+            暂停动画
           </label>
           </div>
 
@@ -1507,7 +1502,7 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
           <div className={styles["mod-preview-grid"]}>
             <SpriteCanvasPreview
               sprite={modCreatorSprites.front}
-              title="Front"
+              title="正面"
               onPickColor={(hex) => handleModPreviewColorPick("front", hex)}
               isPaused={isPaused}
               selectedFrame={selectedFrame}
@@ -1515,7 +1510,7 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
 
             <SpriteCanvasPreview
               sprite={modCreatorSprites.back}
-              title="Back"
+              title="背面"
               onPickColor={(hex) => handleModPreviewColorPick("back", hex)}
               isPaused={isPaused}
               selectedFrame={selectedFrame}
@@ -1528,7 +1523,7 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
 
             <div style={{ marginTop: 10 }}>
               <label>
-                Frame: {selectedFrame} / {activeFrameCount - 1}
+                帧：{selectedFrame} / {activeFrameCount - 1}
               </label>
 
               <input
@@ -1578,7 +1573,7 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
 
           
           <div style={{ marginTop: 12 }}>
-            <label>Texture Name:</label>
+            <label>纹理名称：</label>
             <input
               type="text"
               value={textureName}
@@ -1594,12 +1589,12 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
                 checked={addSparkles}
                 onChange={(e) => setAddSparkles(e.target.checked)}
               />
-              {" "}Sparkles?
+              {" "}添加闪光效果？
             </label>
 
             {addSparkles && (
               <div style={{ marginTop: 8 }}>
-                <label>Sparkles Color: </label>
+                <label>闪光效果颜色：</label>
                 <input
                   type="color"
                   value={sparklesColor}
@@ -1617,7 +1612,7 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
                 checked={isBigSprite}
                 onChange={(e) => setIsBigSprite(e.target.checked)}
               />
-              {" "}Big Sprite?
+              {" "}大尺寸精灵图？
             </label>
           </div>
 
@@ -1629,22 +1624,22 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
                 onChange={(e) => setIsShiny(e.target.checked)}
                 style={{ marginRight: 6 }}
               />
-              Shiny?
+              闪光？
             </label>
           </div>
 
 
-          {modLoadingKey && <div>Processing...</div>}
+          {modLoadingKey && <div>处理中…</div>}
 
           {selectedModPokemonId && modCreatorSprites.front && modCreatorSprites.back && (
             <button onClick={handleDownloadModZip} disabled={Boolean(modLoadingKey)}>
-              Download Mod
+              下载模组
             </button>
           )}
 
             {(modCreatorSprites.front || modCreatorSprites.back) && (
               <div style={{ margin: "1em 0" }}>
-                <button onClick={handleRandomizeModPalette}>Randomize Palette</button>
+                <button onClick={handleRandomizeModPalette}>随机调色板</button>
               </div>
             )}
 
@@ -1652,7 +1647,7 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
             {modPaletteSections.map(({ key, label, sprite }) => (
               <div className={styles["mod-palette-card"]} key={key}>
                 <h2>{label}</h2>
-                {!sprite && <p className={styles["helper-text"]}>Upload a sprite to edit this palette.</p>}
+                {!sprite && <p className={styles["helper-text"]}>上传精灵图以编辑此调色板。</p>}
                 {sprite?.palette?.length > 0 && (
                 <div className={styles["palette-list"]}>
                   {sprite.palette.map(({ hex }) => (

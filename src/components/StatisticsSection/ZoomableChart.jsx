@@ -155,7 +155,7 @@ export default function ZoomableChart({ children }) {
         <button
           className={styles.zoomButton}
           onClick={() => setZoom(Math.max(1, zoom - 0.2))}
-          title="Zoom Out"
+          title="缩小"
         >
           −
         </button>
@@ -163,7 +163,7 @@ export default function ZoomableChart({ children }) {
         <button
           className={styles.zoomButton}
           onClick={() => setZoom(Math.min(10, zoom + 0.2))}
-          title="Zoom In"
+          title="放大"
         >
           +
         </button>
@@ -173,7 +173,7 @@ export default function ZoomableChart({ children }) {
             setZoom(1)
             setPan({ x: 0, y: 0 })
           }}
-          title="Reset"
+          title="重置"
         >
           ↺
         </button>
@@ -195,7 +195,7 @@ export default function ZoomableChart({ children }) {
               screen.orientation.lock('landscape').catch(() => {})
             }
           }}
-          title="Fullscreen (Landscape)"
+          title="全屏（横屏）"
         >
           ⛶
         </button>

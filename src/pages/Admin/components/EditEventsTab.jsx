@@ -43,7 +43,7 @@ export default function EditEventsTab({
 
   return (
     <div>
-      <label>Select Event:</label>
+      <label>选择活动：</label>
       <Autocomplete
         id="editEventSelect"
         value={selectedEventId}
@@ -52,15 +52,15 @@ export default function EditEventsTab({
           setEditingData(null)
         }}
         getOptions={() => eventsList.map(e => ({ value: e.id, label: e.title }))}
-        placeholder="Search event..."
+        placeholder="搜索活动…"
       />
 
       {!selectedEventId && (
-        <p className={styles.hintText}>Select an event to edit its details.</p>
+        <p className={styles.hintText}>选择一个活动以编辑其详情。</p>
       )}
 
       {selectedEventId && !selectedEvent && (
-        <p className={styles.hintText}>Event not found.</p>
+        <p className={styles.hintText}>未找到活动。</p>
       )}
 
       {selectedEvent && !editingData && (
@@ -70,41 +70,41 @@ export default function EditEventsTab({
             className={styles.primaryBtn}
             onClick={handleEdit}
           >
-            Edit Event
+            编辑活动
           </button>
           <button
             className={styles.dangerBtn}
             style={{ marginLeft: 10 }}
             onClick={() => setConfirmDelete(true)}
           >
-            Delete Event
+            删除活动
           </button>
         </div>
       )}
 
       {editingData && (
         <div className={styles.editSection}>
-          <h3>Editing Event: {editingData.title}</h3>
+          <h3>正在编辑活动：{editingData.title}</h3>
           <EventForm
             initialData={editingData}
             onSubmit={handleSaveEdit}
-            submitLabel="Save Changes"
+            submitLabel="保存修改"
             isMutating={isMutating}
           />
           <button
             onClick={handleCancelEdit}
             style={{ backgroundColor: '#555', marginTop: 10 }}
           >
-            Cancel Edit
+            取消编辑
           </button>
         </div>
       )}
 
       {confirmDelete && selectedEvent && (
         <ConfirmDialog
-          title="Delete Event"
-          message={`Are you sure you want to permanently delete "${selectedEvent.title}"? This cannot be undone.`}
-          confirmLabel="Delete Event"
+          title="删除活动"
+          message={`确定要永久删除“${selectedEvent.title}”吗？此操作无法撤销。`}
+          confirmLabel="删除活动"
           typeToConfirm={selectedEvent.title}
           onConfirm={handleConfirmDelete}
           onCancel={() => setConfirmDelete(false)}

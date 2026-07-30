@@ -20,7 +20,7 @@ export default function GraphZoomModal({ isOpen, onClose, children, title }) {
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <h2>{title}</h2>
-          <button className={styles.closeButton} onClick={onClose} aria-label="Close">
+          <button className={styles.closeButton} onClick={onClose} aria-label="关闭">
             ✕
           </button>
         </div>

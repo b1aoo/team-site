@@ -62,7 +62,7 @@ export default function BulkAddDialog({ open, onClose, onBulkAdd, playerNames = 
   function handleBulkAdd() {
     try {
       const entries = parseBulkAddText(text)
-      if (entries.length === 0) throw new Error('No valid entries found.')
+      if (entries.length === 0) throw new Error('未找到有效条目。')
       setReviewEntries(entries)
       setError('')
     } catch (e) {
@@ -101,7 +101,7 @@ export default function BulkAddDialog({ open, onClose, onBulkAdd, playerNames = 
         />
       ) : (
         <div className={styles.dialogBox}>
-          <h3>Bulk Add Pokémon</h3>
+          <h3>批量添加宝可梦</h3>
           <textarea
             value={text}
             onChange={e => setText(e.target.value)}
@@ -113,8 +113,8 @@ export default function BulkAddDialog({ open, onClose, onBulkAdd, playerNames = 
           />
           {error && <div className={styles.errorNotice}>{error}</div>}
           <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
-            <button onClick={handleBulkAdd}>Next: Review</button>
-            <button onClick={onClose}>Cancel</button>
+            <button onClick={handleBulkAdd}>下一步：审核</button>
+            <button onClick={onClose}>取消</button>
           </div>
         </div>
       )}

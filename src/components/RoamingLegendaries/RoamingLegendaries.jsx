@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import roamingLegendariesData from '../../data/roaming_legendaries.json'
+import { translatePokemonName } from '../../utils/pokemon'
 import styles from './RoamingLegendaries.module.css'
 
 export default function RoamingLegendaries() {
@@ -16,11 +17,11 @@ export default function RoamingLegendaries() {
       <div className={styles.card}>
         <div className={styles.header}>
           <span className={styles.icon}>⭐</span>
-          <h2 className={styles.title}>Roaming Legendaries</h2>
+          <h2 className={styles.title}>游走传说宝可梦</h2>
         </div>
         
         <div className={styles.monthLabel}>
-          <span className={styles.monthText}>Available this month:</span>
+          <span className={styles.monthText}>本月可遇到：</span>
         </div>
 
         <div className={styles.legendariesGrid}>
@@ -32,7 +33,7 @@ export default function RoamingLegendaries() {
             >
               <img
                 src={`https://img.pokemondb.net/sprites/black-white/anim/shiny/${legendary.id.toLowerCase()}.gif`}
-                alt={legendary.name}
+                alt={translatePokemonName(legendary.name)}
                 className={styles.legendaryImage}
                 onError={(e) => {
                   e.target.style.display = 'none'
@@ -41,20 +42,20 @@ export default function RoamingLegendaries() {
               <div className={styles.legendaryNameContainer}>
                 <img
                   src={`/images/pokemon_gifs/tier_7/${legendary.id}.gif`}
-                  alt={legendary.name}
+                  alt={translatePokemonName(legendary.name)}
                   className={styles.legendaryNameGif}
                   onError={(e) => {
                     e.target.style.display = 'none'
                   }}
                 />
-                <span>{legendary.name}</span>
+                <span>{translatePokemonName(legendary.name)}</span>
               </div>
             </Link>
           ))}
         </div>
 
         <Link to="/roaming-legendaries/" className={styles.calendarButton}>
-          Calendar
+          月度日历
         </Link>
       </div>
     </div>

@@ -33,32 +33,32 @@ export default function AdminLogin() {
         login(name, password)
         navigate('/admin/panel')
       } else {
-        setMessage(data.message || 'Invalid credentials')
+        setMessage(data.message || '用户名或密码不正确')
       }
     } catch {
-      setMessage('Error connecting to server')
+      setMessage('无法连接到服务器')
     }
   }
 
   return (
     <div className={styles.loginContainer}>
-      <h2 className={styles.adminText}>Admin Login</h2>
+      <h2 className={styles.adminText}>管理后台登录</h2>
       <form onSubmit={handleLogin}>
         <input
           type="text"
           className={styles.adminInput}
-          placeholder="Username"
+          placeholder="用户名"
           value={name}
           onChange={e => setName(e.target.value)}
         />
         <input
           type="password"
           className={styles.adminInput}
-          placeholder="Password"
+          placeholder="密码"
           value={password}
           onChange={e => setPassword(e.target.value)}
         />
-        <button type="submit" className={styles.loginBtn}>Login</button>
+        <button type="submit" className={styles.loginBtn}>登录</button>
       </form>
       {message && <div className={styles.adminMessage}>{message}</div>}
     </div>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getAssetUrl } from '../../../utils/assets'
-import { getLocalPokemonGif, onGifError } from '../../../utils/pokemon'
+import { getLocalPokemonGif, onGifError, translatePokemonName } from '../../../utils/pokemon'
+import { translateLocationName, translateRegionName } from '../../../utils/pokemonTermsZh'
 import styles from '../RegionMaps.module.css'
 import { clamp } from './mapHelpers'
 
@@ -323,9 +324,9 @@ export default function InteractiveRegionMap({
 
   const annotationLayouts = useMemo(
     () => layoutMapAnnotations({
-      areas: visibleAreas,
-      paths: mapConfig.paths || [],
-      markers: mapConfig.markers || [],
+      areas: visibleAreas.map((area) => ({ ...area, name: translateLocationName(area.name) })),
+      paths: (mapConfig.paths || []).map((path) => ({ ...path, label: translateLocationName(path.label) })),
+      markers: (mapConfig.markers || []).map((marker) => ({ ...marker, label: translateLocationName(marker.label) })),
       showPaths,
       showMarkers,
       mapWidth: mapConfig.map.width,
@@ -392,7 +393,7 @@ export default function InteractiveRegionMap({
     try {
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(text)
-        setCopyStatus(`${label} copied to clipboard.`)
+        setCopyStatus(`${label}已复制到剪贴板。`)
         return
       }
       if (debugTextRef.current) {
@@ -400,8 +401,8 @@ export default function InteractiveRegionMap({
         debugTextRef.current.select()
         const copied = document.execCommand?.('copy')
         setCopyStatus(copied
-          ? `${label} copied to clipboard.`
-          : `Clipboard unavailable. ${label} shown below for manual copy.`)
+          ? `${label}已复制到剪贴板。`
+          : `剪贴板不可用，已在下方显示${label}，请手动复制。`)
       }
     } catch {
       if (debugTextRef.current) {
@@ -409,7 +410,7 @@ export default function InteractiveRegionMap({
         debugTextRef.current.select()
         document.execCommand?.('copy')
       }
-      setCopyStatus(`Clipboard blocked. ${label} shown below for manual copy.`)
+      setCopyStatus(`剪贴板被阻止，已在下方显示${label}，请手动复制。`)
     }
   }
 
@@ -419,12 +420,12 @@ export default function InteractiveRegionMap({
 
   const copyPointCoordinates = async () => {
     if (!debugPoint) return
-    await copyPayload({ point: [debugPoint.x, debugPoint.y] }, 'Point coordinates')
+    await copyPayload({ point: [debugPoint.x, debugPoint.y] }, '点坐标')
   }
 
   const copyBoxCoordinates = async () => {
     if (!debugBox) return
-    await copyText(`"points": ${JSON.stringify(debugBox.points)}`, 'Box points')
+    await copyText(`"points": ${JSON.stringify(debugBox.points)}`, '框选坐标')
   }
 
   const handleWheelZoom = useCallback((event) => {
@@ -637,8 +638,8 @@ export default function InteractiveRegionMap({
     <section className={`${styles.mapShell} ${isFullscreen ? styles.mapShellFullscreen : ''}`}>
       <header className={styles.mapTopBar}>
         <div>
-          <h2 className={styles.mapTitle}>{region.name} Region Map</h2>
-          <p className={styles.mapMeta}>{region.game}</p>
+          <h2 className={styles.mapTitle}>{translateRegionName(region.name)}地区地图</h2>
+          <p className={styles.mapMeta}>{translateLocationName(region.game)}</p>
         </div>
         <div className={styles.mapActionGroup}>
           {mapConfigs.length > 1 && (
@@ -650,16 +651,16 @@ export default function InteractiveRegionMap({
                   className={`${styles.mapSwitchButton} ${entry.id === activeMapId ? styles.mapSwitchButtonActive : ''}`}
                   onClick={() => onChangeMap(entry.id)}
                 >
-                  {entry.name}
+                  {translateLocationName(entry.name)}
                 </button>
               ))}
             </div>
           )}
           <button className={styles.resetButton} type="button" onClick={handleResetView}>
-            Reset View
+            重置视图
           </button>
           <button className={styles.resetButton} type="button" onClick={onToggleFullscreen}>
-            {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+            {isFullscreen ? '退出全屏' : '全屏'}
           </button>
         </div>
       </header>
@@ -685,14 +686,14 @@ export default function InteractiveRegionMap({
           >
           {imageFailed ? (
             <div className={styles.mapImagePlaceholder}>
-              <strong>{mapConfig.name}</strong>
-              <span>Map image not found</span>
+              <strong>{translateLocationName(mapConfig.name)}</strong>
+              <span>未找到地图图片</span>
               <small>{mapConfig.map.image}</small>
             </div>
           ) : (
             <img
               src={getAssetUrl(mapConfig.map.image)}
-              alt={`${region.name} map`}
+              alt={`${translateRegionName(region.name)}地区地图`}
               className={styles.baseMap}
               draggable={false}
               loading="lazy"
@@ -818,8 +819,8 @@ export default function InteractiveRegionMap({
                     <img
                       className={styles.switchSprite}
                       src={getLocalPokemonGif(trigger.label)}
-                      alt={trigger.label}
-                      title={trigger.label}
+                      alt={translatePokemonName(trigger.label)}
+                      title={translatePokemonName(trigger.label)}
                       draggable={false}
                       onError={onGifError(trigger.label)}
                     />
@@ -836,7 +837,7 @@ export default function InteractiveRegionMap({
                     textAnchor="middle"
                     dominantBaseline="middle"
                   >
-                    {trigger.label}
+                    {translateLocationName(trigger.label)}
                   </text>
                 )}
               </g>
@@ -853,7 +854,7 @@ export default function InteractiveRegionMap({
                     style={{ fontSize: `${marker.fontSize}px`, strokeWidth: `${marker.strokeWidth}px` }}
                     dominantBaseline="middle"
                   >
-                    {marker.label}
+                    {translateLocationName(marker.label)}
                   </text>
                 )}
               </g>
@@ -888,13 +889,13 @@ export default function InteractiveRegionMap({
             </svg>
           </div>
         ) : (
-          <div className={styles.mapLoading}>Loading map...</div>
+          <div className={styles.mapLoading}>正在载入地图…</div>
         )}
 
         {hoveredArea && !debugMode && (
           <div className={styles.mapTooltip} style={{ left: hoverPosition.x + 12, top: hoverPosition.y + 12 }}>
-            <strong>{hoveredArea.name}</strong>
-            <span>{(hoveredArea.spawns || []).length} configured spawns</span>
+            <strong>{translateLocationName(hoveredArea.name)}</strong>
+            <span>已配置 {(hoveredArea.spawns || []).length} 种出现宝可梦</span>
           </div>
         )}
 
@@ -906,24 +907,24 @@ export default function InteractiveRegionMap({
             onPointerUp={containMapEvent}
             onClick={containMapEvent}
           >
-            <strong>Debug Coordinates</strong>
-            <span>Click for point capture, drag for area box capture.</span>
+            <strong>调试坐标</strong>
+            <span>单击记录点位，拖动记录区域框。</span>
 
-            {debugPoint && <span>Point: [{debugPoint.x}, {debugPoint.y}]</span>}
+            {debugPoint && <span>点位：[{debugPoint.x}, {debugPoint.y}]</span>}
             {currentDebugBox && (
               <>
-                <span>Top-Left: [{currentDebugBox.topLeft.x}, {currentDebugBox.topLeft.y}]</span>
-                <span>Bottom-Right: [{currentDebugBox.bottomRight.x}, {currentDebugBox.bottomRight.y}]</span>
-                <span>Size: {currentDebugBox.width} x {currentDebugBox.height}</span>
+                <span>左上：[{currentDebugBox.topLeft.x}, {currentDebugBox.topLeft.y}]</span>
+                <span>右下：[{currentDebugBox.bottomRight.x}, {currentDebugBox.bottomRight.y}]</span>
+                <span>尺寸：{currentDebugBox.width} × {currentDebugBox.height}</span>
               </>
             )}
 
             <div className={styles.debugButtonRow}>
               <button type="button" className={styles.resetButton} onClick={copyPointCoordinates} disabled={!debugPoint}>
-                Copy Point JSON
+                复制点位 JSON
               </button>
               <button type="button" className={styles.resetButton} onClick={copyBoxCoordinates} disabled={!debugBox}>
-                Copy Box JSON
+                复制区域 JSON
               </button>
             </div>
 
@@ -932,7 +933,7 @@ export default function InteractiveRegionMap({
               className={styles.debugOutput}
               value={debugOutput}
               readOnly
-              placeholder="Captured JSON will appear here."
+              placeholder="捕获到的 JSON 会显示在这里。"
             />
 
             {copyStatus && <span className={styles.debugStatus}>{copyStatus}</span>}

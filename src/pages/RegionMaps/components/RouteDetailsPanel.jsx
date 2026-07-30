@@ -1,40 +1,41 @@
 import styles from '../RegionMaps.module.css'
-import { getLocalPokemonGif, onGifError } from '../../../utils/pokemon'
+import { getLocalPokemonGif, onGifError, translatePokemonName } from '../../../utils/pokemon'
+import { translateEncounterTerm, translateLocationName, translateTypeName } from '../../../utils/pokemonTermsZh'
 import { getSpawnRarityValues } from './mapHelpers'
 
 const SPAWN_CATEGORIES = [
   {
     key: 'hordes',
-    label: 'Hordes',
+    label: '群聚',
     matches: ({ encounterTypes }) => encounterTypes.has('horde'),
   },
   {
     key: 'lure',
-    label: 'Lure',
+    label: '引虫香水',
     matches: ({ encounterTypes }) => encounterTypes.has('lure'),
   },
   {
     key: 'headbutt',
-    label: 'Headbutt',
+    label: '头锤树',
     matches: ({ methods }) => methods.has('headbutt'),
   },
   {
     key: 'single',
-    label: 'Single',
+    label: '单只遭遇',
     matches: ({ encounterTypes, methods }) =>
       ['very common', 'common', 'uncommon', 'rare', 'very rare'].some((type) => encounterTypes.has(type))
         && !['fishing', 'old rod', 'good rod', 'super rod'].some((method) => methods.has(method)),
   },
   {
     key: 'fishing',
-    label: 'Fishing',
+    label: '垂钓',
     matches: ({ encounterTypes, methods }) =>
       encounterTypes.has('fishing')
         || ['fishing', 'old rod', 'good rod', 'super rod'].some((method) => methods.has(method)),
   },
   {
     key: 'special',
-    label: 'Special',
+    label: '特殊遭遇',
     matches: ({ encounterTypes }) => encounterTypes.has('special'),
   },
 ]
@@ -44,11 +45,12 @@ function normalizeEncounterValue(value) {
 }
 
 const TIME_LABELS = ['Morning', 'Day', 'Night']
+const TIME_LABELS_ZH = { Morning: '早晨', Day: '白天', Night: '夜晚' }
 const SEASON_LABELS = {
-  SEASON0: 'Summer',
-  SEASON1: 'Spring',
-  SEASON2: 'Autumn',
-  SEASON3: 'Winter',
+  SEASON0: '夏季',
+  SEASON1: '春季',
+  SEASON2: '秋季',
+  SEASON3: '冬季',
 }
 
 function getSpawnAvailabilityTags(spawn) {
@@ -78,7 +80,7 @@ function getSpawnAvailabilityTags(spawn) {
 
   const tags = []
   if (timeParts.size > 0 && timeParts.size < TIME_LABELS.length) {
-    tags.push(TIME_LABELS.filter((label) => timeParts.has(label)).join('/'))
+    tags.push(TIME_LABELS.filter((label) => timeParts.has(label)).map((label) => TIME_LABELS_ZH[label]).join('/'))
   }
 
   const seasonValues = Object.values(SEASON_LABELS)
@@ -107,7 +109,7 @@ function groupSpawnsByCategory(spawns) {
 
   return [
     ...SPAWN_CATEGORIES.map((category) => ({ ...category, spawns: groups.get(category.key) })),
-    { key: 'other', label: 'Other', spawns: groups.get('other') },
+    { key: 'other', label: '其他', spawns: groups.get('other') },
   ].filter((category) => category.spawns.length > 0)
 }
 
@@ -123,9 +125,9 @@ function formatEncounterSummary(spawn) {
       ? `${encounter.minLevel}`
       : `${encounter.minLevel}-${encounter.maxLevel}`)
 
-  const levelSummary = levels.length > 0 ? `Lv. ${Array.from(new Set(levels)).join(', ')}` : null
-  const methodSummary = methods.length > 0 ? methods.join(', ') : null
-  const raritySummary = getSpawnRarityValues(spawn).join(', ')
+  const levelSummary = levels.length > 0 ? `等级 ${Array.from(new Set(levels)).join(', ')}` : null
+  const methodSummary = methods.length > 0 ? methods.map(translateEncounterTerm).join(', ') : null
+  const raritySummary = getSpawnRarityValues(spawn).map(translateEncounterTerm).join(', ')
 
   return [methodSummary, levelSummary, raritySummary].filter(Boolean).join(' - ')
 }
@@ -135,35 +137,35 @@ function SpawnRow({ spawn }) {
 
   return (
     <li className={styles.spawnRow}>
-      <span className={styles.spawnSpriteWrap} title={spawn.name}>
+      <span className={styles.spawnSpriteWrap} title={translatePokemonName(spawn.name)}>
         <img
           className={styles.spawnSprite}
           src={getLocalPokemonGif(spawn.name)}
-          alt={spawn.name}
+          alt={translatePokemonName(spawn.name)}
           loading="lazy"
           onError={onGifError(spawn.name)}
         />
       </span>
       <span className={styles.spawnName}>
-        {spawn.name}
+        {translatePokemonName(spawn.name)}
         {availabilityTags.map((tag) => (
           <span key={tag} className={styles.spawnAvailabilityTag}>{tag}</span>
         ))}
       </span>
       <span className={styles.spawnMeta}>
-        {(spawn.types || []).join(' / ')} - {formatEncounterSummary(spawn)}
+        {(spawn.types || []).map(translateTypeName).join('／')} · {formatEncounterSummary(spawn)}
       </span>
     </li>
   )
 }
 
 function MatchingRouteList({ matchingAreas, selectedAreaId, onSelectArea }) {
-  const routeLabel = matchingAreas.length === 1 ? 'route' : 'routes'
+  const routeLabel = '个地点'
 
   return (
     <section className={styles.matchingRoutesSection}>
-      <h3 className={styles.sectionHeading}>Total routes selected</h3>
-      <p className={styles.panelSubtle}>{matchingAreas.length} {routeLabel} match the current filters.</p>
+      <h3 className={styles.sectionHeading}>已选地点总数</h3>
+      <p className={styles.panelSubtle}>{matchingAreas.length} {routeLabel}符合当前筛选条件。</p>
       {matchingAreas.length > 0 ? (
         <div className={styles.routeChipGrid}>
           {matchingAreas.map((area) => (
@@ -173,12 +175,12 @@ function MatchingRouteList({ matchingAreas, selectedAreaId, onSelectArea }) {
               className={`${styles.routeChip} ${selectedAreaId === area.id ? styles.routeChipActive : ''}`}
               onClick={() => onSelectArea(area.id)}
             >
-              {area.name}
+              {translateLocationName(area.name)}
             </button>
           ))}
         </div>
       ) : (
-        <p className={styles.panelSubtle}>No routes match the current filters.</p>
+        <p className={styles.panelSubtle}>没有地点符合当前筛选条件。</p>
       )}
     </section>
   )
@@ -193,8 +195,8 @@ export default function RouteDetailsPanel({
   if (!selectedArea) {
     return (
       <section className={styles.panelCard}>
-        <h2 className={styles.panelTitle}>Route Details</h2>
-        <p className={styles.panelSubtle}>Select an area on the map to inspect encounters, notes, and metadata.</p>
+        <h2 className={styles.panelTitle}>地点详情</h2>
+        <p className={styles.panelSubtle}>在地图上选择一个区域以查看遭遇、备注和资料。</p>
         <MatchingRouteList
           matchingAreas={matchingAreas}
           selectedAreaId={selectedArea?.id}
@@ -208,11 +210,11 @@ export default function RouteDetailsPanel({
 
   return (
     <section className={styles.panelCard}>
-      <h2 className={styles.panelTitle}>{selectedArea.name}</h2>
-      <p className={styles.areaKind}>{selectedArea.kind}</p>
+      <h2 className={styles.panelTitle}>{translateLocationName(selectedArea.name)}</h2>
+      <p className={styles.areaKind}>{translateEncounterTerm(selectedArea.kind)}</p>
       <p className={styles.panelSubtle}>{selectedArea.notes}</p>
 
-      <h3 className={styles.sectionHeading}>Pokemon Spawns</h3>
+      <h3 className={styles.sectionHeading}>宝可梦出现池</h3>
       {filteredSpawns.length > 0 ? (
         <div className={styles.spawnCategoryList}>
           {spawnCategories.map((category) => (
@@ -230,7 +232,7 @@ export default function RouteDetailsPanel({
           ))}
         </div>
       ) : (
-        <p className={styles.panelSubtle}>No spawns match the current filters.</p>
+        <p className={styles.panelSubtle}>没有宝可梦符合当前筛选条件。</p>
       )}
 
       <MatchingRouteList

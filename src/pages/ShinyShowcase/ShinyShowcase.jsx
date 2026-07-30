@@ -12,18 +12,18 @@ import styles from './ShinyShowcase.module.css'
 const INITIAL_COUNT = 5
 const BATCH_SIZE = 5
 const SHINY_FILTERS = [
-  { label: 'Eggs', key: 'Egg' },
-  { label: 'Alphas', key: 'Alpha' },
-  { label: 'Safari', key: 'Safari' },
-  { label: 'Fossils', key: 'Fossil' },
-  { label: 'Swarm', key: 'Swarm' },
-  { label: 'Fishing', key: 'Fishing' },
-  { label: `Headbutt`, key: 'Headbutt' },
-  { label: 'Reaction', key: 'Reaction' },
-  { label: 'Mysterious Ball', key: 'MysteriousBall' },
-  { label: 'Honey Tree', key: 'Honey Tree' },
-  { label: 'Secret Shiny', key: 'Secret Shiny' },
-  { label: 'Event', key: 'Event' },
+  { label: '孵化', key: 'Egg' },
+  { label: '头目', key: 'Alpha' },
+  { label: '狩猎地带', key: 'Safari' },
+  { label: '化石', key: 'Fossil' },
+  { label: '群聚', key: 'Swarm' },
+  { label: '钓鱼', key: 'Fishing' },
+  { label: '头锤树', key: 'Headbutt' },
+  { label: '反应闪', key: 'Reaction' },
+  { label: '神秘球', key: 'MysteriousBall' },
+  { label: '甜甜蜜树', key: 'Honey Tree' },
+  { label: '隐藏闪光', key: 'Secret Shiny' },
+  { label: '活动', key: 'Event' },
 ]
 
 function isTruthyFlag(value) {
@@ -39,8 +39,8 @@ function hasReaction(shiny) {
 
 export default function ShinyShowcase() {
   useDocumentHead({
-    title: 'Shiny Showcase - Team Synergy PokeMMO Community',
-    description: 'Browse Team Synergy\'s 140+ member shiny collections. Track completion with our Pokédex, watch live Twitch streamers, and join competitions.',
+    title: '闪光收藏展示－Team Synergy PokeMMO 社区',
+    description: '浏览 Team Synergy 140 多位成员的闪光收藏。使用图鉴追踪完成度、观看 Twitch 直播，并参与社区活动。',
     canonicalPath: '/shiny-showcase/',
     robots: 'index, follow, max-image-preview:large',
   })
@@ -159,8 +159,8 @@ export default function ShinyShowcase() {
     return () => observer.disconnect()
   }, [loadMore])
 
-  if (isLoading) return <div className="message">Loading...</div>
-  if (error) return <div className="message">Error loading data</div>
+  if (isLoading) return <div className="message">加载中…</div>
+  if (error) return <div className="message">数据加载失败</div>
 
   const playersToShow = playersWithFilteredShinies.slice(0, visibleCount)
   const hasMore = visibleCount < playersWithFilteredShinies.length
@@ -168,24 +168,24 @@ export default function ShinyShowcase() {
   return (
     <div>
       <h1 className="seo-optimized">
-        Shiny Showcase - Team Synergy PokeMMO Collections
+        闪光收藏展示－Team Synergy PokeMMO 收藏
       </h1>
       <p className="seo-intro">
-        Browse {playersWithFilteredShinies.length} Team Synergy member shiny collections. Track completion with our Pokédex, explore shiny hunting locations, and discover our community's best shinies.
+        浏览 {playersWithFilteredShinies.length} 位 Team Synergy 成员的闪光收藏。使用图鉴追踪完成度，查找刷闪地点，并欣赏社区中的珍稀闪光宝可梦。
       </p>
 
-      <img src={getAssetUrl('images/pagebreak.png')} alt="Page Break" className="pagebreak" />
+      <img src={getAssetUrl('images/pagebreak.png')} alt="分隔线" className="pagebreak" />
 
       <div className={styles.videoContainer}>
         <h2>
           <a href="https://www.youtube.com/watch?v=G5zh-xZs-eg" target="_blank" rel="noopener noreferrer">
-            Watch our Shiny Showcase Video!
+            观看我们的闪光收藏展示视频！
           </a>
         </h2>
         <a href="https://www.youtube.com/watch?v=G5zh-xZs-eg" target="_blank" rel="noopener noreferrer">
           <img
             src={getAssetUrl('images/shinyshowcase.png')}
-            alt="Shiny Showcase Video"
+            alt="闪光收藏展示视频"
             className={styles.showcaseVideo}
             width="300"
             height="169"

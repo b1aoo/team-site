@@ -6,8 +6,8 @@ import styles from './ParticleViewer.module.css'
 
 export default function ParticleViewer() {
   useDocumentHead({
-    title: 'Particle Viewer - Team Synergy',
-    description: 'Watch in-game particle effects from PokeMMO. View all available particles including shiny effects and special animations.',
+    title: '粒子效果查看器｜PokeMMO',
+    description: '查看 PokeMMO 游戏内粒子效果，包括闪光特效和特殊动画。',
     canonicalPath: '/particle-viewer',
     robots: 'index, follow',
   })
@@ -88,10 +88,10 @@ export default function ParticleViewer() {
 
   return (
     <div className={styles.container}>
-      <h1>Particle Viewer</h1>
+      <h1>粒子效果查看器</h1>
       <div className={styles.creditBanner}>
-        <p>Special thanks to Dracula for helping me record the particles.</p>
-        <p>Special thanks to Coffee (IGN Evolution) for lending us the Pokemon!</p>
+        <p>特别感谢 Dracula 协助录制粒子效果。</p>
+        <p>特别感谢 Coffee（游戏 ID：Evolution）出借宝可梦！</p>
       </div>
 
       {/* Legend */}
@@ -99,19 +99,19 @@ export default function ParticleViewer() {
         <div className={styles.legendItem}>
           <img 
             src={getAssetUrl('images/Shiny Showcase/egg.png')} 
-            alt="Breed Only"
+            alt="仅可孵化获得"
             className={styles.legendIcon}
           />
-          <span>Breed Only - Only obtainable through breeding</span>
+          <span>仅可孵化获得：只能通过孵化取得</span>
         </div>
       </div>
 
       <p className={styles.description}>
-        Explore in-game particle effects from PokeMMO. Select a particle to view its animation.
+        浏览 PokeMMO 游戏内粒子效果；选择一种效果即可观看动画。
       </p>
       {/* Particles List placed under description, compact grid to fit on one page */}
       <div className={styles.particlesList}>
-        <h3>Available Particles</h3>
+        <h3>可用粒子效果</h3>
         <div className={styles.particlesGrid}>
           {particlesData.map((particle, index) => (
             <button
@@ -133,7 +133,7 @@ export default function ParticleViewer() {
               {particle.breed && (
                 <img 
                   src={getAssetUrl('images/Shiny Showcase/egg.png')} 
-                  alt="Breed Only"
+                  alt="仅可孵化获得"
                   className={styles.breedIcon}
                 />
               )}
@@ -155,7 +155,7 @@ export default function ParticleViewer() {
                 <div className={styles.videoPlayer}>
                   {selectedParticle.broken ? (
                     <div className={styles.brokenNotice}>
-                      This particle is currently broken in game and does not display correctly.
+                      该粒子效果目前在游戏内存在异常，无法正确显示。
                     </div>
                   ) : (
                     <>
@@ -171,7 +171,7 @@ export default function ParticleViewer() {
                         preload="auto"
                         playsInline
                       >
-                        Your browser does not support the video tag.
+                        你的浏览器不支持视频播放。
                       </video>
                       <div className={styles.hiddenPreloadVideos} aria-hidden="true">
                         {getAdjacentVideoUrls().map((href) => (
@@ -197,7 +197,7 @@ export default function ParticleViewer() {
                       handlePlayVideo(particlesData[prevIndex])
                     }}
                   >
-                    ◀ Previous
+                    ◀ 上一个
                   </button>
                   <button 
                     className={styles.navButton}
@@ -207,11 +207,11 @@ export default function ParticleViewer() {
                       handlePlayVideo(particlesData[nextIndex])
                     }}
                   >
-                    Next ▶
+                    下一个 ▶
                   </button>
                 </div>
                 <div className={styles.speedControls}>
-                  <span className={styles.speedLabel}>Playback Speed</span>
+                  <span className={styles.speedLabel}>播放速度</span>
                   {[0.5, 0.75, 1, 1.5, 2].map((speed) => (
                     <button
                       key={speed}

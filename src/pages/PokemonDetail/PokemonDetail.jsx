@@ -11,6 +11,17 @@ import SearchBar from '../../components/SearchBar/SearchBar'
 import styles from './PokemonDetail.module.css'
 import abilitiesData from '../../data/pokemmo_data/abilities-data.json'
 import safariData from '../../data/safari_zones.json'
+import { translatePokemonName } from '../../utils/pokemon'
+import { getAssetUrl } from '../../utils/assets'
+import {
+  translateAbilityName,
+  translateEggGroupName,
+  translateEncounterTerm,
+  translateLocationName,
+  translateMoveName,
+  translateRegionName,
+  translateTypeName,
+} from '../../utils/pokemonTermsZh'
 
 const TYPE_COLORS = {
   NORMAL: '#A8A878',
@@ -73,15 +84,15 @@ const TYPE_EFFECTIVENESS = {
  * @returns {string} Human-readable description
  */
 function getMoveLearningMethod(method, level) {
-  if (!method) return 'Unknown'
+  if (!method) return '未知'
   
   const methodMap = {
-    'level-up': level ? `Lvl ${level}` : 'Level Up',
-    'egg': 'Egg Move',
+    'level-up': level ? `等级 ${level}` : '升级习得',
+    'egg': '遗传招式',
     'machine': 'TM/HM',
-    'tutor': 'Move Tutor',
-    'reminder': 'Move Reminder',
-    'form-change': 'Form Change',
+    'tutor': '招式教学',
+    'reminder': '招式回忆',
+    'form-change': '形态变化',
   }
   
   return methodMap[method] || method.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
@@ -174,10 +185,15 @@ function getEggGroupColor(group) {
 function formatEncounterTime(time) {
   if (!time) return ''
   return time
-    .replace(/SEASON0/g, 'Summer')
-    .replace(/SEASON1/g, 'Spring')
-    .replace(/SEASON2/g, 'Autumn')
-    .replace(/SEASON3/g, 'Winter')
+    .replace(/SEASON0/g, '夏季')
+    .replace(/SEASON1/g, '春季')
+    .replace(/SEASON2/g, '秋季')
+    .replace(/SEASON3/g, '冬季')
+    .replace(/Summer/gi, '夏季')
+    .replace(/Spring/gi, '春季')
+    .replace(/Autumn|Fall/gi, '秋季')
+    .replace(/Winter/gi, '冬季')
+    .replace(/Any/gi, '不限')
 }
 
 function getGenderDistribution(genderRate, eggGroups = []) {
@@ -306,59 +322,60 @@ function getAbilityInfo(abilityName) {
  * Format evolution details into a readable string
  */
 function formatEvolutionDetails(details) {
-  if (!details || details.length === 0) return 'Unknown'
+  if (!details || details.length === 0) return '未知'
   
   const detail = details[0]
   
   // Special case for level-up with location requirement
   if (detail.trigger?.name === 'level-up' && detail.location?.name) {
-    return 'Level up near the respective stone'
+    return '在对应岩石附近升级'
   }
   
   const parts = []
   
   if (detail.trigger?.name) {
     const triggerMap = {
-      'level-up': 'Level Up',
-      'use-item': 'Use Item',
-      'trade': 'Trade',
-      'shedding': 'Shedding',
-      'spin': 'Spin',
-      'tower-of-darkness': 'Tower of Darkness',
-      'tower-of-waters': 'Tower of Waters'
+      'level-up': '升级',
+      'use-item': '使用道具',
+      'trade': '交换',
+      'shedding': '蜕壳',
+      'spin': '旋转',
+      'tower-of-darkness': '在恶之塔修行',
+      'tower-of-waters': '在水之塔修行'
     }
     parts.push(triggerMap[detail.trigger.name] || detail.trigger.name)
   }
   
   if (detail.min_level) {
-    parts.push(`at Level ${detail.min_level}`)
+    parts.push(`达到 Lv.${detail.min_level}`)
   }
   
   if (detail.item?.name) {
-    parts.push(`with ${detail.item.name.replace('-', ' ')}`)
+    parts.push(`使用 ${detail.item.name.replace(/-/g, ' ')}`)
   }
   
   if (detail.held_item?.name) {
-    parts.push(`holding ${detail.held_item.name.replace('-', ' ')}`)
+    parts.push(`携带 ${detail.held_item.name.replace(/-/g, ' ')}`)
   }
   
   if (detail.known_move) {
-    parts.push(`knows ${detail.known_move}`)
+    parts.push(`习得 ${translateMoveName(detail.known_move)}`)
   }
   
   if (detail.min_happiness) {
-    parts.push(`with ${detail.min_happiness} happiness`)
+    parts.push(`亲密度达到 ${detail.min_happiness}`)
   }
   
   if (detail.min_affection) {
-    parts.push(`with ${detail.min_affection} affection`)
+    parts.push(`友好度达到 ${detail.min_affection}`)
   }
   
   if (detail.time_of_day && detail.time_of_day.length > 0) {
-    parts.push(`at ${detail.time_of_day}`)
+    const timeMap = { day: '白天', night: '夜晚', dusk: '黄昏' }
+    parts.push(`在${timeMap[detail.time_of_day] || detail.time_of_day}`)
   }
   
-  return parts.length > 0 ? parts.join(' ') : 'Unknown'
+  return parts.length > 0 ? parts.join(' ') : '未知'
 }
 
 
@@ -427,12 +444,12 @@ function renderEvolutionChainLinear(chainLink, navigate, currentPokemonName, hov
               onClick={() => navigate(`/pokemon/${link.species.name}/`, { state: { fromPokemon: true } })}
               className={`${styles.chainPokemon} ${isCurrent ? styles.chainPokemonCurrent : ''}`}
               style={{ minWidth: '140px', padding: '0.75rem 1rem', fontSize: '0.9rem' }}
-              title={`View ${link.species.name}`}
+              title={`查看${translatePokemonName(link.species.name)}`}
               onMouseEnter={() => link.evolution_details && link.evolution_details.length > 0 && setHoveredEvolution(evolutionId)}
               onMouseLeave={() => setHoveredEvolution(null)}
             >
               <span className={styles.chainPokemonName}>
-                {link.species.name.charAt(0).toUpperCase() + link.species.name.slice(1).replace('-', ' ')}
+                {translatePokemonName(link.species.name)}
               </span>
               {link.evolution_details && link.evolution_details.length > 0 && (
                 <span className={styles.chainCondition} style={{ maxWidth: '140px', fontSize: '0.7rem' }}>
@@ -459,12 +476,12 @@ function renderEvolutionChainLinear(chainLink, navigate, currentPokemonName, hov
                         onClick={() => navigate(`/pokemon/${branch.species.name}/`, { state: { fromPokemon: true } })}
                         className={`${styles.chainPokemon} ${branchIsCurrent ? styles.chainPokemonCurrent : ''}`}
                         style={{ minWidth: '140px', padding: '0.75rem 1rem', fontSize: '0.9rem' }}
-                        title={`View ${branch.species.name}`}
+                        title={`查看${translatePokemonName(branch.species.name)}`}
                         onMouseEnter={() => branch.evolution_details && branch.evolution_details.length > 0 && setHoveredEvolution(branchEvolutionId)}
                         onMouseLeave={() => setHoveredEvolution(null)}
                       >
                         <span className={styles.chainPokemonName}>
-                          {branch.species.name.charAt(0).toUpperCase() + branch.species.name.slice(1).replace('-', ' ')}
+                          {translatePokemonName(branch.species.name)}
                         </span>
                         {branch.evolution_details && branch.evolution_details.length > 0 && (
                           <span className={styles.chainCondition} style={{ maxWidth: '140px', fontSize: '0.7rem' }}>
@@ -530,12 +547,12 @@ function renderEvolutionChainHorizontal(chainLink, navigate, currentPokemonName,
               onClick={() => navigate(`/pokemon/${link.species.name}/`, { state: { fromPokemon: true } })}
               className={`${styles.chainPokemon} ${isCurrent ? styles.chainPokemonCurrent : ''}`}
               style={{ minWidth: '140px', padding: '0.75rem 1rem', fontSize: '0.9rem' }}
-              title={`View ${link.species.name}`}
+              title={`查看${translatePokemonName(link.species.name)}`}
               onMouseEnter={() => link.evolution_details && link.evolution_details.length > 0 && setHoveredEvolution(evolutionId)}
               onMouseLeave={() => setHoveredEvolution(null)}
             >
               <span className={styles.chainPokemonName}>
-                {link.species.name.charAt(0).toUpperCase() + link.species.name.slice(1).replace('-', ' ')}
+                {translatePokemonName(link.species.name)}
               </span>
               {link.evolution_details && link.evolution_details.length > 0 && (
                 <span className={styles.chainCondition} style={{ maxWidth: '140px', fontSize: '0.7rem' }}>
@@ -562,12 +579,12 @@ function renderEvolutionChainHorizontal(chainLink, navigate, currentPokemonName,
                         onClick={() => navigate(`/pokemon/${branch.species.name}/`, { state: { fromPokemon: true } })}
                         className={`${styles.chainPokemon} ${branchIsCurrent ? styles.chainPokemonCurrent : ''}`}
                         style={{ minWidth: '140px', padding: '0.75rem 1rem', fontSize: '0.9rem' }}
-                        title={`View ${branch.species.name}`}
+                        title={`查看${translatePokemonName(branch.species.name)}`}
                         onMouseEnter={() => branch.evolution_details && branch.evolution_details.length > 0 && setHoveredEvolution(branchEvolutionId)}
                         onMouseLeave={() => setHoveredEvolution(null)}
                       >
                         <span className={styles.chainPokemonName}>
-                          {branch.species.name.charAt(0).toUpperCase() + branch.species.name.slice(1).replace('-', ' ')}
+                          {translatePokemonName(branch.species.name)}
                         </span>
                         {branch.evolution_details && branch.evolution_details.length > 0 && (
                           <span className={styles.chainCondition} style={{ maxWidth: '140px', fontSize: '0.7rem' }}>
@@ -698,6 +715,18 @@ function calculateBestCatchMethod(catchRate) {
   })
   
   return { bestMethod, secondBestMethod }
+}
+
+function translateBallName(ball) {
+  return {
+    'Pokéball': '精灵球',
+    'Great Ball': '超级球',
+    'Ultra Ball': '高级球',
+    'Quick Ball': '先机球',
+    'Dusk Ball': '黑暗球',
+    'Timer Ball': '计时球',
+    'Safari Ball': '狩猎球',
+  }[ball] || ball
 }
 
 export default function PokemonDetail() {
@@ -915,13 +944,13 @@ export default function PokemonDetail() {
         return firstGen[0].url
       }
     }
-    return 'https://synergymmo.com/images/openGraph.jpg'
+    return 'https://b1aoo.github.io/team-site/images/openGraph.jpg'
   }, [spritesByGeneration])
 
   const safariLocations = useMemo(() => {
     if (!pokemonName) return []
     const results = []
-    const REGION_LABELS = { kanto: 'Kanto', johto: 'Johto', hoenn: 'Hoenn', sinnoh: 'Sinnoh' }
+  const REGION_LABELS = { kanto: '关都', johto: '城都', hoenn: '丰缘', sinnoh: '神奥' }
     const lookupName = pokemonName.toLowerCase()
     Object.entries(safariData).forEach(([region, data]) => {
       if (!data) return
@@ -929,7 +958,7 @@ export default function PokemonDetail() {
       if (data.universalPokemon) {
         const match = data.universalPokemon.find(p => p.name.toLowerCase() === lookupName)
         if (match) {
-          results.push({ region: regionLabel, area: 'All Areas', encounterType: match.encounterType })
+          results.push({ region: regionLabel, area: '全区域', encounterType: match.encounterType })
         }
       } else if (data.areas) {
         data.areas.forEach(area => {
@@ -943,68 +972,51 @@ export default function PokemonDetail() {
     return results
   }, [pokemonName])
 
-// Capitalize first letter helper
-const capitalize = (str) =>
-  str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
+const formatEggGroupName = (group) => translateEggGroupName(group)
 
-// Format egg group names - handles special water groups
-const formatEggGroupName = (group) => {
-  if (!group) return "";
-  const lowerGroup = group.toLowerCase();
-  // Special handling for water groups
-  if (lowerGroup === "watera") return "Water A";
-  if (lowerGroup === "waterb") return "Water B";
-  if (lowerGroup === "waterc") return "Water C";
-  // Default: capitalize and replace hyphens with spaces
-  return capitalize(group).replace('-', ' ');
-};
-
-// Format types → "Dark / Ghost"
 const formatTypes = (types) =>
-  types?.map(capitalize).join(" / ") || "Unknown";
+  types?.map(translateTypeName).join(' / ') || '未知'
 
-// Format egg groups → "Field & Fairy"
 const formatEggGroups = (eggs) =>
-  eggs?.length ? eggs.map(formatEggGroupName).join(" & ") : "Unknown";
+  eggs?.length ? eggs.map(formatEggGroupName).join(' / ') : '未知'
 
-// Build EXACT description format requested
 const buildDescription = (pokemon) => {
-  if (!pokemon) return "Explore Pokémon in the PokeMMO Shiny Dex.";
+  if (!pokemon) return '查看 PokeMMO 闪光图鉴中的宝可梦资料。'
 
-  const name = capitalize(pokemon.displayName);
-  const types = formatTypes(pokemon.types);
-  const eggGroups = formatEggGroups(pokemon.eggGroups);
+  const name = translatePokemonName(pokemon.displayName)
+  const types = formatTypes(pokemon.types)
+  const eggGroups = formatEggGroups(pokemon.eggGroups)
 
-  return `${name} PokeMMO guide - Type: ${types}, Egg Group: ${eggGroups}. Find encounter locations, shiny hunting spots, tier rarity, and strategies in PokeMMO.`;
-};
+  return `${name}的 PokeMMO 图鉴资料：属性为${types}，蛋组为${eggGroups}。查看出没地点、刷闪信息与稀有度分层。`
+}
 
 const breadcrumbs = pokemon ? [
-  { name: 'Home', url: '/' },
-  { name: 'PokeMMO Pokédex', url: '/pokedex' },
-  { name: capitalize(pokemon.displayName), url: `/pokemon/${pokemonName?.toLowerCase()}/` }
+  { name: '首页', url: '/' },
+  { name: 'PokeMMO 宝可梦图鉴', url: '/pokedex' },
+  { name: translatePokemonName(pokemon.displayName), url: `/pokemon/${pokemonName?.toLowerCase()}/` }
 ] : [
-  { name: 'Home', url: '/' },
-  { name: 'PokeMMO Pokédex', url: '/pokedex' }
-];
+  { name: '首页', url: '/' },
+  { name: 'PokeMMO 宝可梦图鉴', url: '/pokedex' }
+]
 
 useDocumentHead({
   title: pokemon
-    ? `${capitalize(pokemon.displayName)} PokeMMO Hunting Guide | Encounter Locations & Tier`
-    : "Pokémon Details | PokeMMO Shiny Dex",
+    ? `${translatePokemonName(pokemon.displayName)}｜PokeMMO 刷闪与出没地点`
+    : '宝可梦详情｜PokeMMO 闪光图鉴',
 
   description: buildDescription(pokemon),
 
   canonicalPath: `/pokemon/${pokemonName?.toLowerCase()}/`,
 
-  url: `https://synergymmo.com/pokemon/${pokemonName?.toLowerCase()}/`,
+  url: `https://b1aoo.github.io/team-site/pokemon/${pokemonName?.toLowerCase()}/`,
 
   ogImage: animatedShinyGif,
 
   twitterCard: "summary_large_image",
 
   twitterTitle: pokemon
-    ? `${capitalize(pokemon.displayName)} PokeMMO Shiny Hunt | Tier & Locations`
-    : "Pokémon Details | PokeMMO Shiny Dex",
+    ? `${translatePokemonName(pokemon.displayName)}｜PokeMMO 刷闪与出没地点`
+    : '宝可梦详情｜PokeMMO 闪光图鉴',
 
   twitterDescription: buildDescription(pokemon),
 
@@ -1020,33 +1032,33 @@ useDocumentHead({
     return (
       <div className={styles.container}>
         <BackButton to={location.state?.fromPokemon ? '/pokedex' : '/pokedex'} />
-        <div className={styles.loadingMessage}>Loading Pokémon data...</div>
+        <div className={styles.loadingMessage}>正在加载宝可梦资料…</div>
       </div>
     )
   }
 
   if (error) {
-    const errorMessage = error?.message || 'Unable to load Pokémon data'
+    const errorMessage = '暂时无法加载宝可梦资料。'
     
     return (
       <div className={styles.container}>
         <BackButton to={location.state?.fromPokemon ? '/pokedex/' : '/pokedex/'} />
         <div className={styles.errorMessage}>
-          <h2>⚠️ Unable to Load Pokémon</h2>
+          <h2>⚠️ 无法加载宝可梦</h2>
           <p className={styles.errorDescription}>
             {errorMessage}
           </p>
           <div className={styles.suggestions}>
-            <p><strong>Troubleshooting tips:</strong></p>
+            <p><strong>你可以尝试：</strong></p>
             <ul>
-              <li>Check that the Pokémon name is spelled correctly</li>
-              <li>Use lowercase names with hyphens (e.g., "mr-mime", "type-null")</li>
-              <li>Try searching on our <button onClick={() => navigate('/pokedex/')} className={styles.linkButton} style={{ background: 'none', border: 'none', color: '#667eea', cursor: 'pointer', textDecoration: 'underline' }}>Pokédex page</button></li>
-              <li>If the issue persists, try again in a few moments (API might be busy)</li>
+              <li>确认宝可梦名称和链接拼写正确。</li>
+              <li>使用小写英文标识并以连字符分隔，例如 “mr-mime”。</li>
+              <li>在<button onClick={() => navigate('/pokedex/')} className={styles.linkButton} style={{ background: 'none', border: 'none', color: '#667eea', cursor: 'pointer', textDecoration: 'underline' }}>宝可梦图鉴</button>中重新搜索。</li>
+              <li>若问题持续出现，请稍后再试。</li>
             </ul>
           </div>
           <button onClick={() => navigate('/pokedex/')} className={styles.linkButton}>
-            Back to Pokédex
+            返回宝可梦图鉴
           </button>
         </div>
       </div>
@@ -1120,7 +1132,7 @@ useDocumentHead({
 
   const fromPage = location.state?.from
   const backTo = fromPage === 'shotm' ? '/shotm/' : fromPage === 'LnyCatchCalc' ? '/LnyCatchCalc/' : fromPage === 'shiny-war-2025/' ? '/shiny-war-2025/' : fromPage === 'pokemon/' ? -1 : '/pokedex/'
-  const backLabel = fromPage === 'shotm' ? '\u2190 Back to SHOTM' : fromPage === 'LnyCatchCalc' ? '\u2190 Back to LNY Catch Calculator' : fromPage === 'shiny-war-2025' ? '\u2190 Back to Shiny Wars 2025' : fromPage === 'pokemon' ? '\u2190 Back to Pokémon' : '\u2190 Back to Showcase'
+  const backLabel = fromPage === 'shotm' ? '← 返回本月闪光' : fromPage === 'LnyCatchCalc' ? '← 返回农历新年捕捉计算器' : fromPage === 'shiny-war-2025' ? '← 返回闪光大战 2025' : fromPage === 'pokemon' ? '← 返回宝可梦' : '← 返回收藏展示'
 
   return (
     <article className={styles.container}>
@@ -1130,7 +1142,7 @@ useDocumentHead({
         <SearchBar
           value={pokemonSearch}
           onChange={setPokemonSearch}
-          placeholder="Search Pokémon..."
+          placeholder="搜索宝可梦…"
           suggestions={pokemonSuggestions}
           onSuggestionSelect={(suggestion) => {
             setPokemonSearch('')
@@ -1144,24 +1156,24 @@ useDocumentHead({
           className={styles.navArrow}
           onClick={handlePrevious}
           disabled={!prevPokemon}
-          title="Previous Pokémon"
-          aria-label="Previous Pokémon"
+          title="上一只宝可梦"
+          aria-label="上一只宝可梦"
         >
           ❮
         </button>
         <div className={styles.titleContainer}>
-          <h1 className={styles.title}>{pokemon.displayName}</h1>
+          <h1 className={styles.title}>{translatePokemonName(pokemon.displayName)}</h1>
           <span className={styles.pokemonId}>#{String(pokemon.id).padStart(3, '0')}</span>
           {(pokemon.isLegendary || pokemon.isMythical) && !pokemon.obtainable && (
-            <div className={styles.unobtainableLabel}>UNOBTAINABLE</div>
+            <div className={styles.unobtainableLabel}>暂不可获得</div>
           )}
         </div>
         <button
           className={styles.navArrow}
           onClick={handleNext}
           disabled={!nextPokemon}
-          title="Next Pokémon"
-          aria-label="Next Pokémon"
+          title="下一只宝可梦"
+          aria-label="下一只宝可梦"
         >
           ❯
         </button>
@@ -1183,7 +1195,7 @@ useDocumentHead({
                   <img
                     key={currentSpriteUrl}
                     src={currentSpriteUrl}
-                    alt={`${pokemon.displayName} - ${currentSprite.label}`}
+                    alt={`${translatePokemonName(pokemon.displayName)}－${currentSprite.label}`}
                     className={`${styles.pokemonImage} ${isSpriteLoaded ? styles.pokemonImageLoaded : styles.pokemonImageLoading}`}
                     onLoad={() => setLoadedSpriteUrl(currentSpriteUrl)}
                     loading="lazy"
@@ -1195,7 +1207,7 @@ useDocumentHead({
                   <img
                     key={currentSpriteUrl}
                     src={pokemon.sprite}
-                    alt={pokemon.displayName}
+                    alt={translatePokemonName(pokemon.displayName)}
                     className={`${styles.pokemonImage} ${isSpriteLoaded ? styles.pokemonImageLoaded : styles.pokemonImageLoading}`}
                     onLoad={() => setLoadedSpriteUrl(currentSpriteUrl)}
                     loading="lazy"
@@ -1206,8 +1218,8 @@ useDocumentHead({
                 <button
                   onClick={playCry}
                   className={styles.volumeButton}
-                  title="Play Pokémon cry"
-                  aria-label={`Play ${pokemon.displayName} cry`}
+                  title="播放宝可梦叫声"
+                  aria-label={`播放${translatePokemonName(pokemon.displayName)}的叫声`}
                 >
                   🔊
                 </button>
@@ -1216,8 +1228,8 @@ useDocumentHead({
                 <button
                   onClick={() => setShowBack(!showBack)}
                   className={styles.reverseButton}
-                  title={showBack ? "Show front sprite" : "Show back sprite"}
-                  aria-label={showBack ? "Show front sprite" : "Show back sprite"}
+                  title={showBack ? '显示正面图像' : '显示背面图像'}
+                  aria-label={showBack ? '显示正面图像' : '显示背面图像'}
                 >
                   🔄
                 </button>
@@ -1225,8 +1237,8 @@ useDocumentHead({
               {particleAnimationKey > 0 && (
                 <img
                   key={`particle-${particleAnimationKey}`}
-                  src={`/images/shiny_particle.gif?t=${particleAnimationKey}`}
-                  alt="Shiny particle effect"
+                  src={`${getAssetUrl('images/shiny_particle.gif')}?t=${particleAnimationKey}`}
+                  alt="闪光粒子特效"
                   className={styles.shinyParticle}
                   aria-hidden="true"
                 />
@@ -1234,7 +1246,7 @@ useDocumentHead({
             </div>
             {availableForms.length > 1 && (
               <div className={styles.formSelector}>
-                <label className={styles.formSelectorLabel}>Available Forms:</label>
+                <label className={styles.formSelectorLabel}>可选形态：</label>
                 <div className={styles.formOptions}>
                   {availableForms.map((form) => (
                     <button
@@ -1257,7 +1269,7 @@ useDocumentHead({
               <div className={styles.spriteNavigationContainer}>
                 {availableGenerations.length > 1 && (
                   <div className={styles.generationSelector}>
-                    <label className={styles.generationLabel}>Generation:</label>
+                    <label className={styles.generationLabel}>世代：</label>
                     <select 
                       value={activeGeneration} 
                       onChange={(e) => setSelectedGeneration(e.target.value)}
@@ -1265,7 +1277,7 @@ useDocumentHead({
                     >
                       {availableGenerations.map((gen) => (
                         <option key={gen} value={gen}>
-                          {gen.replace('generation-', 'Gen ').toUpperCase()}
+                          {`第 ${gen.replace('generation-', '').toUpperCase()} 世代`}
                         </option>
                       ))}
                     </select>
@@ -1274,21 +1286,21 @@ useDocumentHead({
                 
                 {hasFemaleVariants && availableGenerations.includes('generation-v') && (
                   <div className={styles.genderSelector}>
-                    <label className={styles.genderLabel}>Gender:</label>
+                    <label className={styles.genderLabel}>性别：</label>
                     <div className={styles.genderButtons}>
                       <button
                         className={`${styles.genderButton} ${selectedGender === 'male' ? styles.genderButtonActive : ''}`}
                         onClick={() => setSelectedGender('male')}
-                        title="Male variants"
+                        title="雄性形态"
                       >
-                        ♂ Male
+                        ♂ 雄性
                       </button>
                       <button
                         className={`${styles.genderButton} ${selectedGender === 'female' ? styles.genderButtonActive : ''}`}
                         onClick={() => setSelectedGender('female')}
-                        title="Female variants"
+                        title="雌性形态"
                       >
-                        ♀ Female
+                        ♀ 雌性
                       </button>
                     </div>
                   </div>
@@ -1299,8 +1311,8 @@ useDocumentHead({
                     <button
                       className={styles.spriteButton}
                       onClick={() => setCurrentSpriteIndex((prev) => (prev === 0 ? filteredSprites.length - 1 : prev - 1))}
-                      title="Previous sprite"
-                      aria-label="Previous sprite"
+                      title="上一张图像"
+                      aria-label="上一张图像"
                     >
                       ❮
                     </button>
@@ -1310,8 +1322,8 @@ useDocumentHead({
                     <button
                       className={styles.spriteButton}
                       onClick={() => setCurrentSpriteIndex((prev) => (prev === filteredSprites.length - 1 ? 0 : prev + 1))}
-                      title="Next sprite"
-                      aria-label="Next sprite"
+                      title="下一张图像"
+                      aria-label="下一张图像"
                     >
                       ❯
                     </button>
@@ -1324,29 +1336,29 @@ useDocumentHead({
           {/* Basic Info */}
           <div className={styles.basicInfo}>
             <div className={styles.infoRow}>
-              <span className={styles.label}>Height</span>
+              <span className={styles.label}>身高</span>
               <span className={styles.value}>{pokemon.height.toFixed(2)}m</span>
             </div>
             <div className={styles.infoRow}>
-              <span className={styles.label}>Weight</span>
+              <span className={styles.label}>体重</span>
               <span className={styles.value}>{pokemon.weight.toFixed(2)}kg</span>
             </div>
             <div className={styles.infoRow}>
-              <span className={styles.label}>Generation</span>
+              <span className={styles.label}>世代</span>
               <span className={styles.value}>
-                {pokemon.generation.replace('-', ' ').toUpperCase()}
+                {`第 ${pokemon.generation.replace('generation-', '').toUpperCase()} 世代`}
               </span>
             </div>
             {/* Gender Ratio */}
             {pokemon.genderRate !== undefined && (
               <div className={styles.basicInfoGenderSection}>
-                <span className={styles.basicInfoGenderLabel}>Gender Ratio</span>
+                <span className={styles.basicInfoGenderLabel}>性别比例</span>
                 {genderDistribution.isGenderless ? (
-                  <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.95rem' }}>Genderless</div>
+                  <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.95rem' }}>无性别</div>
                 ) : (
                   <div className={styles.basicInfoGender}>
                     <div className={styles.basicInfoGenderRow}>
-                      <span className={styles.basicInfoGenderLabel2}>♂ Male</span>
+                      <span className={styles.basicInfoGenderLabel2}>♂ 雄性</span>
                       <div className={styles.basicInfoGenderBar}>
                         <div 
                           className={styles.basicInfoGenderFill} 
@@ -1359,7 +1371,7 @@ useDocumentHead({
                       <span className={styles.basicInfoGenderPercent}>{genderDistribution.malePercent.toFixed(1)}%</span>
                     </div>
                     <div className={styles.basicInfoGenderRow}>
-                      <span className={styles.basicInfoGenderLabel2}>♀ Female</span>
+                      <span className={styles.basicInfoGenderLabel2}>♀ 雌性</span>
                       <div className={styles.basicInfoGenderBar}>
                         <div 
                           className={styles.basicInfoGenderFill} 
@@ -1378,7 +1390,7 @@ useDocumentHead({
             {/* EV Yields */}
             {pokemon.evYields && pokemon.evYields.length > 0 && (
               <div className={styles.basicInfoEVSection}>
-                <span className={styles.basicInfoEVLabel}>EV Yields</span>
+                <span className={styles.basicInfoEVLabel}>努力值</span>
                 <div className={styles.basicInfoEVs}>
                   {pokemon.evYields.map((ev, index) => (
                     <div key={index} className={styles.basicInfoEVRow}>
@@ -1394,7 +1406,7 @@ useDocumentHead({
           {/* Evolution Line */}
           {pokemon.evolution_chain?.chain && (
             <div className={`${styles.infoCard} ${styles.evolutionSection}`}>
-              <h2 className={styles.cardTitle}>Evolution Line</h2>
+              <h2 className={styles.cardTitle}>进化链</h2>
               <div 
                 className={`${styles.evolutionLineContainerHorizontal} ${hasBranchingEvolutions(pokemon?.name) ? styles.evolutionLineContainerBranching : styles.evolutionLineContainerLinear} ${!hasBranchingEvolutions(pokemon?.name) && countLinearEvolutions(pokemon.evolution_chain.chain) <= 2 ? styles.evolutionSmall : ''}`} 
                 ref={hasBranchingEvolutions(pokemon?.name) ? evolutionContainerRef : null}
@@ -1412,7 +1424,7 @@ useDocumentHead({
         <section className={styles.detailsSection}>
           {/* Types */}
           <div className={styles.infoCard}>
-            <h2 className={styles.cardTitle}>Type</h2>
+            <h2 className={styles.cardTitle}>属性</h2>
             <div className={styles.typeContainer}>
               {pokemon.types.map(type => (
                 <span
@@ -1420,7 +1432,7 @@ useDocumentHead({
                   className={styles.type}
                   style={{ backgroundColor: TYPE_COLORS[type] }}
                 >
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                  {translateTypeName(type)}
                 </span>
               ))}
             </div>
@@ -1428,23 +1440,21 @@ useDocumentHead({
 
           {/* Abilities */}
 
-        <div className={styles.infoCard}> <h2 className={styles.cardTitle}>Abilities</h2>
+        <div className={styles.infoCard}> <h2 className={styles.cardTitle}>特性</h2>
 
         <div className={styles.abilityContainer}>
 
         {/* Normal Abilities */}
         {pokemon.abilities?.normal?.length > 0 && (
           <div>
-            <h3 className={styles.abilitySubtitle}>Abilities</h3>
+            <h3 className={styles.abilitySubtitle}>普通特性</h3>
 
             <ul className={styles.abilityList}>
               {pokemon.abilities.normal.map((ability, index) => {
                 const abilityName = ability || ''
                 const abilityInfo = getAbilityInfo(abilityName)
 
-                const displayName = abilityName
-                  .replace(/-/g, ' ')
-                  .replace(/\b\w/g, char => char.toUpperCase())
+                const displayName = translateAbilityName(abilityName)
 
                 return (
                   <li
@@ -1457,7 +1467,7 @@ useDocumentHead({
 
                     {hoveredAbility === abilityName && abilityInfo && (
                       <div className={styles.abilityTooltip}>
-                        {abilityInfo.effect}
+                        {abilityInfo.effect ? '特性说明暂未收录中文版本。' : ''}
                       </div>
                     )}
                   </li>
@@ -1470,16 +1480,14 @@ useDocumentHead({
         {/* Hidden Ability */}
         {pokemon.abilities?.hidden?.length > 0 && (
           <div>
-            <h3 className={styles.abilitySubtitle}>Hidden Ability</h3>
+            <h3 className={styles.abilitySubtitle}>隐藏特性</h3>
 
             <ul className={styles.abilityList}>
               {pokemon.abilities.hidden.map((ability, index) => {
                 const abilityName = ability || ''
                 const abilityInfo = getAbilityInfo(abilityName)
 
-                const displayName = abilityName
-                  .replace(/-/g, ' ')
-                  .replace(/\b\w/g, char => char.toUpperCase())
+                const displayName = translateAbilityName(abilityName)
 
                 return (
                   <li
@@ -1492,7 +1500,7 @@ useDocumentHead({
 
                     {hoveredAbility === abilityName && abilityInfo && (
                       <div className={styles.abilityTooltip}>
-                        {abilityInfo.effect}
+                        {abilityInfo.effect ? '特性说明暂未收录中文版本。' : ''}
                       </div>
                     )}
                   </li>
@@ -1506,7 +1514,7 @@ useDocumentHead({
 
           {/* Stats */}
           <div className={styles.infoCard}>
-            <h2 className={styles.cardTitle}>Base Stats</h2>
+            <h2 className={styles.cardTitle}>种族值</h2>
             <div className={styles.statsContainer}>
               {[
                 { label: 'HP', value: pokemon.stats.hp },
@@ -1540,7 +1548,7 @@ useDocumentHead({
 
           {/* Type Effectiveness */}
           <div className={styles.infoCard}>
-            <h2 className={styles.cardTitle}>Type Chart</h2>
+            <h2 className={styles.cardTitle}>属性相性</h2>
             {(() => {
               const combined = calculateCombinedTypeEffectiveness(pokemon.types)
               
@@ -1548,11 +1556,11 @@ useDocumentHead({
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                   {combined.fourxWeak.length > 0 && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      <span style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '600' }}>4x Weak To:</span>
+                      <span style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '600' }}>4 倍弱点：</span>
                       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         {combined.fourxWeak.map(type => (
                           <span key={type} style={{ padding: '0.4rem 0.8rem', background: 'rgba(239, 68, 68, 0.3)', border: '2px solid rgba(239, 68, 68, 0.7)', borderRadius: '6px', fontSize: '0.9rem', fontWeight: '600', color: '#fca5a5', textTransform: 'capitalize' }}>
-                            {type}
+                            {translateTypeName(type)}
                           </span>
                         ))}
                       </div>
@@ -1561,11 +1569,11 @@ useDocumentHead({
                   
                   {combined.twoXWeak.length > 0 && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      <span style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '600' }}>Weak To:</span>
+                      <span style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '600' }}>弱点：</span>
                       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         {combined.twoXWeak.map(type => (
                           <span key={type} style={{ padding: '0.4rem 0.8rem', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid rgba(239, 68, 68, 0.5)', borderRadius: '6px', fontSize: '0.9rem', color: '#fca5a5', textTransform: 'capitalize' }}>
-                            {type}
+                            {translateTypeName(type)}
                           </span>
                         ))}
                       </div>
@@ -1574,11 +1582,11 @@ useDocumentHead({
                   
                   {combined.halfDmg.length > 0 && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      <span style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '600' }}>Resists: (1/2 Damage)</span>
+                      <span style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '600' }}>抗性（伤害减半）：</span>
                       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         {combined.halfDmg.map(type => (
                           <span key={type} style={{ padding: '0.4rem 0.8rem', background: 'rgba(74, 222, 128, 0.2)', border: '1px solid rgba(74, 222, 128, 0.5)', borderRadius: '6px', fontSize: '0.9rem', color: '#86efac', textTransform: 'capitalize' }}>
-                            {type}
+                            {translateTypeName(type)}
                           </span>
                         ))}
                       </div>
@@ -1587,11 +1595,11 @@ useDocumentHead({
                   
                   {combined.quarterDmg.length > 0 && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      <span style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '600' }}>Resists (1/4 Damage):</span>
+                      <span style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '600' }}>强抗性（伤害为 1/4）：</span>
                       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         {combined.quarterDmg.map(type => (
                           <span key={type} style={{ padding: '0.4rem 0.8rem', background: 'rgba(74, 222, 128, 0.3)', border: '2px solid rgba(74, 222, 128, 0.7)', borderRadius: '6px', fontSize: '0.9rem', fontWeight: '600', color: '#86efac', textTransform: 'capitalize' }}>
-                            {type}
+                            {translateTypeName(type)}
                           </span>
                         ))}
                       </div>
@@ -1600,11 +1608,11 @@ useDocumentHead({
                   
                   {combined.immune.length > 0 && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      <span style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '600' }}>Immune To:</span>
+                      <span style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '600' }}>免疫：</span>
                       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         {combined.immune.map(type => (
                           <span key={type} style={{ padding: '0.4rem 0.8rem', background: 'rgba(168, 85, 247, 0.2)', border: '1px solid rgba(168, 85, 247, 0.5)', borderRadius: '6px', fontSize: '0.9rem', color: '#d8b4fe', textTransform: 'capitalize' }}>
-                            {type}
+                            {translateTypeName(type)}
                           </span>
                         ))}
                       </div>
@@ -1617,10 +1625,10 @@ useDocumentHead({
 
           {/* Breeding & Catch Info */}
           <div className={styles.infoCard}>
-            <h2 className={styles.cardTitle}>Breeding & Catch Information</h2>
+            <h2 className={styles.cardTitle}>孵化与捕捉信息</h2>
             <div className={styles.additionalInfo}>
               <div className={styles.infoGroup}>
-                <span className={styles.label}>Egg Groups</span>
+                <span className={styles.label}>蛋组</span>
                 {pokemon.eggGroups.length > 0 ? (
                   <div className={styles.eggGroupList}>
                     {pokemon.eggGroups.map((group) => {
@@ -1637,17 +1645,17 @@ useDocumentHead({
                     })}
                   </div>
                 ) : (
-                  <span className={styles.eggGroupNone}>None</span>
+                  <span className={styles.eggGroupNone}>无</span>
                 )}
               </div>
 
               <div className={styles.infoGroup}>
-                <span className={styles.label}>Exp Group</span>
-                <span className={styles.value}>{pokemon.growthRate ? pokemon.growthRate.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'Unknown'}</span>
+                <span className={styles.label}>经验成长</span>
+                <span className={styles.value}>{({ slow: '慢', medium: '中等', fast: '快', 'medium-slow': '中慢', erratic: '不定形', fluctuating: '波动' })[pokemon.growthRate] || '未知'}</span>
               </div>
               <div className={styles.infoGroup}>
-                <span className={styles.label}>Shiny Tier</span>
-                <span className={styles.value} style={{ color: TIER_COLORS[pokemon.shinyTier] ?? '#94a3b8' }}>Tier {pokemon.shinyTier}</span>
+                <span className={styles.label}>闪光分层</span>
+                <span className={styles.value} style={{ color: TIER_COLORS[pokemon.shinyTier] ?? '#94a3b8' }}>第 {pokemon.shinyTier} 阶</span>
               </div>
             </div>
           </div>
@@ -1657,7 +1665,7 @@ useDocumentHead({
       {/* Owners */}
       {Object.keys(owners).length > 0 && (
         <section className={styles.ownersSection}>
-          <h2 className={styles.cardTitle}>Owned By</h2>
+          <h2 className={styles.cardTitle}>收藏者</h2>
           <div className={styles.ownersList}>
             {Object.entries(owners)
               .sort(([, a], [, b]) => b - a) // Sort by count descending
@@ -1669,7 +1677,7 @@ useDocumentHead({
                 >
                   <p className={styles.ownerName}>{playerName}</p>
                   <p className={styles.ownerCount}>
-                    {count} Caught
+                    已捕获 {count} 只
                   </p>
                 </button>
               ))}
@@ -1679,10 +1687,10 @@ useDocumentHead({
 
       {/* Catch Rate Calculator */}
       <section className={styles.catchRateCalculatorSection}>
-        <h2 className={styles.cardTitle}>Catch Rate Calculator</h2>
+        <h2 className={styles.cardTitle}>捕捉率计算器</h2>
         <div className={styles.calculatorContainer}>
           <div className={styles.catchRateInfo}>
-            <span className={styles.label}>Base Catch Rate</span>
+            <span className={styles.label}>基础捕获度</span>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', position: 'relative' }}>
               <span className={styles.value}>{pokemon.catchRate}/255</span>
               <div className={styles.catchBar}>
@@ -1695,25 +1703,25 @@ useDocumentHead({
                 />
               </div>
               <span className={styles.catchDifficulty} style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)' }}>
-                {pokemon.catchRate > 200 ? 'Very Easy' : pokemon.catchRate > 100 ? 'Easy' : pokemon.catchRate > 50 ? 'Moderate' : 'Hard to catch'}
+                {pokemon.catchRate > 200 ? '非常容易捕捉' : pokemon.catchRate > 100 ? '容易捕捉' : pokemon.catchRate > 50 ? '普通难度' : '难以捕捉'}
               </span>
             </div>
           </div>
           <div className={styles.catchRateTooltip} style={{ position: 'static', marginTop: '1.5rem' }}>
-            <div className={styles.tooltipTitle}>Catch Rate by Ball & HP</div>
+            <div className={styles.tooltipTitle}>不同球种与 HP 下的捕捉率</div>
             {maxWildLevel > 0 && (
               <div className={styles.tooltipLevelInfo}>
-                Max Wild Level: <strong>{maxWildLevel}</strong>
+                野生最高等级：<strong>{maxWildLevel}</strong>
               </div>
             )}
             <div className={styles.tooltipContent}>
               <div className={styles.tooltipTable}>
                 <div className={styles.tooltipRow}>
-                  <div className={styles.tooltipHeader}>Ball</div>
-                  <div className={styles.tooltipHeader}>100% HP</div>
+                  <div className={styles.tooltipHeader}>球种</div>
+                  <div className={styles.tooltipHeader}>满 HP</div>
                   <div className={styles.tooltipHeader}>1% HP</div>
-                  <div className={styles.tooltipHeader}>Sleep 100% HP</div>
-                  <div className={styles.tooltipHeader}>Sleep 1% HP</div>
+                  <div className={styles.tooltipHeader}>催眠 + 满 HP</div>
+                  <div className={styles.tooltipHeader}>催眠 + 1% HP</div>
                 </div>
                 {(() => {
                   const pokeBall100 = calculateCatchChance(pokemon.catchRate, 1.0, 100).toFixed(1)
@@ -1722,7 +1730,7 @@ useDocumentHead({
                   const pokeBallSleep1 = calculateCatchChance(pokemon.catchRate, 1.0, 1, 2.0).toFixed(1)
                   return (
                     <div className={styles.tooltipRow}>
-                      <div>Pokéball</div>
+                      <div>精灵球</div>
                       <div className={pokeBall100 === "100.0" ? styles.highlightedCell : ""}>{pokeBall100}%</div>
                       <div className={pokeBall1 === "100.0" ? styles.highlightedCell : ""}>{pokeBall1}%</div>
                       <div className={pokeBallSleep100 === "100.0" ? styles.highlightedCell : ""}>{pokeBallSleep100}%</div>
@@ -1737,7 +1745,7 @@ useDocumentHead({
                   const greatBallSleep1 = calculateCatchChance(pokemon.catchRate, 1.5, 1, 2.0).toFixed(1)
                   return (
                     <div className={styles.tooltipRow}>
-                      <div>Great Ball</div>
+                      <div>超级球</div>
                       <div className={greatBall100 === "100.0" ? styles.highlightedCell : ""}>{greatBall100}%</div>
                       <div className={greatBall1 === "100.0" ? styles.highlightedCell : ""}>{greatBall1}%</div>
                       <div className={greatBallSleep100 === "100.0" ? styles.highlightedCell : ""}>{greatBallSleep100}%</div>
@@ -1752,7 +1760,7 @@ useDocumentHead({
                   const ultraBallSleep1 = calculateCatchChance(pokemon.catchRate, 2.0, 1, 2.0).toFixed(1)
                   return (
                     <div className={styles.tooltipRow}>
-                      <div>Ultra Ball</div>
+                      <div>高级球</div>
                       <div className={ultraBall100 === "100.0" ? styles.highlightedCell : ""}>{ultraBall100}%</div>
                       <div className={ultraBall1 === "100.0" ? styles.highlightedCell : ""}>{ultraBall1}%</div>
                       <div className={ultraBallSleep100 === "100.0" ? styles.highlightedCell : ""}>{ultraBallSleep100}%</div>
@@ -1767,7 +1775,7 @@ useDocumentHead({
                   const quickBallSleep1 = calculateCatchChance(pokemon.catchRate, 1.0, 1, 2.0).toFixed(1)
                   return (
                     <div className={styles.tooltipRow}>
-                      <div>Quick Ball<span className={styles.tooltipNote}>(Turn 1)</span></div>
+                      <div>先机球<span className={styles.tooltipNote}>（第 1 回合）</span></div>
                       <div className={quickBall100 === "100.0" ? styles.highlightedCell : ""}>{quickBall100}%</div>
                       <div className={quickBall1 === "100.0" ? styles.highlightedCell : ""}>{quickBall1}%</div>
                       <div className={quickBallSleep100 === "100.0" ? styles.highlightedCell : ""}>{quickBallSleep100}%</div>
@@ -1782,7 +1790,7 @@ useDocumentHead({
                   const duskBallSleep1 = calculateCatchChance(pokemon.catchRate, 2.5, 1, 2.0).toFixed(1)
                   return (
                     <div className={styles.tooltipRow}>
-                      <div>Dusk Ball<span className={styles.tooltipNote}>(Night)</span></div>
+                      <div>黑暗球<span className={styles.tooltipNote}>（夜晚）</span></div>
                       <div className={duskBall100 === "100.0" ? styles.highlightedCell : ""}>{duskBall100}%</div>
                       <div className={duskBall1 === "100.0" ? styles.highlightedCell : ""}>{duskBall1}%</div>
                       <div className={duskBallSleep100 === "100.0" ? styles.highlightedCell : ""}>{duskBallSleep100}%</div>
@@ -1797,7 +1805,7 @@ useDocumentHead({
                   const timerBallSleep1 = calculateCatchChance(pokemon.catchRate, 4.0, 1, 2.0).toFixed(1)
                   return (
                     <div className={styles.tooltipRow}>
-                      <div>Timer Ball<span className={styles.tooltipNote}>(Turn 11+)</span></div>
+                      <div>计时球<span className={styles.tooltipNote}>（第 11 回合起）</span></div>
                       <div className={timerBall100 === "100.0" ? styles.highlightedCell : ""}>{timerBall100}%</div>
                       <div className={timerBall1 === "100.0" ? styles.highlightedCell : ""}>{timerBall1}%</div>
                       <div className={timerBallSleep100 === "100.0" ? styles.highlightedCell : ""}>{timerBallSleep100}%</div>
@@ -1810,7 +1818,7 @@ useDocumentHead({
                   const isSafari100 = safariPercent === "100.0"
                   return (
                     <div className={`${styles.tooltipRow} ${isSafari100 ? styles.safariRow : ""}`}>
-                      <div>Safari Ball<span className={styles.tooltipNote}>(100% HP Only)</span></div>
+                      <div>狩猎球<span className={styles.tooltipNote}>（仅满 HP）</span></div>
                       <div className={isSafari100 ? styles.highlightedCell : ""}>{safariPercent}%</div>
                       <div className={styles.safariPercent}>—</div>
                       <div className={styles.safariPercent}>—</div>
@@ -1823,27 +1831,27 @@ useDocumentHead({
                   return (
                     <>
                       <div className={`${styles.tooltipRow} ${styles.bestMethodRow}`}>
-                        <div><strong>✓ Best</strong></div>
-                        <div><strong>{bestMethod.ball}</strong></div>
+                        <div><strong>✓ 最优</strong></div>
+                        <div><strong>{translateBallName(bestMethod.ball)}</strong></div>
                         <div>
-                          {bestMethod.hp === 100 ? '100% HP' : '1% HP'}
-                          {bestMethod.statusMod === 2.0 ? ' + Sleep' : ''}
+                          {bestMethod.hp === 100 ? '满 HP' : '1% HP'}
+                          {bestMethod.statusMod === 2.0 ? ' + 催眠' : ''}
                         </div>
                         <div><strong>{bestMethod.catchChance.toFixed(1)}%</strong></div>
                         <div style={{ fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.7)' }}>
-                          {bestMethod.turns} turn{bestMethod.turns !== 1 ? 's' : ''}
+                          {bestMethod.turns} 回合
                         </div>
                       </div>
                       <div className={`${styles.tooltipRow} ${styles.secondBestMethodRow}`}>
-                        <div><strong>2nd Best</strong></div>
-                        <div><strong>{secondBestMethod.ball}</strong></div>
+                        <div><strong>次优</strong></div>
+                        <div><strong>{translateBallName(secondBestMethod.ball)}</strong></div>
                         <div>
-                          {secondBestMethod.hp === 100 ? '100% HP' : '1% HP'}
-                          {secondBestMethod.statusMod === 2.0 ? ' + Sleep' : ''}
+                          {secondBestMethod.hp === 100 ? '满 HP' : '1% HP'}
+                          {secondBestMethod.statusMod === 2.0 ? ' + 催眠' : ''}
                         </div>
                         <div><strong>{secondBestMethod.catchChance.toFixed(1)}%</strong></div>
                         <div style={{ fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.7)' }}>
-                          {secondBestMethod.turns} turn{secondBestMethod.turns !== 1 ? 's' : ''}
+                          {secondBestMethod.turns} 回合
                         </div>
                       </div>
                     </>
@@ -1851,10 +1859,10 @@ useDocumentHead({
                 })()}
               </div>
               <div className={styles.tooltipNote2}>
-                Formula: A = [(3×MaxHP - 2×CurrentHP) / (3×MaxHP)] × Ball × CatchRate × Status
+                公式：A = [(3×最大 HP - 2×当前 HP) / (3×最大 HP)] × 球种修正 × 捕获度 × 状态修正
               </div>
               <div className={styles.tooltipNote2} style={{ marginTop: '0.5rem', borderTop: '1px solid rgba(102, 126, 234, 0.2)', paddingTop: '0.5rem' }}>
-                <strong>Best Method:</strong> Selected by balancing catch chance, turns needed (0-2), and ball cost. Prefers cheaper balls when effectiveness is similar.
+                <strong>最优方案：</strong>综合捕捉率、所需回合（0–2）与球种成本计算；效果相近时优先选择较便宜的球。
               </div>
             </div>
           </div>
@@ -1916,26 +1924,26 @@ if (location.is_horde_3x) {
 
 // Check for lure
 if (rarities.includes('Lure')) {
-  return '/images/lure.png'
+  return 'images/lure.png'
 }
 
 // Check habitat for fishing rods
 const habitat = location.type || ''
 
 if (habitat.includes('Super Rod')) {
-  return '/images/super_rod.png'
+  return 'images/super_rod.png'
 }
 
 if (habitat.includes('Good Rod')) {
-  return '/images/good_rod.png'
+  return 'images/good_rod.png'
 }
 
 if (habitat.includes('Old Rod')) {
-  return '/images/old_rod.png'
+  return 'images/old_rod.png'
 }
 
 if (habitat.includes('Fishing')) {
-  return '/images/super_rod.png'
+  return 'images/super_rod.png'
 }
 
 return null
@@ -1973,7 +1981,7 @@ return rarityA - rarityB
 
 })
 
-return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>Locations</h2>
+return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>出没地点</h2>
 
 
   <div className={styles.locationsContainer}>
@@ -1993,7 +2001,7 @@ return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>
               )}`
             )
           }
-          title={`Search for Pokémon at ${location.location_name_full}`}
+          title={`查看${translatePokemonName(pokemon.displayName)}在${location.location_name_full}的出没资料`}
         >
           <div className={styles.locationHeader}>
             <div
@@ -2004,7 +2012,7 @@ return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>
               }}
             >
               <h3 className={styles.locationName}>
-                {location.location_name_full}
+                {translateLocationName(location.location_name_full)}
               </h3>
 
               {encounterIcon && (
@@ -2014,18 +2022,18 @@ return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>
                     height: '24px',
                     marginLeft: 'auto'
                   }}
-                  src={encounterIcon}
-                  alt="Encounter type"
+                  src={getAssetUrl(encounterIcon)}
+                  alt="遇敌类型"
                   onError={(event) => {
                     event.currentTarget.onerror = null
-                    event.currentTarget.src = '/images/horde.png'
+                    event.currentTarget.src = getAssetUrl('images/horde.png')
                   }}
                 />
               )}
             </div>
 
             <span className={styles.locationRegion}>
-              {location.region_name}
+              {translateRegionName(location.region_name)}
             </span>
           </div>
 
@@ -2033,7 +2041,7 @@ return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>
 
             {/* Level */}
             <span className={styles.locationDetail}>
-              <strong>Level:</strong>{' '}
+              <strong>等级：</strong>{' '}
               {location.min_level === location.max_level
                 ? location.min_level
                 : `${location.min_level}-${location.max_level}`}
@@ -2041,8 +2049,8 @@ return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>
 
             {/* Season */}
             <span className={styles.locationDetail}>
-              <strong>Season:</strong>{' '}
-              {location.season || 'Any'}
+              <strong>季节：</strong>{' '}
+              {formatEncounterTime(location.season || '不限')}
             </span>
 
            {/* Morning Rarity */}
@@ -2050,7 +2058,7 @@ return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>
               location.rarity_morning !== '--' &&
               location.rarity_morning !== 'Unknown' && (
               <span className={styles.locationDetail}>
-              <strong>Morning:</strong>{' '}
+              <strong>早晨：</strong>{' '}
               {normalizeHordePercent(location.rarity_morning, location)}
               </span>
               )}
@@ -2060,7 +2068,7 @@ return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>
               location.rarity_day !== '--' &&
               location.rarity_day !== 'Unknown' && (
               <span className={styles.locationDetail}>
-              <strong>Day:</strong>{' '}
+              <strong>白天：</strong>{' '}
               {normalizeHordePercent(location.rarity_day, location)}
               </span>
               )}
@@ -2070,7 +2078,7 @@ return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>
               location.rarity_night !== '--' &&
               location.rarity_night !== 'Unknown' && (
               <span className={styles.locationDetail}>
-              <strong>Night:</strong>{' '}
+              <strong>夜晚：</strong>{' '}
               {normalizeHordePercent(location.rarity_night, location)}
               </span>
               )}
@@ -2078,18 +2086,18 @@ return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>
             {/* Horde Information */}
             {(location.is_horde_3x || location.is_horde_5x) && (
               <span className={styles.locationDetail}>
-                <strong>Horde:</strong>{' '}
+                <strong>群聚：</strong>{' '}
                 {location.is_horde_5x
-                  ? '5x Horde'
-                  : '3x Horde'}
+                  ? '5 只群聚'
+                  : '3 只群聚'}
               </span>
             )}
 
             {/* Habitat */}
             {location.type && (
               <span className={styles.locationDetail}>
-                <strong>Habitat:</strong>{' '}
-                {location.type}
+                <strong>遇敌方式：</strong>{' '}
+                {translateEncounterTerm(location.type)}
               </span>
             )}
 
@@ -2111,7 +2119,7 @@ return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>
             }
           })
         }
-        title={`${safariLoc.region} Safari Zone`}
+        title={`${safariLoc.region}狩猎地带`}
       >
         <div className={styles.locationHeader}>
           <div
@@ -2122,7 +2130,7 @@ return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>
             }}
           >
             <h3 className={styles.locationName}>
-              Safari Zone
+              狩猎地带
             </h3>
           </div>
 
@@ -2135,14 +2143,13 @@ return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>
 
         <div className={styles.locationDetails}>
           <span className={styles.locationDetail}>
-            <strong>Area:</strong>{' '}
+            <strong>区域：</strong>{' '}
             {safariLoc.area}
           </span>
 
           <span className={styles.locationDetail}>
-            <strong>Encounter:</strong>{' '}
-            {safariLoc.encounterType.charAt(0).toUpperCase() +
-              safariLoc.encounterType.slice(1)}
+            <strong>遇敌方式：</strong>{' '}
+            {translateEncounterTerm(safariLoc.encounterType)}
           </span>
         </div>
       </button>
@@ -2156,15 +2163,15 @@ return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>
 
       {/* Moves */}
       <section className={styles.infoCard} key={`moves-${pokemonName}`}>
-        <h2 className={styles.cardTitle}>Learnable Moves</h2>
+        <h2 className={styles.cardTitle}>可习得招式</h2>
         {pokemon.moves && pokemon.moves.length > 0 ? (
           (() => {
             const groupedMoves = groupMovesByMethod(pokemon.moves)
             const methodLabels = {
-              'level-up': 'Level Up Moves',
-              'machine': 'TM/HM Moves',
-              'tutor': 'Move Tutor Moves',
-              'egg': 'Egg Moves',
+              'level-up': '升级习得招式',
+              'machine': '招式学习器 / 秘传学习器',
+              'tutor': '招式教学招式',
+              'egg': '遗传招式',
             }
             
             return (
@@ -2193,14 +2200,14 @@ return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>
                         <h3 className={styles.moveGroupTitle}>{methodLabels[method]}</h3>
                         {method === 'level-up' && (
                           <label className={styles.levelFilter} htmlFor="wild-level-input">
-                            <span className={styles.levelFilterLabel}>Wild Pokemon Level</span>
+                            <span className={styles.levelFilterLabel}>野生宝可梦等级</span>
                             <input
                               id="wild-level-input"
                               className={styles.levelFilterInput}
                               type="number"
                               min="1"
                               inputMode="numeric"
-                              placeholder="e.g. 22"
+                              placeholder="例如 22"
                               value={wildLevel}
                               onChange={(e) => setWildLevel(e.target.value)}
                             />
@@ -2218,7 +2225,7 @@ return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>
                               className={`${styles.moveTag} ${highlightedMoveKeys.has(moveKey) ? styles.moveTagHighlight : ''}`}
                               title={methodLabel}
                             >
-                              <div>{move.name}</div>
+                              <div>{translateMoveName(move.name)}</div>
                               <div className={styles.moveMethod}>{methodLabel}</div>
                             </div>
                           )
@@ -2229,7 +2236,7 @@ return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>
                 })}
                 {groupedMoves.other.length > 0 && (
                   <div className={styles.moveGroup} key={`${pokemonName}-other`}>
-                    <h3 className={styles.moveGroupTitle}>Other Moves</h3>
+                    <h3 className={styles.moveGroupTitle}>其他招式</h3>
                     <div className={styles.movesGrid}>
                       {groupedMoves.other.map((move, moveIndex) => {
                         const primaryMethod = move.methods?.[0]
@@ -2237,7 +2244,7 @@ return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>
                         const moveKey = `${move.name}-${primaryMethod?.method || 'unknown'}-${primaryMethod?.level || 0}-${moveIndex}`
                         return (
                           <div key={moveKey} className={styles.moveTag} title={methodLabel}>
-                            <div>{move.name}</div>
+                            <div>{translateMoveName(move.name)}</div>
                             <div className={styles.moveMethod}>{methodLabel}</div>
                           </div>
                         )
@@ -2249,27 +2256,27 @@ return ( <section className={styles.infoCard}> <h2 className={styles.cardTitle}>
             )
           })()
         ) : (
-          <p className={styles.noMovesMessage}>No moves available</p>
+          <p className={styles.noMovesMessage}>暂无可用招式资料</p>
         )}
       </section>
 
       {/* Name Translations */}
       {pokemon.nameTranslations && Object.keys(pokemon.nameTranslations).length > 0 && (
         <section className={styles.infoSection}>
-          <h2 className={styles.cardTitle}>Name Translations</h2>
+          <h2 className={styles.cardTitle}>名称对照</h2>
           <div className={styles.translationsGrid}>
             {Object.entries(pokemon.nameTranslations).map(([code, data]) => {
               const languageNames = {
-                'ja-Hrkt': '日本語 (Hiragana)',
-                'roomaji': 'Romaji',
+                'ja-Hrkt': '日语（平假名）',
+                'roomaji': '罗马字',
                 'ko': '한국어',
                 'zh-Hant': '繁體中文',
-                'fr': 'Français',
-                'de': 'Deutsch',
-                'es': 'Español',
-                'it': 'Italiano',
-                'en': 'English',
-                'ja': '日本語'
+                'fr': '法语',
+                'de': '德语',
+                'es': '西班牙语',
+                'it': '意大利语',
+                'en': '英语',
+                'ja': '日语'
               }
               return (
                 <div key={code} className={styles.translationItem}>

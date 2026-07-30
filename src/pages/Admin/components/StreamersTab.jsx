@@ -45,15 +45,15 @@ export default function StreamersTab({ streamersDB, onAdd, onDelete, isMutating,
 
   return (
     <div>
-      <h3>Add Streamer</h3>
-      <label>PokeMMO Name:</label>
+      <h3>添加主播</h3>
+      <label>PokeMMO 名称：</label>
       <input
         type="text"
         value={pokeName}
         onChange={e => setPokeName(e.target.value)}
         placeholder="MiroMMO"
       />
-      <label>Twitch Name:</label>
+      <label>Twitch 名称：</label>
       <input
         type="text"
         value={twitchName}
@@ -61,20 +61,20 @@ export default function StreamersTab({ streamersDB, onAdd, onDelete, isMutating,
         placeholder="MiroMMO"
       />
       <button onClick={handleAdd} disabled={isMutating || !pokeName.trim() || !twitchName.trim()}>
-        {isMutating ? 'Saving...' : 'Add Streamer'}
+        {isMutating ? '保存中…' : '添加主播'}
       </button>
 
-      <h3>Current Streamers ({streamerEntries.length})</h3>
+      <h3>现有主播（{streamerEntries.length}）</h3>
       {streamerEntries.length === 0 ? (
-        <p className={styles.hintText}>No streamers in the database.</p>
+        <p className={styles.hintText}>数据库中没有主播。</p>
       ) : (
         <div className={styles.tableWrapper}>
           <table className={styles.shinyTable}>
             <thead>
               <tr>
-                <th>PokeMMO Name</th>
-                <th>Twitch Name</th>
-                <th>Actions</th>
+                <th>PokeMMO 名称</th>
+                <th>Twitch 名称</th>
+                <th>操作</th>
               </tr>
             </thead>
             <tbody>
@@ -99,10 +99,10 @@ export default function StreamersTab({ streamersDB, onAdd, onDelete, isMutating,
                     </td>
                     <td>
                       <button onClick={handleEditSave} disabled={isMutating || !editing.pokeName.trim() || !editing.twitchName.trim()}>
-                        Save
+                        保存
                       </button>
                       <button onClick={cancelEdit} disabled={isMutating}>
-                        Cancel
+                        取消
                       </button>
                     </td>
                   </tr>
@@ -112,10 +112,10 @@ export default function StreamersTab({ streamersDB, onAdd, onDelete, isMutating,
                     <td>{data.twitch_username}</td>
                     <td>
                       <button className={styles.editBtn} onClick={() => startEdit(name, data)} disabled={isMutating}>
-                        Edit
+                        编辑
                       </button>
                       <button className={styles.deleteBtn} onClick={() => setConfirmDelete(name)} disabled={isMutating}>
-                        Delete
+                        删除
                       </button>
                     </td>
                   </tr>
@@ -128,9 +128,9 @@ export default function StreamersTab({ streamersDB, onAdd, onDelete, isMutating,
 
       {confirmDelete && (
         <ConfirmDialog
-          title="Delete Streamer"
-          message={`Are you sure you want to delete streamer "${confirmDelete}"?`}
-          confirmLabel="Delete"
+          title="删除主播"
+          message={`确定要删除主播“${confirmDelete}”吗？`}
+          confirmLabel="删除"
           onConfirm={handleConfirmDelete}
           onCancel={() => setConfirmDelete(null)}
         />

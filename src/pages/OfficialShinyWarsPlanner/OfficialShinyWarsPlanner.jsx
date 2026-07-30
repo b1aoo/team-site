@@ -6,7 +6,7 @@ import pokemonData from '../../data/pokemmo_data/pokemon-data.json'
 import oswCaughtData from '../../data/osw-caught.json'
 import oswEncounterMethods from '../../data/osw-encounter-methods.json'
 import oswEncounterTiers from '../../data/osw-encounter-tiers.json'
-import { getLocalPokemonGif, normalizePokemonName, onGifError } from '../../utils/pokemon'
+import { getLocalPokemonGif, normalizePokemonName, onGifError, translatePokemonName } from '../../utils/pokemon'
 import styles from './OfficialShinyWarsPlanner.module.css'
 
 
@@ -134,7 +134,7 @@ function getDisplayPokemon(name, points = null, tier = null) {
 
   return {
     id: name,
-    name: formatPokemonName(name),
+    name: translatePokemonName(formatPokemonName(name)),
     points: points !== null
       ? Number(points)
       : Number(pokemon?.shiny_points) || 0,

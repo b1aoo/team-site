@@ -10,13 +10,13 @@ export default function EventsPage() {
   const navigate = useNavigate()
 
   const breadcrumbs = [
-    { name: 'Home', url: '/' },
-    { name: 'Events', url: '/events' }
+    { name: '首页', url: '/' },
+    { name: '活动', url: '/events' }
   ];
 
     useDocumentHead({
-    title: 'PokeMMO Events - Team Synergy Community Events',
-    description: 'Discover Team Synergy PokeMMO community events. Join shiny hunting competitions, seasonal tournaments, team challenges, special events & tournaments. Stay connected with latest activities.',
+    title: 'PokeMMO 活动｜Team Synergy 社群活动',
+    description: '查看 Team Synergy 的 PokeMMO 社群活动：闪光狩猎竞赛、季节赛、公会挑战与特别活动。',
     canonicalPath: '/events/',
     breadcrumbs: breadcrumbs
   })
@@ -39,8 +39,8 @@ export default function EventsPage() {
     fetchEvents()
   }, [])
 
-  if (isLoading) return <div className="message">Loading events...</div>
-  if (!events.length) return <div className="message">No events found.</div>
+  if (isLoading) return <div className="message">正在加载活动…</div>
+  if (!events.length) return <div className="message">暂无活动资料。</div>
 
   const now = new Date()
 
@@ -61,7 +61,7 @@ export default function EventsPage() {
           onClick={() => navigate(`/event/${slugify(event.title)}/`)}
         >
           <img
-            src={event.imageLink || '/placeholder.png'}
+            src={event.imageLink || `${import.meta.env.BASE_URL}placeholder.png`}
             alt={event.title}
             className={styles.img}
             width="200"
@@ -70,7 +70,7 @@ export default function EventsPage() {
           />
           <div className={styles.label}>
             <strong>{event.title}</strong>
-            <div>{new Date(event.startDate).toLocaleString()}</div>
+            <div>{new Date(event.startDate).toLocaleString('zh-CN')}</div>
           </div>
         </div>
       ))}
@@ -79,25 +79,25 @@ export default function EventsPage() {
 
   return (
     <div>
-      <h1 className={styles.eventTitle}>Team Synergy Events!</h1>
+      <h1 className={styles.eventTitle}>Team Synergy 活动</h1>
 
       {ongoingEvents.length > 0 && (
         <>
-          <h2 className={styles.eventStatus}>ONGOING</h2>
+          <h2 className={styles.eventStatus}>进行中</h2>
           {renderEventGrid(ongoingEvents)}
         </>
       )}
 
       {upcomingEvents.length > 0 && (
         <>
-          <h2 className={styles.eventStatus}>UPCOMING</h2>
+          <h2 className={styles.eventStatus}>即将开始</h2>
           {renderEventGrid(upcomingEvents)}
         </>
       )}
 
       {pastEvents.length > 0 && (
         <>
-          <h2 className={styles.eventStatus}>PAST</h2>
+          <h2 className={styles.eventStatus}>往期活动</h2>
           {renderEventGrid(pastEvents)}
         </>
       )}

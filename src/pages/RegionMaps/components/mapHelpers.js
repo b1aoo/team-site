@@ -1,4 +1,5 @@
 import pokemonData from '../../../data/pokemmo_data/pokemon-data.json'
+import { translatePokemonName } from '../../../utils/pokemon'
 
 export const RARITY_ORDER = [
   'very common',
@@ -81,8 +82,10 @@ export function getSpawnShinyTier(spawn) {
 }
 
 function spawnMatchesFilters(spawn, filters) {
-  const nameMatch = !filters.pokemonSearch
-    || spawn.name.toLowerCase().includes(filters.pokemonSearch.toLowerCase())
+  const query = String(filters.pokemonSearch || '').toLowerCase()
+  const nameMatch = !query
+    || spawn.name.toLowerCase().includes(query)
+    || translatePokemonName(spawn.name).includes(filters.pokemonSearch)
   const typeMatch = filters.types.size === 0
     || (spawn.types || []).some((type) => filters.types.has(type))
   const rarityMatch = filters.rarities.size === 0

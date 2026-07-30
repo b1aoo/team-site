@@ -16,7 +16,7 @@ export default function AddPokemonTab({ db, playerNames, allPokemonNames, onAdd,
       ([, s]) => s.Pokemon.toLowerCase() === pokemonName.toLowerCase()
     )
     if (matches.length > 0) {
-      return `"${pokemonName}" already exists ${matches.length} time(s) for ${player}. Duplicates are valid - this is just a heads-up.`
+      return `“${pokemonName}”已在 ${player} 的记录中出现 ${matches.length} 次。重复记录有效，此提示仅供参考。`
     }
     return null
   }
@@ -63,7 +63,7 @@ export default function AddPokemonTab({ db, playerNames, allPokemonNames, onAdd,
 
   return (
     <div>
-      <label>Player Name:</label>
+      <label>训练家名称：</label>
       <Autocomplete
         id="addPlayerName"
         value={player}
@@ -73,7 +73,7 @@ export default function AddPokemonTab({ db, playerNames, allPokemonNames, onAdd,
       />
 
       <button style={{ marginTop: 10, marginBottom: 10 }} onClick={() => setBulkOpen(true)}>
-        Bulk Add
+        批量添加
       </button>
 
       <BulkAddDialog
@@ -86,7 +86,7 @@ export default function AddPokemonTab({ db, playerNames, allPokemonNames, onAdd,
       />
 
       {!player.trim() && (
-        <p className={styles.hintText}>Select or type a player name to add a shiny.</p>
+        <p className={styles.hintText}>选择或输入训练家名称以添加一只闪光宝可梦。</p>
       )}
 
       {player.trim() && (
@@ -96,7 +96,7 @@ export default function AddPokemonTab({ db, playerNames, allPokemonNames, onAdd,
           )}
           <ShinyForm
             onSubmit={handleSubmit}
-            submitLabel="Add Pokemon"
+            submitLabel="添加宝可梦"
             allPokemonNames={allPokemonNames}
             isMutating={isMutating}
           />

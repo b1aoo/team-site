@@ -17,8 +17,8 @@ const BATCH_SIZE = 5
 
 export default function Showcase() {
   useDocumentHead({
-    title: 'Team Synergy - PokeMMO Shiny Hunting Team & Community',
-    description: 'Team Synergy is the ultimate PokeMMO shiny hunting community. Browse 140+ player shiny collections, track completion with our Pokédex, watch live Twitch streamers, and join competitions.',
+    title: 'Team Synergy－PokeMMO 闪光狩猎公会与社区',
+    description: 'Team Synergy 是 PokeMMO 闪光狩猎社区。浏览 140 多位玩家的闪光收藏、用图鉴追踪完成度、观看 Twitch 直播并参与活动。',
     canonicalPath: '/',
     robots: 'index, follow, max-image-preview:large',
   })
@@ -98,8 +98,8 @@ export default function Showcase() {
     return () => observer.disconnect()
   }, [loadMore])
 
-  if (isLoading) return <div className="message">Loading...</div>
-  if (error) return <div className="message">Error loading data</div>
+  if (isLoading) return <div className="message">加载中…</div>
+  if (error) return <div className="message">数据加载失败</div>
 
   const playersToShow = filteredPlayers.slice(0, visibleCount)
   const hasMore = visibleCount < filteredPlayers.length
@@ -107,24 +107,24 @@ export default function Showcase() {
   return (
     <div>
       <h1 className="seo-optimized">
-        Team Synergy: PokeMMO Shiny Hunting Community
+        Team Synergy：PokeMMO 闪光狩猎社区
       </h1>
       <p className="seo-intro">
-        Track PokeMMO shinies, join PokeMMO Events, Study all PokeMMO Shiny Hunting Locations, Alphas, and more in our detailed PokeDex Page, and explore our {filteredPlayers.length} member collections
+        追踪 PokeMMO 闪光宝可梦、参加活动、查阅详尽图鉴中的刷闪地点与头目宝可梦信息，并浏览 {filteredPlayers.length} 位成员的收藏。
       </p>
 
-      <img src={getAssetUrl('images/pagebreak.png')} alt="Page Break" className="pagebreak" />
+      <img src={getAssetUrl('images/pagebreak.png')} alt="分隔线" className="pagebreak" />
 
       <div className={styles.videoContainer}>
         <h2>
           <a href="https://www.youtube.com/watch?v=ngejc1FMWqg" target="_blank" rel="noopener noreferrer">
-            Watch our Shiny Showcase Video!
+            观看我们的闪光收藏展示视频！
           </a>
         </h2>
         <a href="https://www.youtube.com/watch?v=ngejc1FMWqg" target="_blank" rel="noopener noreferrer">
           <img
             src={getAssetUrl('images/shinyshowcase.png')}
-            alt="Shiny Showcase Video"
+            alt="闪光收藏展示视频"
             className={styles.showcaseVideo}
             width="300"
             height="169"

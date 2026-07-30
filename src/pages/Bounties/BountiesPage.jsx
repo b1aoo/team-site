@@ -6,6 +6,7 @@ import { useDocumentHead } from '../../hooks/useDocumentHead';
 import styles from './BountiesPage.module.css';
 
 import MarshMondayPopup from './MarshMondayPopup';
+import { translatePokemonName } from '../../utils/pokemonNamesZh';
 
 const POKEMON_NAME_OVERRIDES = {
   'mr-mime':    'Mr. Mime',
@@ -28,10 +29,7 @@ function formatPokemonName(slugOrList) {
   const lower = String(slugOrList).trim().toLowerCase();
   if (!lower) return '';
   if (POKEMON_NAME_OVERRIDES[lower]) return POKEMON_NAME_OVERRIDES[lower];
-  return lower
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+  return translatePokemonName(lower);
 }
 
 const MONTH_NAMES = [
@@ -209,7 +207,7 @@ export default function BountiesPage() {
     : null;
   const firstBountySprites = usePokemonSprites(firstBountyPokemon);
   const ogImage = useMemo(() => {
-    if (!firstBountyPokemon || !firstBountySprites) return 'https://synergymmo.com/images/openGraph.jpg';
+    if (!firstBountyPokemon || !firstBountySprites) return 'https://b1aoo.github.io/team-site/images/openGraph.jpg';
     if (firstBountySprites['generation-v']) {
       const genVSprites = firstBountySprites['generation-v'];
       const gif = genVSprites.find(s => s.type === 'gif' && s.url);
@@ -219,7 +217,7 @@ export default function BountiesPage() {
       const sprite = firstBountySprites[gen].find(s => s.url);
       if (sprite) return sprite.url;
     }
-    return 'https://synergymmo.com/images/openGraph.jpg';
+    return 'https://b1aoo.github.io/team-site/images/openGraph.jpg';
   }, [firstBountyPokemon, firstBountySprites]);
 
   useDocumentHead({
@@ -227,7 +225,7 @@ export default function BountiesPage() {
     description: '参与 Team Synergy 的月度与常驻悬赏。完成刷闪挑战、赢取奖励，并加入社区竞赛。',
     canonicalPath: '/bounties/',
     ogImage,
-    url: 'https://synergymmo.com/bounties/',
+    url: 'https://b1aoo.github.io/team-site/bounties/',
     keywords: 'PokeMMO bounties, shiny bounties, Team Synergy bounties, monthly bounties, permanent bounties, shiny hunting challenges, PokeMMO events, Team Synergy rewards',
     author: 'Team Synergy - PokeMMO Community',
   });

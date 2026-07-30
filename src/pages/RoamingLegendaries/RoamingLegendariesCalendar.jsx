@@ -1,20 +1,21 @@
 import { Link } from 'react-router-dom'
 import { useDocumentHead } from '../../hooks/useDocumentHead'
 import roamingLegendariesData from '../../data/roaming_legendaries.json'
+import { translatePokemonName } from '../../utils/pokemon'
 import styles from './RoamingLegendariesCalendar.module.css'
 
 export default function RoamingLegendariesCalendar() {
   const currentMonth = new Date().getMonth()
   const breadcrumbs = [
-    { name: 'Home', url: '/' },
-    { name: 'PokeMMO Pokédex', url: '/pokedex' },
-    { name: 'Roaming Legendaries Calendar', url: '/roaming-legendaries' }
+    { name: '首页', url: '/' },
+    { name: 'PokeMMO 图鉴', url: '/pokedex' },
+    { name: '游走传说宝可梦日历', url: '/roaming-legendaries' }
   ]
 
 
   useDocumentHead({
-    title: 'Roaming Legendaries Calendar - PokeMMO Zapdos, Articuno, Moltres, Entei, Suicune, Raikou Schedule',
-    description: 'PokeMMO Roaming Legendaries Calendar showing monthly availability of Zapdos, Moltres, Articuno, Entei, Suicune, and Raikou. Track which roaming legendaries are available each month and plan your shiny hunts.',
+    title: '游走传说宝可梦日历－PokeMMO 闪电鸟、急冻鸟、火焰鸟、炎帝、水君与雷公出现时间',
+    description: 'PokeMMO 游走传说宝可梦日历：查看闪电鸟、火焰鸟、急冻鸟、炎帝、水君与雷公的月度出现安排，规划你的刷闪行程。',
     canonicalPath: '/roaming-legendaries/',
     breadcrumbs: breadcrumbs
   })
@@ -28,15 +29,15 @@ export default function RoamingLegendariesCalendar() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Roaming Legendaries Calendar</h1>
+        <h1 className={styles.title}>游走传说宝可梦日历</h1>
         <p className={styles.subtitle}>
-          Check which Roaming Legendaries are available each month in PokeMMO.
+          查看 PokeMMO 每月可遇到的游走传说宝可梦。
         </p>
       </div>
 
       <div className={styles.backLinkWrapper}>
         <Link to="/" className={styles.backLink}>
-          ← Back to Home
+          ← 返回首页
         </Link>
       </div>
 
@@ -50,7 +51,7 @@ export default function RoamingLegendariesCalendar() {
               key={month} 
               className={`${styles.monthCard} ${isCurrentMonth ? styles.currentMonth : ''}`}
             >
-              <h2 className={styles.monthTitle}>{month}</h2>
+              <h2 className={styles.monthTitle}>{new Date(2026, monthIndex).toLocaleString('zh-CN', { month: 'long' })}</h2>
               
               <div className={styles.legendariesContainer}>
                 {legendaries.map(legendary => (
@@ -61,7 +62,7 @@ export default function RoamingLegendariesCalendar() {
                   >
                     <img
                       src={`https://img.pokemondb.net/sprites/black-white/anim/shiny/${legendary.id.toLowerCase()}.gif`}
-                      alt={legendary.name}
+                      alt={translatePokemonName(legendary.name)}
                       className={styles.legendaryGif}
                       onError={(e) => {
                         e.target.style.display = 'none'
@@ -69,14 +70,14 @@ export default function RoamingLegendariesCalendar() {
                     />
                     <div className={styles.legendaryNameContainer}>
                       <img
-                        src={`/images/pokemon_gifs/tier_7/${legendary.id}.gif`}
-                        alt={legendary.name}
+                        src={`${import.meta.env.BASE_URL}images/pokemon_gifs/tier_7/${legendary.id}.gif`}
+                        alt={translatePokemonName(legendary.name)}
                         className={styles.legendaryNameGif}
                         onError={(e) => {
                           e.target.style.display = 'none'
                         }}
                       />
-                      <span>{legendary.name}</span>
+                      <span>{translatePokemonName(legendary.name)}</span>
                     </div>
                   </Link>
                 ))}

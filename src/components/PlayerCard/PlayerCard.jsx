@@ -29,9 +29,9 @@ function PlayerCard({ player, data, rank, streamers, mobileInteractive = false, 
           className={`${styles.playerName} ${playerClass} ${inactiveClass}`}
           data-player={player}
           state={linkState}
-          title={isInactivePlayer ? 'No longer in the team shiny showcase database' : undefined}
+          title={isInactivePlayer ? '已不在公会闪光收藏数据库中' : undefined}
         >
-          #{rank + 1} {player} ({showPoints && typeof data.points === 'number' ? `${data.points} pts` : data.shiny_count})
+          #{rank + 1} {player} ({showPoints && typeof data.points === 'number' ? `${data.points} 分` : data.shiny_count})
         </Link>
         {medal && <span className={styles.medal}>{medal}</span>}
         {sparkle && <span className={styles.sparkle}>&#10024;</span>}

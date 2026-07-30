@@ -2,6 +2,7 @@ import React from 'react';
 import './MarshMondayPopup.css';
 
 import { usePokemonSprites } from '../../hooks/usePokemonSprites';
+import { translatePokemonName } from '../../utils/pokemon';
 
 function PokemonGif({ name }) {
   const sprites = usePokemonSprites(name);
@@ -21,15 +22,15 @@ function PokemonGif({ name }) {
     }
   }
   if (!gifUrl) return null;
-  return <img className="marsh-monday-pokemon-sprite" src={gifUrl} alt={name} title={name} />;
+  return <img className="marsh-monday-pokemon-sprite" src={gifUrl} alt={translatePokemonName(name)} title={translatePokemonName(name)} />;
 }
 
 export default function MarshMondayPopup() {
   return (
     <div className="marsh-monday-popup" role="status" aria-live="polite">
-      <div className="marsh-monday-popup-title">Monferno Marsh Mondays</div>
+      <div className="marsh-monday-popup-title">猛火猴湿原星期一</div>
       <div className="marsh-monday-popup-desc">
-        Catch a shiny Pokemon in the Great Marsh for 1000rp, active every monday! Remember your Monferno Follower!
+        每周一在大湿原捕获一只闪光宝可梦，即可获得 1000 RP！别忘了带上你的猛火猴跟随宝可梦！
       </div>
       <div className="marsh-monday-pokemon-row">
         <PokemonGif name="skorupi" />

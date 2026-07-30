@@ -4,7 +4,8 @@ import { useDocumentHead } from "../../hooks/useDocumentHead";
 import useCatchCalcs, { getCatchRateByName } from "../../hooks/useCatchCalcs";
 import lnyPokemon from "../../data/lny_pokemon.json";
 import styles from "./LnyCatchCalc.module.css";
-import { onGifError } from "../../utils/pokemon";
+import { onGifError, translatePokemonName } from "../../utils/pokemon";
+import { translateMoveName } from '../../utils/pokemonTermsZh'
 import { API } from "../../api/endpoints";
 import pokemonData from "../../data/pokemmo_data/pokemon-data.json";
 import { getPokemonDataByName } from "../../utils/getPokemonDataByName";
@@ -15,11 +16,11 @@ const LnyCatchCalc = () => {
   const [useLevelBall, setUseLevelBall] = useState(false);
   const { getTopBalls } = useCatchCalcs();
   useDocumentHead({
-    title: "LNY Catch Calculator",
+    title: '农历新年捕捉计算器',
     description:
-      "A Quick and Easy tool to help Calculate the catch rates and shiny odds for the PokeMMO Lunar New Year event. Find the Best PokeBalls to use on the swarm mons to save time and money",
+      '快速计算 PokeMMO 农历新年活动宝可梦的捕捉率与闪光概率，并推荐节省时间和金钱的球种。',
     canonicalPath: "/LnyCatchCalc/",
-    ogImage: "https://synergymmo.com/images/openGraph.jpg",
+    ogImage: 'https://b1aoo.github.io/team-site/images/openGraph.jpg',
   });
 
   const [search, setSearch] = useState("");
@@ -39,20 +40,20 @@ const LnyCatchCalc = () => {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>LNY Pokémon Catch Calculator</h1>
+      <h1 className={styles.title}>农历新年宝可梦捕捉计算器</h1>
 
       {/* Apricorn guide info box */}
       <div className={styles.infoBox}>
-        <p className={styles.infoBoxTitle}>Apricorn Ball Guide to LNY Swarms</p>
+        <p className={styles.infoBoxTitle}>农历新年群聚的球种指引</p>
         <p className={styles.infoBoxMuted}>
-          <span className={styles.infoBoxHighlight}>Fast Balls:</span> Tauros, Fearow, Espeon<br />
-          <span className={styles.infoBoxHighlight}>Friend Ball:</span> Buneary, Pikachu, Riolu<br />
-          <span className={styles.infoBoxHighlight}>Moon Ball:</span> Nidorans, Munna<br />
-          94.11% catch rate at 100% HP asleep — 100% full HP asleep<br />
-          Friend Balls are cheaper for Riolu than Ultras and you can immediately evolve them into Lucario!
+          <span className={styles.infoBoxHighlight}>速度球：</span>肯泰罗、大嘴雀、太阳伊布<br />
+          <span className={styles.infoBoxHighlight}>友友球：</span>卷卷耳、皮卡丘、利欧路<br />
+          <span className={styles.infoBoxHighlight}>月亮球：</span>尼多兰、食梦梦<br />
+          催眠且满 HP 时捕捉率为 94.11% — 更低 HP 可达 100%。<br />
+          捕捉利欧路时，友友球比高级球便宜；捕获后即可让它进化为路卡利欧！
         </p>
         <p className={styles.infoBoxMuted} style={{ marginTop: '0.5rem' }}>
-          Level balls are an effective but expensive way to catch difficult Pokémon, and require a level 30 Pokémon to be most effective. Tick the checkbox to include them.
+          等级球能有效捕捉较难捕捉的宝可梦，但成本较高；使用 Lv.30 的宝可梦时效果最佳。勾选后将其纳入计算。
         </p>
         <div className={styles.levelBallRow}>
           <label className={styles.levelBallLabel}>
@@ -61,24 +62,24 @@ const LnyCatchCalc = () => {
               checked={useLevelBall}
               onChange={e => setUseLevelBall(e.target.checked)}
             />
-            Use Level Balls
+            使用等级球
           </label>
         </div>
-        <p className={styles.infoBoxThanks}>Thanks to Alisae for this information!</p>
+        <p className={styles.infoBoxThanks}>感谢 Alisae 提供资料！</p>
       </div>
 
       <div className={styles.tooltipNote2}>
-        <strong>Best Method:</strong> Selected by balancing catch chance, turns needed (0–2), and ball cost. Prefers cheaper balls when effectiveness is similar.
+        <strong>最优方案：</strong>综合捕捉率、所需回合（0–2）与球种成本计算；效果相近时优先选择更便宜的球。
       </div>
       <div className={styles.tooltipNote2}>
-        <strong>Dusk Balls:</strong> Only appear when it's night time in-game. If it isn't night time, Dusk Balls will not appear as an option.
+        <strong>黑暗球：</strong>仅在游戏内夜晚显示；若当前不是夜晚，则不会出现在可选方案中。
       </div>
 
       {/* Search */}
       <div className={styles.searchWrapper}>
         <input
           type="text"
-          placeholder="Search Pokémon..."
+          placeholder="搜索宝可梦…"
           value={search}
           onChange={e => {
             setSearch(e.target.value);
@@ -87,7 +88,7 @@ const LnyCatchCalc = () => {
           onFocus={() => setShowSuggestions(true)}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
           className={styles.searchBar}
-          aria-label="Search Pokémon"
+          aria-label="搜索宝可梦"
           ref={inputRef}
           autoComplete="off"
         />
@@ -105,7 +106,7 @@ const LnyCatchCalc = () => {
                     inputRef.current && inputRef.current.blur();
                   }}
                 >
-                  {poke.name}
+                  {translatePokemonName(poke.name)}
                 </li>
               ))}
             </ul>
@@ -115,7 +116,7 @@ const LnyCatchCalc = () => {
       {/* Cards */}
       <div className={styles.flexWrap}>
         {filteredPokemon.length === 0 ? (
-          <div className={styles.empty}>No Pokémon found.</div>
+          <div className={styles.empty}>未找到宝可梦。</div>
         ) : (
           filteredPokemon.map((poke) => {
             const catchRate = getCatchRateByName(poke.name);
@@ -155,27 +156,27 @@ const LnyCatchCalc = () => {
               >
                 <img
                   src={API.pokemonSprite(poke.name)}
-                  alt={poke.name}
+                  alt={translatePokemonName(poke.name)}
                   onError={onGifError(poke.name)}
                   className={styles.pokemon}
                   width="50"
                   height="50"
                   loading="lazy"
                 />
-                <div className={styles.pokemonName}>{poke.name}</div>
+                <div className={styles.pokemonName}>{translatePokemonName(poke.name)}</div>
                 <div className={styles.catchRate}>
-                  Catch Rate: <b>{catchRate !== null && catchRate !== undefined ? catchRate : "?"}</b>
+                  基础捕获度：<b>{catchRate !== null && catchRate !== undefined ? catchRate : "?"}</b>
                 </div>
                 <div className={styles.ballInfo}>
                   <div className={styles.best}>
-                    Best: <b>{best?.ball ?? "-"}</b>{" "}
+                    最优：<b>{best?.ball ?? "-"}</b>{" "}
                     {best?.catchChance !== undefined && !isNaN(best.catchChance) ? `(${best.catchChance.toFixed(1)}%)` : ""}
                     <span className={styles.ballDetails}>
                       {best?.hpLabel ?? ""}{best?.statusLabel ? `, ${best.statusLabel}` : ""}
                     </span>
                   </div>
                   <div className={styles.second}>
-                    2nd: <b>{second?.ball ?? "-"}</b>{" "}
+                    次优：<b>{second?.ball ?? "-"}</b>{" "}
                     {second?.catchChance !== undefined && !isNaN(second.catchChance) ? `(${second.catchChance.toFixed(1)}%)` : ""}
                     <span className={styles.ballDetails}>
                       {second?.hpLabel ?? ""}{second?.statusLabel ? `, ${second.statusLabel}` : ""}
@@ -185,14 +186,14 @@ const LnyCatchCalc = () => {
 
                 {/* Level 30 Moveset */}
                 <div className={styles.movesetSection}>
-                  <div className={styles.movesetTitle}>Level 30 Moveset</div>
+                  <div className={styles.movesetTitle}>Lv.30 招式表</div>
                   <ul className={styles.moveList}>
                     {moveset.length === 0 ? (
-                      <li className={styles.noMoves}>No data</li>
+                      <li className={styles.noMoves}>暂无资料</li>
                     ) : (
                       moveset.map(m => (
                         <li key={m.move + m.level} className={styles.moveItem}>
-                          <span className={styles.moveName}>{m.move}</span>
+                          <span className={styles.moveName}>{translateMoveName(m.move)}</span>
                           <span className={styles.moveLevel}>Lv{m.level}</span>
                         </li>
                       ))

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useDocumentHead } from '../../hooks/useDocumentHead'
 import tierPokemon from '../../data/tier_pokemon.json'
+import { translatePokemonName } from '../../utils/pokemon'
 import styles from './PlayerCardGenerator.module.css'
 
 const RARE_TIERS = ['Tier 0', 'Tier 1', 'Tier 2']
@@ -24,37 +25,37 @@ const DEFAULT_EXPORT_OPTIONS = {
 }
 
 const EXPORT_FIELDS = [
-  { key: 'totalEncounters', label: 'Total Encounters' },
-  { key: 'totalShinies', label: 'Total Shinies' },
-  { key: 'averageEncounterPerShiny', label: 'Average Encounter Per Shiny' },
-  { key: 'totalEggEncounters', label: 'Egg Encounters' },
-  { key: 'totalAlphaEncounters', label: 'Alpha Encounters' },
-  { key: 'totalWildOtherEncounters', label: 'Wild Other Encounters *non horde*' },
-  { key: 'totalRareEncounters', label: 'Rare Encounters' },
-  { key: 'totalFossilEncounters', label: 'Fossil Encounters' },
-  { key: 'includeTimeBreakdown', label: 'Include Days/Weeks' },
-  { key: 'averageEncounterPerHour', label: 'Avg Encounter Per Hour' },
-  { key: 'topSeen', label: 'Top Seen Pokemon' },
-  { key: 'topRareSeen', label: 'Top Rare Seen Pokemon' },
-  { key: 'highestIvShiny', label: 'Highest IV Shiny' },
-  { key: 'lowestIvShiny', label: 'Lowest IV Shiny' },
-  { key: 'highestEncounterShiny', label: 'Highest Encounter Shiny' },
-  { key: 'lowestEncounterShiny', label: 'Lowest Encounter Shiny' },
+  { key: 'totalEncounters', label: '总遭遇数' },
+  { key: 'totalShinies', label: '闪光总数' },
+  { key: 'averageEncounterPerShiny', label: '每只闪光平均遭遇' },
+  { key: 'totalEggEncounters', label: '孵蛋次数' },
+  { key: 'totalAlphaEncounters', label: '头目遭遇数' },
+  { key: 'totalWildOtherEncounters', label: '其他野生遭遇（非群聚）' },
+  { key: 'totalRareEncounters', label: '稀有遭遇数' },
+  { key: 'totalFossilEncounters', label: '化石遭遇数' },
+  { key: 'includeTimeBreakdown', label: '显示天数／周数' },
+  { key: 'averageEncounterPerHour', label: '每小时平均遭遇' },
+  { key: 'topSeen', label: '遭遇最多的宝可梦' },
+  { key: 'topRareSeen', label: '遭遇最多的稀有宝可梦' },
+  { key: 'highestIvShiny', label: '最高个体值闪光' },
+  { key: 'lowestIvShiny', label: '最低个体值闪光' },
+  { key: 'highestEncounterShiny', label: '最高遇敌数闪光' },
+  { key: 'lowestEncounterShiny', label: '最低遇敌数闪光' },
 ]
 
 const EDITABLE_FIELDS = [
-  { key: 'totalEncounters', label: 'Total Encounters', type: 'number' },
-  { key: 'totalShinies', label: 'Total Shinies', type: 'number' },
-  { key: 'averageEncounterPerShiny', label: 'Average Encounter Per Shiny', type: 'number' },
-  { key: 'totalEggEncounters', label: 'Egg Encounters', type: 'number' },
-  { key: 'totalAlphaEncounters', label: 'Alpha Encounters', type: 'number' },
-  { key: 'totalWildOtherEncounters', label: 'Wild Other Encounters', type: 'number' },
-  { key: 'totalRareEncounters', label: 'Rare Encounters', type: 'number' },
-  { key: 'totalFossilEncounters', label: 'Fossil Encounters', type: 'number' },
-  { key: 'highestIvShiny', label: 'Highest IV Shiny', type: 'text' },
-  { key: 'lowestIvShiny', label: 'Lowest IV Shiny', type: 'text' },
-  { key: 'highestEncounterShiny', label: 'Highest Encounter Shiny', type: 'text' },
-  { key: 'lowestEncounterShiny', label: 'Lowest Encounter Shiny', type: 'text' },
+  { key: 'totalEncounters', label: '总遭遇数', type: 'number' },
+  { key: 'totalShinies', label: '闪光总数', type: 'number' },
+  { key: 'averageEncounterPerShiny', label: '每只闪光平均遭遇', type: 'number' },
+  { key: 'totalEggEncounters', label: '孵蛋次数', type: 'number' },
+  { key: 'totalAlphaEncounters', label: '头目遭遇数', type: 'number' },
+  { key: 'totalWildOtherEncounters', label: '其他野生遭遇', type: 'number' },
+  { key: 'totalRareEncounters', label: '稀有遭遇数', type: 'number' },
+  { key: 'totalFossilEncounters', label: '化石遭遇数', type: 'number' },
+  { key: 'highestIvShiny', label: '最高个体值闪光', type: 'text' },
+  { key: 'lowestIvShiny', label: '最低个体值闪光', type: 'text' },
+  { key: 'highestEncounterShiny', label: '最高遇敌数闪光', type: 'text' },
+  { key: 'lowestEncounterShiny', label: '最低遇敌数闪光', type: 'text' },
 ]
 
 function normalizeName(name = '') {
@@ -91,10 +92,10 @@ function getPlayerTimeBreakdown(value, includeTimeBreakdown = true) {
   if (!hours) return ['-']
 
   const breakdown = [
-    formatDuration(hours, 'Hours'),
+    formatDuration(hours, '小时'),
   ]
   if (includeTimeBreakdown) {
-    breakdown.push(formatDuration(hours / 24, 'Days'), formatDuration(hours / 168, 'Weeks'))
+    breakdown.push(formatDuration(hours / 24, '天'), formatDuration(hours / 168, '周'))
   }
   return breakdown
 }
@@ -106,7 +107,7 @@ function formatAverageEncounterPerHour(totalEncounters, playerTime) {
   return `${(encounters / hours).toLocaleString(undefined, {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
-  })} Encounters/Hour`
+  })} 次遭遇／小时`
 }
 
 function hasManualOverrides(manualValues) {
@@ -238,7 +239,7 @@ function parseIvTotal(ivs) {
 
 function formatPokemonMetric(entry, fallback = '-') {
   if (!entry) return fallback
-  return `${entry.name} (${formatNumber(entry.value)})`
+  return `${translatePokemonName(entry.name)}（${formatNumber(entry.value)}）`
 }
 
 function getIvSpread(stats, key) {
@@ -378,21 +379,21 @@ async function downloadPlayerCard({ playerName, playerTime, imagePreview, stats,
   const hasPlayerTime = String(playerTime || '').replace(/\D/g, '').length > 0
   const averageEncounterPerHour = formatAverageEncounterPerHour(stats.totalEncounters, playerTime)
   const statRows = [
-    ['totalEncounters', 'Total Encounters', formatCardNumber(stats.totalEncounters)],
-    ['totalShinies', 'Total Shinies', formatCardNumber(stats.totalShinies)],
-    ['averageEncounterPerShiny', 'Avg Encounter/Shiny', formatCardNumber(stats.averageEncounterPerShiny)],
-    ['totalEggEncounters', 'Egg Encounters', formatCardNumber(stats.totalEggEncounters)],
-    ['totalAlphaEncounters', 'Alpha Encounters', formatCardNumber(stats.totalAlphaEncounters)],
-    ['totalWildOtherEncounters', 'Wild Other Encounters', formatCardNumber(stats.totalWildOtherEncounters)],
-    ['totalRareEncounters', 'Rare Encounters', formatCardNumber(stats.totalRareEncounters)],
-    ['totalFossilEncounters', 'Fossil Encounters', formatCardNumber(stats.totalFossilEncounters)],
+    ['totalEncounters', '总遭遇数', formatCardNumber(stats.totalEncounters)],
+    ['totalShinies', '闪光总数', formatCardNumber(stats.totalShinies)],
+    ['averageEncounterPerShiny', '平均遇敌／闪光', formatCardNumber(stats.averageEncounterPerShiny)],
+    ['totalEggEncounters', '孵蛋次数', formatCardNumber(stats.totalEggEncounters)],
+    ['totalAlphaEncounters', '头目遭遇数', formatCardNumber(stats.totalAlphaEncounters)],
+    ['totalWildOtherEncounters', '其他野生遭遇', formatCardNumber(stats.totalWildOtherEncounters)],
+    ['totalRareEncounters', '稀有遭遇数', formatCardNumber(stats.totalRareEncounters)],
+    ['totalFossilEncounters', '化石遭遇数', formatCardNumber(stats.totalFossilEncounters)],
   ].filter(([key]) => exportOptions[key])
 
   const detailRows = [
-    ['highestIvShiny', 'Highest IV Shiny', stats.highestIvShiny, stats.highestIvShinyIvs],
-    ['lowestIvShiny', 'Lowest IV Shiny', stats.lowestIvShiny, stats.lowestIvShinyIvs],
-    ['highestEncounterShiny', 'Highest Encounter Shiny', stats.highestEncounterShiny, ''],
-    ['lowestEncounterShiny', 'Lowest Encounter Shiny', stats.lowestEncounterShiny, ''],
+    ['highestIvShiny', '最高个体值闪光', stats.highestIvShiny, stats.highestIvShinyIvs],
+    ['lowestIvShiny', '最低个体值闪光', stats.lowestIvShiny, stats.lowestIvShinyIvs],
+    ['highestEncounterShiny', '最高遇敌数闪光', stats.highestEncounterShiny, ''],
+    ['lowestEncounterShiny', '最低遇敌数闪光', stats.lowestEncounterShiny, ''],
   ].filter(([key]) => exportOptions[key])
 
   const hasTopSeen = exportOptions.topSeen
@@ -441,7 +442,7 @@ async function downloadPlayerCard({ playerName, playerTime, imagePreview, stats,
   }
   ctx.font = '600 23px Arial'
   ctx.fillStyle = '#fbbf24'
-  ctx.fillText('Player Card', 52, 120)
+  ctx.fillText('训练家卡片', 52, 120)
 
   drawRoundedRect(ctx, 48, 158, 310, leftPanelHeight, 18)
   ctx.fillStyle = 'rgba(15, 23, 42, 0.82)'
@@ -461,14 +462,14 @@ async function downloadPlayerCard({ playerName, playerTime, imagePreview, stats,
     ctx.fill()
     ctx.fillStyle = '#cbd5e1'
     ctx.font = '700 26px Arial'
-    ctx.fillText('No Image', 148, 334)
+    ctx.fillText('未上传图片', 148, 334)
   }
 
   if (hasPlayerTime) {
     ctx.fillStyle = '#fbbf24'
     ctx.font = '700 18px Arial'
     ctx.textAlign = 'center'
-    ctx.fillText('Play Time', 203, 512)
+    ctx.fillText('游戏时长', 203, 512)
     getPlayerTimeBreakdown(playerTime, exportOptions.includeTimeBreakdown).forEach((line, index) => {
       ctx.fillStyle = index === 0 ? '#f8fafc' : '#cbd5e1'
       drawFitText(ctx, line, 203, 546 + index * 32, 270, 18, index === 0 ? 30 : 22)
@@ -477,7 +478,7 @@ async function downloadPlayerCard({ playerName, playerTime, imagePreview, stats,
       ctx.fillStyle = '#fbbf24'
       ctx.font = '700 18px Arial'
       const y = exportOptions.includeTimeBreakdown ? 644 : 586
-      ctx.fillText('Avg Encounter Per Hour', 203, y)
+      ctx.fillText('每小时平均遭遇', 203, y)
       ctx.fillStyle = '#f8fafc'
       drawFitText(ctx, averageEncounterPerHour, 203, y + 30, 270, 16, 22)
     }
@@ -526,7 +527,7 @@ async function downloadPlayerCard({ playerName, playerTime, imagePreview, stats,
       items.slice(0, 5).forEach((pokemon, index) => {
         const rowY = y + 32 + index * 24
         ctx.fillStyle = '#e2e8f0'
-        drawFitText(ctx, `${index + 1}. ${pokemon.name}`, x, rowY, listWidth - 112, 13, 18)
+        drawFitText(ctx, `${index + 1}. ${translatePokemonName(pokemon.name)}`, x, rowY, listWidth - 112, 13, 18)
         ctx.fillStyle = '#fbbf24'
         ctx.textAlign = 'right'
         ctx.fillText(formatNumber(pokemon.encounter ?? pokemon.encounters), x + listWidth, rowY)
@@ -535,11 +536,11 @@ async function downloadPlayerCard({ playerName, playerTime, imagePreview, stats,
     }
 
     if (hasTopSeen) {
-      drawTopList('Top Seen Pokemon', stats.mostSeen, 408, listStartY)
+      drawTopList('遭遇最多的宝可梦', stats.mostSeen, 408, listStartY)
     }
     if (hasTopRareSeen) {
       drawTopList(
-        'Top Rare Seen Pokemon',
+        '遭遇最多的稀有宝可梦',
         stats.rareSeen.map(pokemon => ({ ...pokemon, encounter: pokemon.encounters })),
         hasTopSeen ? 790 : 408,
         listStartY
@@ -588,13 +589,13 @@ export default function PlayerCardGenerator() {
   const [manualValues, setManualValues] = useState({})
 
   useDocumentHead({
-    title: 'PokeMMO Player Card Generator',
-    description: 'Upload a PokeMMO encounter tracker JSON and create a downloadable player card with encounter totals, shiny history, rares seen, and most seen Pokemon.',
+    title: 'PokeMMO 训练家卡片生成器',
+    description: '上传 PokeMMO 遭遇计数器 JSON，生成可下载的训练家卡片，展示遭遇总数、闪光记录、稀有遭遇与常见宝可梦。',
     canonicalPath: '/player-card-generator/',
     breadcrumbs: [
-      { name: 'Home', url: '/' },
-      { name: 'Tools', url: '/tools' },
-      { name: 'Player Card Generator', url: '/player-card-generator' },
+      { name: '首页', url: '/' },
+      { name: '工具', url: '/tools' },
+      { name: '训练家卡片生成器', url: '/player-card-generator' },
     ],
   })
 
@@ -633,7 +634,7 @@ export default function PlayerCardGenerator() {
       setTracker(parsed)
     } catch {
       setTracker(null)
-      setError('That file could not be read as tracker JSON.')
+      setError('无法将该文件读取为计数器 JSON。')
     }
   }
 
@@ -659,7 +660,7 @@ export default function PlayerCardGenerator() {
         hasManualEdits,
       })
     } catch {
-      setError('The player card image could not be generated.')
+      setError('无法生成训练家卡片图片。')
     } finally {
       setIsDownloading(false)
     }
@@ -676,62 +677,62 @@ export default function PlayerCardGenerator() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <h1>Player Card Generator</h1>
-        <p>Upload an encounter tracker JSON, add your PokeMMO name and trainer image, then export a clean player card.</p>
+        <h1>训练家卡片生成器</h1>
+        <p>上传遭遇计数器 JSON，填写你的 PokeMMO 名称并添加训练家图片，即可导出精美卡片。</p>
       </header>
 
       <details className={styles.helpPanel} open>
-        <summary>How to use this page</summary>
+        <summary>如何使用本页面</summary>
         <div className={styles.helpContent}>
           <article>
-            <h2>How to get encounter tracker data</h2>
+            <h2>如何获取遭遇计数器数据</h2>
             <p>
-              Open the settings in game and navigate to Utilities, click Dump Moddable Resources, then check Encounter
+              在游戏设置中进入“实用工具”，点击“导出可修改资源”，然后勾选 Encounter（遭遇计数器）并导出 JSON。
               Tracker. Open the PokeMMO folder, go to Dump &gt; Resources &gt; Dump.zip. Extract the
               encounter_tracker.json from the Dump.zip, then upload it to Tracker JSON.
             </p>
           </article>
 
           <article>
-            <h2>How to get my player image?</h2>
-            <p>You can screenshot your character from the Player Card in game, or upload any photo you want.</p>
+            <h2>如何获取训练家图片？</h2>
+            <p>你可以截取游戏内训练家卡片中的角色，或上传任意想使用的图片。</p>
           </article>
 
           <article>
-            <h2>How to download the card?</h2>
-            <p>Click the download button.</p>
+            <h2>如何下载卡片？</h2>
+            <p>点击下载按钮即可。</p>
           </article>
         </div>
       </details>
 
-      <section className={styles.controls} aria-label="Player card inputs">
+      <section className={styles.controls} aria-label="训练家卡片输入项">
         <label className={styles.field}>
-          <span>Player Name</span>
+          <span>训练家名称</span>
           <input
             type="text"
             value={playerName}
             onChange={event => setPlayerName(event.target.value)}
-            placeholder="Your trainer name"
+            placeholder="你的训练家名称"
           />
         </label>
 
         <label className={styles.field}>
-          <span>Player Time</span>
+          <span>游戏时长</span>
           <input
             type="text"
             value={playerTime}
             onChange={event => setPlayerTime(event.target.value)}
-            placeholder="e.g. 1,234 hours"
+            placeholder="如：1,234 小时"
           />
         </label>
 
         <label className={styles.fileField}>
-          <span>Tracker JSON</span>
+          <span>计数器 JSON</span>
           <input type="file" accept="application/json,.json" onChange={handleJsonUpload} />
         </label>
 
         <label className={styles.fileField}>
-          <span>Trainer Card Image</span>
+          <span>训练家卡片图片</span>
           <input type="file" accept="image/*" onChange={handleImageUpload} />
         </label>
       </section>
@@ -741,23 +742,23 @@ export default function PlayerCardGenerator() {
 
       {stats && cardStats ? (
         <>
-          <section className={styles.summaryGrid} aria-label="Player tracker summary">
-            <StatCard label="Total Encounters" value={cardStats.totalEncounters} />
-            <StatCard label="Total Shinies on Counter" value={cardStats.totalShinies} />
-            <StatCard label="Average Encounter Per Shiny" value={cardStats.averageEncounterPerShiny} />
-            <StatCard label="Egg Encounters" value={cardStats.totalEggEncounters} />
-            <StatCard label="Alpha Encounters" value={cardStats.totalAlphaEncounters} />
-            <StatCard label="Wild Other Encounters (non horde)" value={cardStats.totalWildOtherEncounters} />
-            <StatCard label="Rare Encounters" value={cardStats.totalRareEncounters} />
-            <StatCard label="Fossil Encounters" value={cardStats.totalFossilEncounters} />
-            <StatCard label="Highest IV Shiny" value={cardStats.highestIvShiny} detail={cardStats.highestIvShinyIvs} textValue />
-            <StatCard label="Lowest IV Shiny" value={cardStats.lowestIvShiny} detail={cardStats.lowestIvShinyIvs} textValue />
-            <StatCard label="Highest Encounter Shiny" value={cardStats.highestEncounterShiny} textValue />
-            <StatCard label="Lowest Encounter Shiny" value={cardStats.lowestEncounterShiny} textValue />
+          <section className={styles.summaryGrid} aria-label="训练家计数器摘要">
+            <StatCard label="总遭遇数" value={cardStats.totalEncounters} />
+            <StatCard label="计数器闪光总数" value={cardStats.totalShinies} />
+            <StatCard label="每只闪光平均遭遇" value={cardStats.averageEncounterPerShiny} />
+            <StatCard label="孵蛋次数" value={cardStats.totalEggEncounters} />
+            <StatCard label="头目遭遇数" value={cardStats.totalAlphaEncounters} />
+            <StatCard label="其他野生遭遇（非群聚）" value={cardStats.totalWildOtherEncounters} />
+            <StatCard label="稀有遭遇数" value={cardStats.totalRareEncounters} />
+            <StatCard label="化石遭遇数" value={cardStats.totalFossilEncounters} />
+            <StatCard label="最高个体值闪光" value={cardStats.highestIvShiny} detail={cardStats.highestIvShinyIvs} textValue />
+            <StatCard label="最低个体值闪光" value={cardStats.lowestIvShiny} detail={cardStats.lowestIvShinyIvs} textValue />
+            <StatCard label="最高遇敌数闪光" value={cardStats.highestEncounterShiny} textValue />
+            <StatCard label="最低遇敌数闪光" value={cardStats.lowestEncounterShiny} textValue />
           </section>
 
-          <section className={styles.checklist} aria-label="Player card PNG options">
-            <h2>PNG Checklist</h2>
+          <section className={styles.checklist} aria-label="训练家卡片 PNG 选项">
+            <h2>PNG 包含内容</h2>
             <div className={styles.checklistGrid}>
               {EXPORT_FIELDS.map(field => (
                 <label key={field.key}>
@@ -772,9 +773,9 @@ export default function PlayerCardGenerator() {
             </div>
           </section>
 
-          <section className={styles.manualEditor} aria-label="Manual player card value edits">
-            <h2>Manual Edits</h2>
-            {hasManualEdits && <span className={styles.editedBadge}>Edited marker will appear on PNG</span>}
+          <section className={styles.manualEditor} aria-label="手动编辑训练家卡片数值">
+            <h2>手动编辑</h2>
+            {hasManualEdits && <span className={styles.editedBadge}>PNG 上会显示已编辑标记</span>}
             <div className={styles.manualGrid}>
               {EDITABLE_FIELDS.map(field => (
                 <label key={field.key} className={styles.field}>
@@ -799,7 +800,7 @@ export default function PlayerCardGenerator() {
                     {imagePreview ? (
                       <img src={imagePreview} alt="" />
                     ) : (
-                      <span>No image uploaded</span>
+                      <span>未上传图片</span>
                     )}
                   </div>
                   <div className={styles.playerTime}>
@@ -812,40 +813,40 @@ export default function PlayerCardGenerator() {
                   </div>
                 </div>
                 <div>
-                  <h2>{playerName || 'PokeMMO Player'}</h2>
-                  <p>Encounter Tracker Card</p>
+                  <h2>{playerName || 'PokeMMO 训练家'}</h2>
+                  <p>遭遇计数卡片</p>
                 </div>
               </div>
 
               <div className={styles.previewStats}>
-                <StatCard label="Encounters" value={cardStats.totalEncounters} compact />
-                <StatCard label="Shinies" value={cardStats.totalShinies} compact />
-                <StatCard label="Rare Encounters" value={cardStats.totalRareEncounters} compact />
+                <StatCard label="遭遇数" value={cardStats.totalEncounters} compact />
+                <StatCard label="闪光数" value={cardStats.totalShinies} compact />
+                <StatCard label="稀有遭遇" value={cardStats.totalRareEncounters} compact />
               </div>
             </div>
 
             <button className={styles.downloadButton} onClick={handleDownload} disabled={isDownloading}>
-              {isDownloading ? 'Generating...' : 'Download Player Card PNG'}
+              {isDownloading ? '生成中…' : '下载训练家卡片 PNG'}
             </button>
           </section>
 
           <section className={styles.tables}>
             <div className={styles.tablePanel}>
-              <h2>Most Seen Pokemon</h2>
+              <h2>遭遇最多的宝可梦</h2>
               <div className={styles.tableWrap}>
                 <table>
                   <thead>
                     <tr>
-                      <th>Pokemon</th>
-                      <th>Tier</th>
-                      <th>Encounters</th>
+                      <th>宝可梦</th>
+                      <th>阶级</th>
+                      <th>遭遇数</th>
                     </tr>
                   </thead>
                   <tbody>
                     {stats.mostSeen.map(pokemon => (
                       <tr key={pokemon.key}>
-                        <td>{pokemon.name}</td>
-                        <td>{pokemon.tier || '-'}</td>
+                        <td>{translatePokemonName(pokemon.name)}</td>
+                        <td>{pokemon.tier ? pokemon.tier.replace('Tier', '阶级') : '-'}</td>
                         <td>{formatNumber(pokemon.encounter)}</td>
                       </tr>
                     ))}
@@ -855,27 +856,27 @@ export default function PlayerCardGenerator() {
             </div>
 
             <div className={styles.tablePanel}>
-              <h2>Rare Pokemon Seen</h2>
+              <h2>已遭遇的稀有宝可梦</h2>
               <div className={styles.tableWrap}>
                 <table>
                   <thead>
                     <tr>
-                      <th>Pokemon</th>
-                      <th>Tier</th>
-                      <th>Encounters</th>
+                      <th>宝可梦</th>
+                      <th>阶级</th>
+                      <th>遭遇数</th>
                     </tr>
                   </thead>
                   <tbody>
                     {stats.rareSeen.map(pokemon => (
                       <tr key={`${pokemon.tier}-${pokemon.name}`}>
-                        <td>{pokemon.name}</td>
-                        <td>{pokemon.tier}</td>
+                        <td>{translatePokemonName(pokemon.name)}</td>
+                        <td>{pokemon.tier?.replace('Tier', '阶级')}</td>
                         <td>{formatNumber(pokemon.encounters)}</td>
                       </tr>
                     ))}
                     {stats.rareSeen.length === 0 && (
                       <tr>
-                        <td colSpan="3">No tier 0, 1, or 2 Pokemon found in the uploaded tracker.</td>
+                        <td colSpan="3">上传的计数器中未找到阶级 0、1 或 2 的宝可梦。</td>
                       </tr>
                     )}
                   </tbody>
@@ -886,8 +887,8 @@ export default function PlayerCardGenerator() {
         </>
       ) : (
         <section className={styles.emptyState}>
-          <h2>Upload a tracker JSON to begin</h2>
-          <p>The page reads the file in your browser and uses the tracker sections to calculate player totals.</p>
+          <h2>上传计数器 JSON 以开始</h2>
+          <p>页面会在你的浏览器中读取文件，并根据计数器分区计算训练家总数据。</p>
         </section>
       )}
     </div>

@@ -3,7 +3,74 @@ import { Link } from 'react-router-dom'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useDocumentHead } from '../../hooks/useDocumentHead'
 import resourcesData from '../../data/resources.json'
+import { translatePokemonName } from '../../utils/pokemon'
 import styles from './Resources.module.css'
+
+const RESOURCE_LABELS_ZH = {
+  'Content Creators': '内容创作者',
+  'Twitch Streamers': 'Twitch 主播',
+  YouTubers: 'YouTube 创作者',
+  Events: '活动',
+  Guides: '攻略',
+  Tools: '工具',
+  'Rock Smash Routes': '碎岩地点',
+  'Money Making': '赚钱',
+  'Gym Re-Runs': '道馆复战',
+  'Shiny Hunting': '闪光狩猎',
+  'Safari Zone': '狩猎地带',
+  Raids: '团体战',
+  '6 Pillars': '六柱队',
+  '7 Hells': '七狱队',
+  'Prehistoric 5': '史前五人队',
+  'Double Typhlosion': '双火暴兽',
+  'Safari Zone Guide': '狩猎地带指南',
+  'The Ultimate Christmas Event Guide': '圣诞活动终极指南',
+  'Ultimate Halloween Guide': '万圣节终极指南',
+  'The Ultimate Lunar New Year Event Guide': '农历新年活动终极指南',
+  'Mystery Ball Drop Rates': '神秘球掉落率',
+  'Pumpcat Spawn Locations 2025': '2025 南瓜猫出没地点',
+  'Raids Den Discord': '团体战巢穴 Discord',
+  'Christmas Event Raids': '圣诞活动团体战',
+  'Halloween Event Raids': '万圣节活动团体战',
+  'Lunar New Year Event Raids': '农历新年活动团体战',
+  'Money Per Hour': '每小时收益',
+  'Cost of Team': '队伍成本',
+  Difficulty: '难度',
+  'Medium - High depending on Route': '中等至高（取决于路线）',
+  'Easy - Medium': '简单至中等',
+  Hard: '困难',
+  'Medium - High': '中等至高',
+  Easy: '简单',
+  Medium: '中等',
+  guides: '攻略',
+  gameplay: '游戏实况',
+  news: '新闻',
+  music: '音乐',
+  'shiny hunting': '闪光狩猎',
+  en: '英语',
+  pvp: '对战',
+  description: '简介',
+  credits: '鸣谢',
+  tags: '标签',
+}
+
+function translateResourceLabel(value) {
+  if (typeof value !== 'string') return value
+  return RESOURCE_LABELS_ZH[value] || translatePokemonName(value)
+}
+
+function translateResourceDescription(item) {
+  const name = translateResourceLabel(item?.name || '此资源')
+  if (item?.link || item?.url) {
+    return `点击下方链接查看“${name}”的详细攻略、说明或原作者内容。`
+  }
+  return `“${name}”的相关资料。`
+}
+
+function translateResourceTags(tags) {
+  if (typeof tags !== 'string') return tags
+  return tags.split(',').map((tag) => translateResourceLabel(tag.trim())).join('、')
+}
 
 // Utility function to convert text to URL slug
 const toSlug = (text) => {
@@ -96,18 +163,18 @@ export default function Resources() {
   // Build breadcrumbs with dynamic metadata
   const buildBreadcrumbs = () => {
     const crumbs = [
-      { name: 'Home', url: '/' },
-      { name: 'Resources', url: '/resources/' }
+      { name: '首页', url: '/' },
+      { name: '资源', url: '/resources/' }
     ]
     
     if (activeCategory) {
-      crumbs.push({ name: activeCategory, url: `/resources/${toSlug(activeCategory)}/` })
+      crumbs.push({ name: translateResourceLabel(activeCategory), url: `/resources/${toSlug(activeCategory)}/` })
     }
     if (activeSubcategory) {
-      crumbs.push({ name: activeSubcategory, url: `/resources/${toSlug(activeCategory)}/${toSlug(activeSubcategory)}/` })
+      crumbs.push({ name: translateResourceLabel(activeSubcategory), url: `/resources/${toSlug(activeCategory)}/${toSlug(activeSubcategory)}/` })
     }
     if (activeNestedTab) {
-      crumbs.push({ name: activeNestedTab, url: `/resources/${toSlug(activeCategory)}/${toSlug(activeSubcategory)}/${toSlug(activeNestedTab)}/` })
+      crumbs.push({ name: translateResourceLabel(activeNestedTab), url: `/resources/${toSlug(activeCategory)}/${toSlug(activeSubcategory)}/${toSlug(activeNestedTab)}/` })
     }
     
     return crumbs
@@ -118,8 +185,8 @@ export default function Resources() {
   let currentCanonicalPath = `/resources${activeCategory ? `/${toSlug(activeCategory)}` : ''}${activeSubcategory ? `/${toSlug(activeSubcategory)}` : ''}${activeNestedTab ? `/${toSlug(activeNestedTab)}` : ''}/`;
 
   useDocumentHead({
-    title: seoMeta.title || 'Team Synergy Resources',
-    description: seoMeta.description || 'Explore Team Synergy\'s comprehensive PokeMMO resources. Find guides, tools, calculators, community links, and expert tips.',
+    title: `PokeMMO 资源中心${activeNestedTab || activeSubcategory || activeCategory ? `｜${translateResourceLabel(activeNestedTab || activeSubcategory || activeCategory)}` : ''}`,
+    description: '浏览 PokeMMO 攻略、工具、计算器、社区链接与实用技巧。',
     canonicalPath: currentCanonicalPath,
     breadcrumbs: buildBreadcrumbs()
   })
@@ -247,14 +314,14 @@ export default function Resources() {
       if (key === 'description') {
         return (
           <p key={key} className={styles.itemDescription}>
-            {value}
+            {translateResourceDescription(item)}
           </p>
         )
       }
       return (
         <>
-          <strong key={`${key}-label`} className={styles.itemFieldLabel}>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong>
-          <span key={`${key}-value`} className={styles.itemFieldValue}>{String(value)}</span>
+          <strong key={`${key}-label`} className={styles.itemFieldLabel}>{translateResourceLabel(key)}：</strong>
+          <span key={`${key}-value`} className={styles.itemFieldValue}>{key === 'tags' ? translateResourceTags(value) : translateResourceLabel(String(value))}</span>
         </>
       )
     })
@@ -311,12 +378,12 @@ export default function Resources() {
 
   return (
     <div className={styles.container}>
-      <h1>Team Synergy Resources</h1>
+      <h1>PokeMMO 资源中心</h1>
       <p className={styles.intro}>
-        Discover guides, tools, and community links to enhance your PokeMMO experience.
+        发现攻略、工具和社区链接，提升你的 PokeMMO 游戏体验。
       </p>
 
-        <h4 className={styles.intro}>If you are creddited in this and would like for your guide to be removed or you have a useful guide or tool that you would like to be added please contact ohypers on discord</h4>
+        <h4 className={styles.intro}>如果此处收录了你的内容且希望移除，或你有值得加入的攻略或工具，请通过 Discord 联系 ohypers。</h4>
 
       {/* Index/Table of Contents */}
       <div className={styles.indexContainer}>
@@ -325,7 +392,7 @@ export default function Resources() {
           onClick={() => setShowIndex(!showIndex)}
         >
           <span className={styles.indexToggleIcon}>{showIndex ? '▼' : '▶'}</span>
-          📑 Index
+          📑 目录
         </button>
         
         {showIndex && (
@@ -348,7 +415,7 @@ export default function Resources() {
                         setShowIndex(false)
                       }}
                     >
-                      {categoryKey}
+                      {translateResourceLabel(categoryKey)}
                     </button>
                   </div>
                   {subcategoryKeys.length > 0 && (
@@ -371,7 +438,7 @@ export default function Resources() {
                                   setShowIndex(false)
                                 }}
                               >
-                                {subcategoryKey}
+                                {translateResourceLabel(subcategoryKey)}
                               </button>
                             </div>
                             {nestedKeys.length > 0 && (
@@ -388,7 +455,7 @@ export default function Resources() {
                                       setShowIndex(false)
                                     }}
                                   >
-                                    {nestedKey}
+                                  {translateResourceLabel(nestedKey)}
                                   </button>
                                 ))}
                               </div>
@@ -418,7 +485,7 @@ export default function Resources() {
                 setActiveNestedTab(null)
               }}
             >
-              {category}
+              {translateResourceLabel(category)}
             </button>
           ))}
         </div>
@@ -437,7 +504,7 @@ export default function Resources() {
                   setActiveNestedTab(null)
                 }}
               >
-                {subcategory}
+                {translateResourceLabel(subcategory)}
               </button>
             ))}
           </div>
@@ -454,7 +521,7 @@ export default function Resources() {
                 className={`${styles.nestedTab} ${activeNestedTab === nestedKey ? styles.activeNestedTab : ''}`}
                 onClick={() => setActiveNestedTab(nestedKey)}
               >
-                {nestedKey}
+                {translateResourceLabel(nestedKey)}
               </button>
             ))}
           </div>
@@ -465,10 +532,10 @@ export default function Resources() {
       {activeCategory === 'Content Creators' && activeSubcategory === 'Twitch Streamers' && subcategoryContent?._meta?.description && (
         <div className={styles.subcategoryDescription}>
           <p>
-            {subcategoryContent._meta.description}
+            浏览 Team Synergy 收录的 PokeMMO 主播与直播内容。
             {' '}
             {(() => {
-              return <Link to="/streamers/">Streamers page</Link>;
+              return <Link to="/streamers/">主播页面</Link>;
             })()}
           </p>
         </div>
@@ -478,14 +545,14 @@ export default function Resources() {
       {activeCategory === 'Content Creators' &&
         (activeSubcategory === 'Twitch Streamers' || activeSubcategory === 'YouTubers') && (
         <div className={styles.contentCreatoradd}>
-          <p>Wish to be added? DM ohypers on discord</p>
+          <p>希望被收录？请在 Discord 私信 ohypers。</p>
         </div>
       )}
 
       {/* Tag Filter UI for Content Creators */}
       {activeCategory === 'Content Creators' && allContentCreatorTags.length > 0 && (
         <div className={styles.tagFilterContainer}>
-          <span className={styles.tagFilterLabel}>Filter by tag:</span>
+          <span className={styles.tagFilterLabel}>按标签筛选：</span>
           {allContentCreatorTags.map(tag => (
             <button
               key={tag}
@@ -501,7 +568,7 @@ export default function Resources() {
           ))}
           {selectedTags.length > 0 && (
             <button className={styles.tagFilterClearButton} onClick={() => setSelectedTags([])}>
-              Clear
+              清除
             </button>
           )}
         </div>
@@ -517,7 +584,7 @@ export default function Resources() {
                   <div className={styles.cardImageContainer}>
                     <img 
                       src={getAssetUrl(item.profileImage)} 
-                      alt={item.name || 'Profile'}
+                      alt={item.name || '个人资料'}
                       className={styles.cardImage}
                       onError={(e) => {
                         e.target.style.display = 'none'
@@ -526,7 +593,7 @@ export default function Resources() {
                   </div>
                 )}
                 <div className={styles.cardContent}>
-                  <h3 className={styles.itemName}>{item.name || 'Unnamed Item'}</h3>
+                  <h3 className={styles.itemName}>{translateResourceLabel(item.name || '未命名条目')}</h3>
                   {renderItemFields(item)}
                 </div>
                 {(item.link || item.url) && (
@@ -536,7 +603,7 @@ export default function Resources() {
                     rel={(item.link || item.url).startsWith('http') ? 'noopener noreferrer' : ''}
                     className={styles.itemLink}
                   >
-                    Visit {item.name || 'Resource'}
+                    前往 {translateResourceLabel(item.name || '资源')}
                     {(item.link || item.url).startsWith('http') && (
                       <span className={styles.externalIcon}>↗</span>
                     )}
@@ -550,19 +617,19 @@ export default function Resources() {
 
       {filterItemsByTags(items).length === 0 && (
         <div className={styles.emptyState}>
-          <p>No resources available in this section yet.</p>
+          <p>此分区暂时没有可用资源。</p>
         </div>
       )}
 
       {/* Leaderboard Section */}
       <div className={styles.leaderboardSection}>
-        <h2>Top Contributors</h2>
+        <h2>贡献者排行</h2>
         <div className={styles.leaderboard}>
           {calculateLeaderboard(resourcesData).map((contributor) => (
             <div key={contributor.name} className={styles.leaderboardEntry}>
               <div className={styles.leaderboardRank}>#{contributor.rank}</div>
               <div className={styles.leaderboardName}>{contributor.name}</div>
-              <div className={styles.leaderboardCount}>{contributor.count} {contributor.count === 1 ? 'guide' : 'guides'}</div>
+              <div className={styles.leaderboardCount}>{contributor.count} 份攻略／资源</div>
             </div>
           ))}
         </div>

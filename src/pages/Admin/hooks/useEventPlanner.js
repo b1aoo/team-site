@@ -76,7 +76,7 @@ export function renderEventSections(container, split) {
 
     if (!list.length) {
       const empty = document.createElement("p");
-      empty.textContent = "No events";
+      empty.textContent = "暂无活动";
       sectionEl.appendChild(empty);
     }
 
@@ -86,7 +86,7 @@ export function renderEventSections(container, split) {
 
       item.innerHTML = `
         <h3>${ev.name ?? "Unnamed Event"}</h3>
-        <p><strong>Date:</strong> ${new Date(ev.date).toLocaleString()}</p>
+        <p><strong>日期：</strong> ${new Date(ev.date).toLocaleString('zh-CN')}</p>
         ${ev.description ? `<p>${ev.description}</p>` : ""}
       `;
 

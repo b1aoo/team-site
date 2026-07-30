@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import styles from '../Admin.module.css'
 
-export default function ConfirmDialog({ title, message, confirmLabel = 'Confirm', typeToConfirm, onConfirm, onCancel }) {
+export default function ConfirmDialog({ title, message, confirmLabel = '确认', typeToConfirm, onConfirm, onCancel }) {
   const [typed, setTyped] = useState('')
   const needsTyping = !!typeToConfirm
   const canConfirm = !needsTyping || typed === typeToConfirm
@@ -14,7 +14,7 @@ export default function ConfirmDialog({ title, message, confirmLabel = 'Confirm'
         {needsTyping && (
           <div style={{ marginTop: 12 }}>
             <label style={{ fontSize: '0.9rem', color: '#aaa' }}>
-              Type <strong style={{ color: '#e53935' }}>{typeToConfirm}</strong> to confirm:
+              输入 <strong style={{ color: '#e53935' }}>{typeToConfirm}</strong> 以确认：
             </label>
             <input
               type="text"
@@ -36,7 +36,7 @@ export default function ConfirmDialog({ title, message, confirmLabel = 'Confirm'
           >
             {confirmLabel}
           </button>
-          <button onClick={onCancel}>Cancel</button>
+          <button onClick={onCancel}>取消</button>
         </div>
       </div>
     </div>

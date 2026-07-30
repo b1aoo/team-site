@@ -189,7 +189,7 @@ export default function BountiesTab({ bounties, onAdd, onEdit, onDelete, isMutat
   }
 
   async function handleDelete(bountyId) {
-    if (window.confirm("Delete this bounty?")) {
+    if (window.confirm("确定要删除此悬赏吗？")) {
       try {
         await onDelete(bountyId);
       } catch (err) {
@@ -236,7 +236,7 @@ export default function BountiesTab({ bounties, onAdd, onEdit, onDelete, isMutat
             colSpan={showClaimed ? (isPerm ? 9 : 10) : (isPerm ? 8 : 9)}
             className={styles.hintText}
           >
-            {showClaimed ? `No claimed ${category} bounties.` : `No unclaimed ${category} bounties.`}
+            {showClaimed ? `暂无已领取的${category === 'Perm' ? '永久' : category}悬赏。` : `暂无未领取的${category === 'Perm' ? '永久' : category}悬赏。`}
           </td>
         </tr>
       );
@@ -256,8 +256,8 @@ export default function BountiesTab({ bounties, onAdd, onEdit, onDelete, isMutat
         <td>{(b.perm || isPerm) ? "\u2714\ufe0f" : ""}</td>
         {showClaimed && <td>{b.claimed}</td>}
         <td className={styles.actionBtns}>
-          <button className={styles.editBtn} onClick={() => handleEdit(b)}>Edit</button>
-          <button className={styles.deleteBtn} onClick={() => handleDelete(b.id)}>Delete</button>
+          <button className={styles.editBtn} onClick={() => handleEdit(b)}>编辑</button>
+          <button className={styles.deleteBtn} onClick={() => handleDelete(b.id)}>删除</button>
         </td>
       </tr>
     ));
@@ -265,48 +265,48 @@ export default function BountiesTab({ bounties, onAdd, onEdit, onDelete, isMutat
 
   return (
     <div>
-      <h3>{editingBounty ? "Edit Bounty" : "Add Bounty"}</h3>
+      <h3>{editingBounty ? '编辑悬赏' : '添加悬赏'}</h3>
       <form className={styles.editSection} onSubmit={handleSubmit}>
-        <label>Title:</label>
+        <label>标题：</label>
         <input name="title" value={form.title} onChange={handleChange} className={styles.adminInput} required />
-        <label>Month (leave blank if perm):</label>
+        <label>月份（永久悬赏请留空）：</label>
         <input name="month" value={form.month} onChange={handleChange} className={styles.adminInput} disabled={form.perm} />
-        <label>Pokemon (comma-separated for multiple):</label>
+        <label>宝可梦（多只请用逗号分隔）：</label>
         <input
           name="pokemon"
           value={form.pokemon}
           onChange={handleChange}
           className={styles.adminInput}
-          placeholder="e.g. pikachu, raichu"
+          placeholder="如：皮卡丘，雷丘"
           required
         />
-        <label>Host:</label>
+        <label>主办人：</label>
         <input name="host" value={form.host} onChange={handleChange} className={styles.adminInput} required />
-        <label>Reward:</label>
+        <label>奖励：</label>
         <input name="reward" value={form.reward} onChange={handleChange} className={styles.adminInput} required />
-        <label>Description:</label>
+        <label>说明：</label>
         <textarea name="description" value={form.description} onChange={handleChange} className={styles.adminInput} rows={2} />
         <label>
-          <input type="checkbox" name="perm" checked={form.perm} onChange={handleChange} /> Permanent (perm)
+          <input type="checkbox" name="perm" checked={form.perm} onChange={handleChange} /> 永久悬赏
         </label>
         <label>
-          Claimed by:
-          <input name="claimed" value={form.claimed} onChange={handleChange} className={styles.adminInput} placeholder="(leave blank if unclaimed)" />
+          领取人：
+          <input name="claimed" value={form.claimed} onChange={handleChange} className={styles.adminInput} placeholder="（未领取请留空）" />
         </label>
         <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
           <button className={styles.editBtn} type="submit" disabled={isMutating}>
-            {isMutating ? "Saving..." : editingBounty ? "Save Changes" : "Add Bounty"}
+            {isMutating ? '保存中…' : editingBounty ? '保存修改' : '添加悬赏'}
           </button>
           {editingBounty && (
-            <button className={styles.deleteBtn} type="button" onClick={handleCancel}>Cancel</button>
+            <button className={styles.deleteBtn} type="button" onClick={handleCancel}>取消</button>
           )}
         </div>
       </form>
 
-      <h3>Bounties List</h3>
+      <h3>悬赏列表</h3>
 
       <div style={{ margin: "16px 0" }}>
-        <label htmlFor="bountyFilter" style={{ fontWeight: 600, marginRight: 8 }}>Show:</label>
+        <label htmlFor="bountyFilter" style={{ fontWeight: 600, marginRight: 8 }}>显示：</label>
         <select
           id="bountyFilter"
           value={bountyFilter}
@@ -317,27 +317,27 @@ export default function BountiesTab({ bounties, onAdd, onEdit, onDelete, isMutat
           {monthCategories.map((category) => (
             <option key={category} value={category}>{category}</option>
           ))}
-          {hasPermCategory && <option value="Perm">Permanent</option>}
-          <option value="Claimed">Claimed</option>
+          {hasPermCategory && <option value="Perm">永久</option>}
+          <option value="Claimed">已领取</option>
         </select>
       </div>
 
       {bountyFilter !== "Claimed" && (
         <>
-          <h4>{bountyFilter === "Perm" ? "Permanent Bounties" : `${bountyFilter} Bounties`}</h4>
+          <h4>{bountyFilter === 'Perm' ? '永久悬赏' : `${bountyFilter} 悬赏`}</h4>
           <div className={styles.tableWrapper}>
             <table className={styles.shinyTable}>
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Title</th>
-                  {bountyFilter !== "Perm" && <th>Month</th>}
-                  <th>Pokemon</th>
-                  <th>Host</th>
-                  <th>Reward</th>
-                  <th>Description</th>
-                  <th>Perm</th>
-                  <th>Actions</th>
+                  <th>标题</th>
+                  {bountyFilter !== 'Perm' && <th>月份</th>}
+                  <th>宝可梦</th>
+                  <th>主办人</th>
+                  <th>奖励</th>
+                  <th>说明</th>
+                  <th>永久</th>
+                  <th>操作</th>
                 </tr>
               </thead>
               <tbody>{renderTable(bountyFilter)}</tbody>
@@ -352,29 +352,29 @@ export default function BountiesTab({ bounties, onAdd, onEdit, onDelete, isMutat
         );
 
         if (!claimedCategories.length) {
-          return <div className={styles.hintText} style={{ margin: "16px 0" }}>No claimed bounties.</div>;
+          return <div className={styles.hintText} style={{ margin: '16px 0' }}>没有已领取的悬赏。</div>;
         }
 
         return (
           <>
-            <h4>Claimed Bounties</h4>
+            <h4>已领取悬赏</h4>
             {claimedCategories.map((category) => (
               <div key={category}>
-                <h4 style={{ marginBottom: 8 }}>{category === "Perm" ? "Permanent" : category}</h4>
+                <h4 style={{ marginBottom: 8 }}>{category === "Perm" ? "永久悬赏" : category}</h4>
                 <div className={styles.tableWrapper}>
                   <table className={styles.shinyTable}>
                     <thead>
                       <tr>
                         <th>ID</th>
-                        <th>Title</th>
-                        {category !== "Perm" && <th>Month</th>}
-                        <th>Pokemon</th>
-                        <th>Host</th>
-                        <th>Reward</th>
-                        <th>Description</th>
-                        <th>Perm</th>
-                        <th>Claimed By</th>
-                        <th>Actions</th>
+                        <th>标题</th>
+                        {category !== "Perm" && <th>月份</th>}
+                        <th>宝可梦</th>
+                        <th>主办人</th>
+                        <th>奖励</th>
+                        <th>说明</th>
+                        <th>永久</th>
+                        <th>领取人</th>
+                        <th>操作</th>
                       </tr>
                     </thead>
                     <tbody>{renderTable(category, true)}</tbody>

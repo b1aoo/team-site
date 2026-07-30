@@ -30,7 +30,7 @@ export default function PlayerPage() {
   }, [data, playerName])
 
   if (realKey && playerName && realKey !== playerName) {
-    window.location.replace(`/player/${realKey}`);
+    window.location.replace(`${import.meta.env.BASE_URL}player/${realKey}/`);
     return null;
   }
 
@@ -44,8 +44,7 @@ export default function PlayerPage() {
   }, [])
 
   const breadcrumbs = realKey ? [
-    { name: 'Home', url: '/' },
-    { name: 'Shiny Showcase', url: '/' },
+    { name: '首页', url: '/' }, { name: '闪光收藏展示', url: '/' },
     { name: realKey, url: `/player/${playerName}` }
   ] : null;
 
@@ -72,15 +71,15 @@ export default function PlayerPage() {
   const ogImage =
     (firstFavouriteShiny && getLocalPokemonGif(firstFavouriteShiny.Pokemon)) ||
     (firstNormalShiny && getLocalPokemonGif(firstNormalShiny.Pokemon)) ||
-    'https://synergymmo.com/images/openGraph.jpg'
+    'https://b1aoo.github.io/team-site/images/openGraph.jpg'
 
-  const ogUrl = `https://synergymmo.com/player/${playerName?.toLowerCase()}/?v=2`
+  const ogUrl = `https://b1aoo.github.io/team-site/player/${playerName?.toLowerCase()}/?v=2`
 
   useDocumentHead({
-    title: realKey ? `${realKey}'s Shiny Collection | Team Synergy PokeMMO` : 'Player Shinies | Team Synergy - PokeMMO',
+    title: realKey ? `${realKey}的闪光收藏｜Team Synergy` : '玩家闪光收藏｜Team Synergy',
     description: realKey
-      ? `Browse ${realKey}'s shiny Pokémon collection in PokeMMO. View caught shinies, collections, and stats for Team Synergy member.`
-      : 'Explore player shiny collections in Team Synergy PokeMMO.',
+      ? `查看 Team Synergy 成员 ${realKey} 的 PokeMMO 闪光宝可梦收藏与统计。`
+      : '查看 Team Synergy 玩家闪光宝可梦收藏。',
     canonicalPath: `/player/${playerName?.toLowerCase()}/`,
     breadcrumbs: breadcrumbs,
     ogImage,
@@ -90,7 +89,7 @@ export default function PlayerPage() {
   // --- Back button logic ---
   const fromPage = location.state?.from
   const backTo = fromPage === 'shotm' ? '/shotm' : fromPage === 'shiny-war-2025' ? '/shiny-war-2025' : fromPage === 'pokemon' ? -1 : '/shiny-showcase'
-  const backLabel = fromPage === 'shotm' ? '\u2190 Back to SHOTM' : fromPage === 'shiny-war-2025' ? '\u2190 Back to Shiny Wars 2025' : fromPage === 'pokemon' ? '\u2190 Back to Pokémon' : '\u2190 Back to Showcase'
+  const backLabel = fromPage === 'shotm' ? '← 返回本月闪光' : fromPage === 'shiny-war-2025' ? '← 返回闪光大战 2025' : fromPage === 'pokemon' ? '← 返回宝可梦' : '← 返回收藏展示'
 
   // --- Find streamer info ---
     const streamerInfo = useMemo(() => {
@@ -175,15 +174,15 @@ export default function PlayerPage() {
     return { showStatisticsSection: canShow, sectionFlags: flags }
   }, [playerData, safeShinies])
 
-  const parentDomain = typeof window !== 'undefined' ? window.location.hostname : 'synergymmo.com'
+  const parentDomain = typeof window !== 'undefined' ? window.location.hostname : 'b1aoo.github.io'
 
   // --- Loading / not found ---
-  if (isLoading) return <div className="message">Loading...</div>
+  if (isLoading) return <div className="message">加载中…</div>
 
   if (!playerData) {
     return (
       <h2 style={{ color: 'white', textAlign: 'center' }}>
-        Player "{playerName}" not found
+        未找到玩家 “{playerName}”
       </h2>
     )
   }
@@ -196,7 +195,7 @@ export default function PlayerPage() {
     if (isLive) {
       return (
         <div className={styles.twitchSection}>
-          <h2>🔴 Live on Twitch</h2>
+          <h2>🔴 Twitch 正在直播</h2>
 
           <div className={styles.twitchWrapper}>
             <iframe
@@ -215,7 +214,7 @@ export default function PlayerPage() {
     // OFFLINE CARD
     return (
       <div className={styles.streamerSection}>
-        <h2>📺 Streamer</h2>
+        <h2>📺 主播</h2>
 
         <a
           href={`https://www.twitch.tv/${streamerInfo.twitch_username.toLowerCase()}`}
@@ -243,12 +242,12 @@ export default function PlayerPage() {
     <div className={styles.playerPage}>
       <BackButton to={backTo} label={backLabel} />
       
-      <h1>{safeRealKey}'s Shiny Collection &#10024;</h1>
-      <p>Total Shinies: {playerData.shiny_count ?? 0}</p>
+      <h1>{safeRealKey} 的闪光收藏 ✨</h1>
+      <p>闪光总数：{playerData.shiny_count ?? 0}</p>
 
       {safeFavourites.length > 0 && (
         <div className={styles.favouriteList}>
-          <h2 className={styles.favouritesHeader}>My Favourites</h2>
+          <h2 className={styles.favouritesHeader}>我的收藏</h2>
           <div className={styles.favouriteGrid}>
             {safeFavourites.map(([id, s]) => (
               <div key={id} className={styles.bigShinyWrapper}>
@@ -269,31 +268,21 @@ export default function PlayerPage() {
 
       {playerRanks && (
         <div className={styles.rankSection}>
-          <h2>📊 Rankings</h2>
+          <h2>📊 排行</h2>
 
           <ul>
             {[
-              { key: 'luckiest', label: 'Luckiest' },
-              { key: 'unluckiest', label: 'Unluckiest' },
-              { key: 'mostEncounters', label: 'Most Encounters' },
-              { key: 'highestDryStreak', label: 'Highest Dry Streak' },
-              { key: 'lowestEncounter', label: 'Lowest Encounter Shinies' },
-              { key: 'mostRares', label: 'Most Rare Shinies' },
-              { key: 'mostPhases', label: 'Most Phases' },
-              { key: 'mostInWeek', label: 'Most Shinies in a Week' },
-              { key: 'mostSingleEncounters', label: 'Most Single Encounters' },
-              { key: 'most5xHordes', label: 'Most 5x Hordes' },
-              { key: 'mostFishing', label: 'Most Fishing Shinies' },
-              { key: 'mostFossils', label: 'Most Fossil Shinies' },
-              { key: 'mostSwarm', label: 'Most Swarm Shinies' },
-              { key: 'mostHeadbutt', label: 'Most Headbutt Shinies' },
-              { key: 'mostSafariCatches', label: 'Most Safari Catches' },
-              { key: 'mostSafariFlees', label: 'Most Safari Flees' },
-              { key: 'mostBountiesClaimed', label: 'Most Bounties Claimed' },
-              { key: 'contributors', label: 'Contributors' },
-              { key: 'mostTeamDexEntries', label: 'Most Team Dex Entries' },
-              { key: 'newLivingDexEntries', label: 'New Living Dex Entries' },
-              { key: 'highestWildIvShiny', label: 'Highest Wild IV Shiny' },
+              { key: 'luckiest', label: '欧皇玩家' }, { key: 'unluckiest', label: '非酋玩家' },
+              { key: 'mostEncounters', label: '遇敌次数最多' }, { key: 'highestDryStreak', label: '最长无闪记录' },
+              { key: 'lowestEncounter', label: '最少遇敌出闪' }, { key: 'mostRares', label: '稀有闪光最多' },
+              { key: 'mostPhases', label: '阶段闪光最多' }, { key: 'mostInWeek', label: '单周闪光最多' },
+              { key: 'mostSingleEncounters', label: '单遇次数最多' }, { key: 'most5xHordes', label: '5 只群聚闪光最多' },
+              { key: 'mostFishing', label: '钓鱼闪光最多' }, { key: 'mostFossils', label: '化石闪光最多' },
+              { key: 'mostSwarm', label: '群聚闪光最多' }, { key: 'mostHeadbutt', label: '头锤树闪光最多' },
+              { key: 'mostSafariCatches', label: '狩猎地带捕获最多' }, { key: 'mostSafariFlees', label: '狩猎地带逃跑最多' },
+              { key: 'mostBountiesClaimed', label: '悬赏领取最多' }, { key: 'contributors', label: '社群贡献者' },
+              { key: 'mostTeamDexEntries', label: '公会图鉴独有条目最多' }, { key: 'newLivingDexEntries', label: '独有活体图鉴条目' },
+              { key: 'highestWildIvShiny', label: '野生闪光个体值最高' },
             ].map(({ key, label }) => {
               const rank = playerRanks[key]
               if (!rank) return null

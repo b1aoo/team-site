@@ -57,15 +57,15 @@ export default function App() {
       "@context": "https://schema.org",
       "@type": "Organization",
       "name": "Team Synergy",
-      "url": "https://synergymmo.com",
-      "logo": "https://synergymmo.com/favicon.png",
+      "url": "https://b1aoo.github.io/team-site/",
+      "logo": "https://b1aoo.github.io/team-site/favicon.png",
       "description": "Team Synergy 是 PokeMMO 闪光狩猎公会；在这里查看闪光图鉴、成员收藏、主播与遇敌计数器主题。",
       "sameAs": [
         "https://discord.gg/2BEUq6fWAj",
       ],
       "contactPoint": {
         "@type": "ContactPoint",
-        "contactType": "Customer Support",
+        "contactType": "社群支持",
         "url": "https://discord.gg/2BEUq6fWAj"
       }
     };

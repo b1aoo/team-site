@@ -1,4 +1,5 @@
 import tierPokemon from '../data/tier_pokemon.json'
+import { translatePokemonName } from './pokemonNamesZh'
 
 const VERSION = 1
 
@@ -143,11 +144,11 @@ export function getLocalPokemonGif(name) {
   }
   
   if (GIF_FOLDER_OVERRIDES[sanitized]) {
-    return `/images/pokemon_gifs/${GIF_FOLDER_OVERRIDES[sanitized]}/${sanitized}.gif?v=${VERSION}`
+    return `${import.meta.env.BASE_URL || '/'}images/pokemon_gifs/${GIF_FOLDER_OVERRIDES[sanitized]}/${sanitized}.gif?v=${VERSION}`
   }
   const tier = tierLookup[sanitized]
   const folder = tier ? `tier_${tier.replace(/\D/g, '')}` : 'tier_0'
-  return `/images/pokemon_gifs/${folder}/${sanitized}.gif?v=${VERSION}`
+  return `${import.meta.env.BASE_URL || '/'}images/pokemon_gifs/${folder}/${sanitized}.gif?v=${VERSION}`
 }
 
 export function getRemoteFallbackUrl(name, shiny = true) {
@@ -183,8 +184,10 @@ export function getPokemonImageUrl(name, shiny = true) {
 }
 
 export function formatPokemonName(name) {
-  return name ? name.charAt(0).toUpperCase() + name.slice(1) : name
+  return translatePokemonName(name)
 }
+
+export { translatePokemonName }
 export function getBasePokemonName(name) {
   if (!name || typeof name !== 'string') return name
   

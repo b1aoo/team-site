@@ -2,7 +2,8 @@ import { useState } from "react";
 import styles from "../Admin.module.css";
 import ConfirmDialog from "./ConfirmDialog";
 
-const CATEGORIES = ["Themes", "Encounter Counters", "Pokemon Textures", "Other"];
+const CATEGORIES = ['Themes', 'Encounter Counters', 'Pokemon Textures', 'Other'];
+const CATEGORY_LABELS = { Themes: '主题', 'Encounter Counters': '遭遇计数器', 'Pokemon Textures': '宝可梦贴图', Other: '其他' };
 
 function slugify(str) {
   return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
@@ -112,15 +113,15 @@ export default function ThemesTab({ themesDB, onSave, onDelete, isMutating }) {
               setThemeData(emptyTheme);
             }}
           >
-            {cat}
+            {CATEGORY_LABELS[cat] || cat}
           </button>
         ))}
       </div>
 
       {/* Form */}
-      <h3>{editingKey ? "Edit Theme" : "Add Theme"} — {activeCategory}</h3>
+      <h3>{editingKey ? '编辑主题' : '添加主题'} — {CATEGORY_LABELS[activeCategory] || activeCategory}</h3>
       <div className={styles.editSection}>
-        <label>Name:</label>
+        <label>名称：</label>
         <input
           type="text"
           className={styles.adminInput}
@@ -128,7 +129,7 @@ export default function ThemesTab({ themesDB, onSave, onDelete, isMutating }) {
           onChange={(e) => setThemeData({ ...themeData, name: e.target.value })}
         />
 
-        <label>Author:</label>
+        <label>作者：</label>
         <input
           type="text"
           className={styles.adminInput}
@@ -136,7 +137,7 @@ export default function ThemesTab({ themesDB, onSave, onDelete, isMutating }) {
           onChange={(e) => setThemeData({ ...themeData, author: e.target.value })}
         />
 
-        <label>Description:</label>
+        <label>说明：</label>
         <input
           type="text"
           className={styles.adminInput}
@@ -145,7 +146,7 @@ export default function ThemesTab({ themesDB, onSave, onDelete, isMutating }) {
         />
 
 
-        <label>Preview Image URL:</label>
+        <label>预览图片 URL：</label>
         <input
           type="text"
           className={styles.adminInput}
@@ -153,7 +154,7 @@ export default function ThemesTab({ themesDB, onSave, onDelete, isMutating }) {
           onChange={(e) => setThemeData({ ...themeData, previewImage: e.target.value })}
         />
 
-        <label>Detailed Images:</label>
+        <label>详情图片：</label>
         <div style={{ marginBottom: 8 }}>
           {(themeData.detailedImages || []).map((img, idx) => (
             <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
@@ -175,7 +176,7 @@ export default function ThemesTab({ themesDB, onSave, onDelete, isMutating }) {
           </button>
         </div>
 
-        <label>Download / Link URL:</label>
+        <label>下载／链接 URL：</label>
         <input
           type="text"
           className={styles.adminInput}
@@ -189,7 +190,7 @@ export default function ThemesTab({ themesDB, onSave, onDelete, isMutating }) {
             onClick={handleCreateOrUpdate}
             disabled={isMutating || !themeData.name}
           >
-            {isMutating ? "Saving..." : editingKey ? "Save Changes" : "Add Theme"}
+            {isMutating ? '保存中…' : editingKey ? '保存修改' : '添加主题'}
           </button>
           {editingKey && (
             <button className={styles.deleteBtn} onClick={handleCancelEdit}>
@@ -200,19 +201,19 @@ export default function ThemesTab({ themesDB, onSave, onDelete, isMutating }) {
       </div>
 
       {/* Theme list */}
-      <h3>Themes in "{activeCategory}"</h3>
+      <h3>“{CATEGORY_LABELS[activeCategory] || activeCategory}”中的主题</h3>
       {Object.keys(currentItems).length === 0 ? (
-        <p className={styles.hintText}>No themes in this category yet.</p>
+        <p className={styles.hintText}>此分类暂时没有主题。</p>
       ) : (
         <div className={styles.tableWrapper}>
           <table className={styles.shinyTable}>
             <thead>
               <tr>
-                <th>Preview</th>
-                <th>Name</th>
-                <th>Author</th>
-                <th>Description</th>
-                <th>Actions</th>
+                <th>预览</th>
+                <th>名称</th>
+                <th>作者</th>
+                <th>说明</th>
+                <th>操作</th>
               </tr>
             </thead>
             <tbody>
@@ -226,7 +227,7 @@ export default function ThemesTab({ themesDB, onSave, onDelete, isMutating }) {
                         style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 4 }}
                       />
                     ) : (
-                      <span style={{ color: "#666", fontSize: "0.8rem" }}>No image</span>
+                      <span style={{ color: '#666', fontSize: '0.8rem' }}>无图片</span>
                     )}
                   </td>
                   <td>{item.name}</td>
@@ -254,9 +255,9 @@ export default function ThemesTab({ themesDB, onSave, onDelete, isMutating }) {
 
       {confirmDelete && (
         <ConfirmDialog
-          title="Delete Theme"
-          message={`Are you sure you want to delete "${confirmDelete.name}" from ${confirmDelete.category}?`}
-          confirmLabel="Delete"
+          title="删除主题"
+          message={`确定要从${CATEGORY_LABELS[confirmDelete.category] || confirmDelete.category}中删除“${confirmDelete.name}”吗？`}
+          confirmLabel="删除"
           onConfirm={handleConfirmDelete}
           onCancel={() => setConfirmDelete(null)}
         />

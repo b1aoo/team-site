@@ -12,7 +12,8 @@ import {
   getAlteringCaveMoveWarning,
   getMsUntilAlteringCaveRotation,
 } from '../../utils/alteringCave'
-import { getLocalPokemonGif, normalizePokemonName, onGifError } from '../../utils/pokemon'
+import { getLocalPokemonGif, normalizePokemonName, onGifError, translatePokemonName } from '../../utils/pokemon'
+import { translateEncounterTerm } from '../../utils/pokemonTermsZh'
 import alteringCaveData from '../../data/altering_cave_rotations.json'
 import styles from './AlteringCaveRotations.module.css'
 
@@ -41,14 +42,14 @@ function PokemonCard({ pokemon, repelOnly }) {
       {moveWarning && <span className={styles.moveWarning}>{moveWarning}</span>}
       <img
         src={getLocalPokemonGif(pokemon.name)}
-        alt={pokemon.name}
+        alt={translatePokemonName(pokemon.name)}
         className={styles.pokemonGif}
         onError={onGifError(pokemon.name, false)}
         loading="lazy"
       />
-      <span className={styles.pokemonName}>{pokemon.name}</span>
-      <span className={styles.levelRange}>Lvl {pokemon.levelRange[0]}-{pokemon.levelRange[1]}</span>
-      <span className={`${styles.statBadge} ${statClass}`}>{statLabel}</span>
+      <span className={styles.pokemonName}>{translatePokemonName(pokemon.name)}</span>
+      <span className={styles.levelRange}>Lv.{pokemon.levelRange[0]}–{pokemon.levelRange[1]}</span>
+      <span className={`${styles.statBadge} ${statClass}`}>{translateEncounterTerm(statLabel)}</span>
     </Link>
   )
 }
@@ -62,17 +63,17 @@ function RotationPanel({ cycle, isCurrent, repelOnly, showTimeUntil, timeUntil }
     <section className={`${styles.rotationPanel} ${isCurrent ? styles.currentPanel : ''}`}>
       <div className={styles.rotationHeader}>
         <div>
-          <h2>Rotation {cycle.cycle}</h2>
-          <p>{cycle.repelTrick ? `Repel Trick: Lvl ${cycle.repelLevel}` : 'No repel trick route'}</p>
+          <h2>第 {cycle.cycle} 轮轮换</h2>
+          <p>{cycle.repelTrick ? `喷雾剂技巧：Lv.${cycle.repelLevel}` : '暂无喷雾剂技巧路线'}</p>
         </div>
         <div className={styles.rotationStatus}>
           {showTimeUntil && (
             <div className={styles.timeUntil}>
-              <span>Time Until</span>
-              <strong>{timeUntil === 0 ? 'Active now' : formatRotationDuration(timeUntil)}</strong>
+              <span>距该轮换</span>
+              <strong>{timeUntil === 0 ? '当前生效' : formatRotationDuration(timeUntil)}</strong>
             </div>
           )}
-          {isCurrent && <span className={styles.currentBadge}>Current</span>}
+          {isCurrent && <span className={styles.currentBadge}>当前轮换</span>}
         </div>
       </div>
 
@@ -83,7 +84,7 @@ function RotationPanel({ cycle, isCurrent, repelOnly, showTimeUntil, timeUntil }
           ))}
         </div>
       ) : (
-        <div className={styles.emptyState}>100% Zubat</div>
+        <div className={styles.emptyState}>100% 超音蝠</div>
       )}
     </section>
   )
@@ -96,12 +97,12 @@ export default function AlteringCaveRotations() {
   const rotationState = getAlteringCaveRotationState()
 
   useDocumentHead({
-    title: 'Altering Cave Rotations - PokeMMO Shiny Hunting',
-    description: 'Track PokeMMO Altering Cave rotations, repel trick targets, repel levels, and rotation swap timers.',
+    title: '变化洞窟轮换｜PokeMMO 刷闪',
+    description: '追踪 PokeMMO 变化洞窟轮换、喷雾剂技巧目标、等级条件与轮换倒计时。',
     canonicalPath: '/altering-cave-rotations/',
     breadcrumbs: [
-      { name: 'Home', url: '/' },
-      { name: 'Altering Cave Rotations', url: '/altering-cave-rotations/' },
+      { name: '首页', url: '/' },
+      { name: '变化洞窟轮换', url: '/altering-cave-rotations/' },
     ],
   })
 
@@ -113,24 +114,24 @@ export default function AlteringCaveRotations() {
 
   return (
     <div className={styles.page}>
-      <h1>Altering Cave Rotations</h1>
+      <h1>变化洞窟轮换</h1>
       <div className={styles.credit}>
-        Credit to{' '}
+        资料鸣谢：
         <a href="https://forums.pokemmo.com/index.php?/topic/144715-altering-cave-with-repel-trick/" target="_blank" rel="noopener noreferrer">
           pikabuuh
         </a>
       </div>
-      <img src={getAssetUrl('images/pagebreak.png')} alt="Page Break" className="pagebreak" />
+      <img src={getAssetUrl('images/pagebreak.png')} alt="分隔线" className="pagebreak" />
 
       <section className={styles.clockPanel}>
         <div className={styles.clockTime}>{formatInGameTime(clock)}</div>
         <div className={styles.clockDetails}>
           <span>{clock.day}</span>
           <span className={styles.periodBadge}>{clock.period}</span>
-          <span>Rotation {rotationState.rotation}</span>
+          <span>第 {rotationState.rotation} 轮轮换</span>
         </div>
         <div className={styles.swapTimer}>
-          <span>Next rotation in</span>
+          <span>距下次轮换</span>
           <strong>{formatRotationDuration(rotationState.msUntilSwap)}</strong>
         </div>
       </section>
@@ -142,19 +143,19 @@ export default function AlteringCaveRotations() {
             checked={repelOnly}
             onChange={(event) => setRepelOnly(event.target.checked)}
           />
-          <span>Repel Trick</span>
+          <span>仅看喷雾剂技巧</span>
         </label>
         <button type="button" className={styles.viewAllButton} onClick={() => setViewAll((value) => !value)}>
-          {viewAll ? 'View current rotation' : 'View all rotations'}
+          {viewAll ? '只看当前轮换' : '查看全部轮换'}
         </button>
       </div>
 
       <details className={styles.moveSummary}>
-        <summary>Move Summary</summary>
+        <summary>招式与捕捉注意事项</summary>
         <div className={styles.moveSummaryContent}>
           {ALTERING_CAVE_MOVE_SUMMARY.map((entry) => (
             <div key={entry.pokemon} className={styles.moveSummaryItem}>
-              <strong>{entry.pokemon}:</strong>
+              <strong>{translatePokemonName(entry.pokemon)}：</strong>
               <span>{entry.summary}</span>
             </div>
           ))}

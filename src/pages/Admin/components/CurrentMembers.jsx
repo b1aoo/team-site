@@ -82,21 +82,21 @@ export default function CurrentMembers({ auth }) {
   // ------------------ Render ------------------
   return (
     <div className={styles.panel}>
-      <h1>Current Members</h1>
+      <h1>当前成员</h1>
 
       <button onClick={() => setShowMembers(v => !v)} style={{ marginBottom: 8 }}>
-        {showMembers ? 'Hide Members' : 'Show Members'}
+        {showMembers ? '隐藏成员' : '显示成员'}
       </button>
 
       {showMembers && (
         <>
           {db.isMembersLoading ? (
-            <div>Loading members…</div>
+            <div>正在载入成员…</div>
           ) : (
             <>
               <input
                 type="text"
-                placeholder="Search members..."
+                placeholder="搜索成员…"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 style={{ marginBottom: 12, width: '100%', maxWidth: 300 }}
@@ -112,23 +112,23 @@ export default function CurrentMembers({ auth }) {
                           onChange={e =>
                             setEditingPlayer({ ...editingPlayer, name: e.target.value })
                           }
-                          placeholder="Name"
+                          placeholder="名称"
                         />
                         <input
                           value={editingPlayer.details || ''}
                           onChange={e =>
                             setEditingPlayer({ ...editingPlayer, details: e.target.value })
                           }
-                          placeholder="Details"
+                          placeholder="详情"
                         />
-                        <button onClick={() => handleSaveEdit(editingPlayer)}>Save</button>
-                        <button onClick={() => setEditingPlayer(null)}>Cancel</button>
+                        <button onClick={() => handleSaveEdit(editingPlayer)}>保存</button>
+                        <button onClick={() => setEditingPlayer(null)}>取消</button>
                       </div>
                     ) : (
                       <div>
                         <span>{idx + 1}: {player.name}{player.details ? ` - ${player.details}` : ''}</span>
-                        <button onClick={() => handleEdit(player)}>Edit</button>
-                        <button onClick={() => handleDelete(player.id)}>Delete</button>
+                        <button onClick={() => handleEdit(player)}>编辑</button>
+                        <button onClick={() => handleDelete(player.id)}>删除</button>
                       </div>
                     )}
                   </li>
@@ -140,18 +140,18 @@ export default function CurrentMembers({ auth }) {
       )}
 
       <div style={{ marginTop: 24 }}>
-        <h2>Add New Player</h2>
+        <h2>添加新训练家</h2>
         <input
-          placeholder="Name"
+          placeholder="名称"
           value={newPlayer.name}
           onChange={e => setNewPlayer({ ...newPlayer, name: e.target.value })}
         />
-        <button onClick={handleAdd}>Add</button>
+        <button onClick={handleAdd}>添加</button>
       </div>
 
       {notInTeam.length > 0 && (
         <div style={{ marginTop: 24 }}>
-          <h2>Not in team</h2>
+          <h2>不在公会中</h2>
           <ul>
             {notInTeam.map(owner => <li key={owner}>{owner}</li>)}
           </ul>
@@ -160,7 +160,7 @@ export default function CurrentMembers({ auth }) {
 
       {notInDatabase.length > 0 && (
         <div style={{ marginTop: 24 }}>
-          <h2>Not in database</h2>
+          <h2>不在数据库中</h2>
           <ul>
             {notInDatabase.map(name => <li key={name}>{name}</li>)}
           </ul>

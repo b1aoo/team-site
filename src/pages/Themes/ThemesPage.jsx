@@ -4,16 +4,13 @@ import { Link } from 'react-router-dom';
 import styles from './ThemesPage.module.css';
 
 const tabList = [
-  { key: 'Themes', label: 'Themes' },
-  { key: 'Encounter Counters', label: 'Encounter Counters' },
-  { key: 'Pokemon Textures', label: 'Pokemon Textures' },
-  { key: 'Other', label: 'Other' },
+  { key: 'Themes', label: '主题' }, { key: 'Encounter Counters', label: '遇敌计数器' },
+  { key: 'Pokemon Textures', label: '宝可梦贴图' }, { key: 'Other', label: '其他' },
 ];
 
 export default function ThemesPage() {
   useDocumentHead({
-    title: 'Themes & Resources',
-    description: 'Browse and download PokeMMO themes, encounter counter themes, and more community resources for Team Synergy.',
+    title: '主题与资源', description: '浏览并下载 PokeMMO 主题、遇敌计数器主题及 Team Synergy 社群资源。',
     canonicalPath: '/themes/'
   });
   const [activeTab, setActiveTab] = useState('Themes');
@@ -75,7 +72,7 @@ export default function ThemesPage() {
         item.author && item.author.toLowerCase().includes(authorFilter.toLowerCase())
       );
     }
-    if (items.length === 0) return <div className={styles.empty}>No resources found.</div>;
+    if (items.length === 0) return <div className={styles.empty}>暂无资源。</div>;
 
     return (
       <div className={styles.grid}>
@@ -86,7 +83,7 @@ export default function ThemesPage() {
             key={item.name + idx}
           >
             <img
-              src={item.previewImage || '/placeholder.png'}
+              src={item.previewImage || `${import.meta.env.BASE_URL}placeholder.png`}
               alt={item.name}
               className={styles.img}
               width="160"
@@ -96,7 +93,7 @@ export default function ThemesPage() {
             <div className={styles.label}>
               <span className={styles.itemName}>{item.name}</span>
               <div className={styles.itemDesc}>{item.description}</div>
-              <div className={styles.itemAuthor}>By {item.author}</div>
+              <div className={styles.itemAuthor}>作者：{item.author}</div>
             </div>
           </Link>
         ))}
@@ -105,17 +102,17 @@ export default function ThemesPage() {
   };
 
 
-  if (loading) return <div className="message">Loading themes...</div>;
-  if (error) return <div className="message">Error loading themes: {error}</div>;
+  if (loading) return <div className="message">正在加载主题…</div>;
+  if (error) return <div className="message">主题加载失败：{error}</div>;
 
 
 
   return (
     <div className={styles.themesPage}>
-      <h1>PokeMMO Themes & Resources</h1>
+      <h1>PokeMMO 主题与资源</h1>
       <p>
-        Explore a curated collection of PokeMMO Themes, Encounter Counter Themes, Pokemon Retextures, and more!<br />
-        Enhance your game experience with these community resources.
+        浏览精选的 PokeMMO 主题、遇敌计数器主题、宝可梦贴图及更多资源！<br />
+        用这些社群资源丰富你的游戏体验。
       </p>
 
       <div className={styles.tabs}>
@@ -131,7 +128,7 @@ export default function ThemesPage() {
       </div>
 
       <div className={styles.filterRow}>
-        <label htmlFor="authorFilter" className={styles.authorFilterLabel}>Filter by Author:</label>
+        <label htmlFor="authorFilter" className={styles.authorFilterLabel}>按作者筛选：</label>
         <select
           id="authorFilter"
           className={styles.authorFilterSelect}
@@ -139,7 +136,7 @@ export default function ThemesPage() {
           onChange={e => setAuthorFilter(e.target.value)}
         >
           {authors.map(author => (
-            <option key={author} value={author}>{author}</option>
+            <option key={author} value={author}>{author === 'All' ? '全部作者' : author}</option>
           ))}
         </select>
       </div>

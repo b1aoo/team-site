@@ -76,7 +76,7 @@ export default function PlayerStatsDropdown({ winners, data }) {
         className={styles.button}
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
-        aria-label="Toggle player statistics"
+        aria-label="展开或收起玩家统计"
       >
         Player Leaderboards {isOpen ? '▼' : '►'}
       </button>

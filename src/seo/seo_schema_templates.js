@@ -6,11 +6,11 @@ function generatePersonSchema(playerName) {
     "@context": "https://schema.org",
     "@type": "Person",
     "name": playerName,
-    "url": `https://synergymmo.com/player/${playerName}/`,
+    "url": `https://b1aoo.github.io/team-site/player/${playerName}/`,
     "memberOf": {
       "@type": "Organization",
       "name": "Team Synergy",
-      "url": "https://synergymmo.com"
+      "url": "https://b1aoo.github.io/team-site"
     }
   };
 }
@@ -20,9 +20,9 @@ function generatePokemonSchema(name, sanitized) {
     "@context": "https://schema.org",
     "@type": "Thing",
     "name": name,
-    "url": `https://synergymmo.com/pokemon/${sanitized}/`,
+    "url": `https://b1aoo.github.io/team-site/pokemon/${sanitized}/`,
     "image": `https://img.pokemondb.net/sprites/black-white/anim/shiny/${sanitized}.gif`,
-    "description": `${name} shiny form in PokeMMO`
+    "description": `${name} 在 PokeMMO 中的闪光形态`
   };
 }
 
@@ -32,8 +32,8 @@ function generateBreadcrumbSchema(routePath, routeName) {
     {
       "@type": "ListItem",
       "position": 1,
-      "name": "Home",
-      "item": "https://synergymmo.com/"
+      "name": "首页",
+      "item": "https://b1aoo.github.io/team-site/"
     }
   ];
   let currentPath = '';
@@ -43,7 +43,7 @@ function generateBreadcrumbSchema(routePath, routeName) {
       "@type": "ListItem",
       "position": idx + 2,
       "name": segment.charAt(0).toUpperCase() + segment.slice(1),
-      "item": `https://synergymmo.com${currentPath}/`
+      "item": `https://b1aoo.github.io/team-site${currentPath}/`
     });
   });
   if (routePath !== '/') {
@@ -51,7 +51,7 @@ function generateBreadcrumbSchema(routePath, routeName) {
       "@type": "ListItem",
       "position": itemListElements.length + 1,
       "name": routeName,
-      "item": `https://synergymmo.com${routePath}/`
+      "item": `https://b1aoo.github.io/team-site${routePath}/`
     });
   }
   return {
@@ -67,15 +67,15 @@ function generateResourceBreadcrumbSchema(routePath, resourceMeta = {}) {
     {
       "@type": "ListItem",
       "position": 1,
-      "name": "Home",
-      "item": "https://synergymmo.com/"
+      "name": "首页",
+      "item": "https://b1aoo.github.io/team-site/"
     }
   ];
   itemListElements.push({
     "@type": "ListItem",
     "position": 2,
-    "name": "Resources",
-    "item": "https://synergymmo.com/resources/"
+    "name": "资源中心",
+    "item": "https://b1aoo.github.io/team-site/resources/"
   });
   let currentPath = '/resources';
   let position = 3;
@@ -90,7 +90,7 @@ function generateResourceBreadcrumbSchema(routePath, resourceMeta = {}) {
       "@type": "ListItem",
       "position": position,
       "name": displayName,
-      "item": `https://synergymmo.com${currentPath}/`,
+      "item": `https://b1aoo.github.io/team-site${currentPath}/`,
       ...(resourceMeta.description ? { "description": resourceMeta.description } : {})
     });
     position++;
@@ -106,23 +106,23 @@ function generateResourceCollectionSchema(routePath, categoryTitle, categoryDesc
   return {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    "url": `https://synergymmo.com${routePath}/`,
+    "url": `https://b1aoo.github.io/team-site${routePath}/`,
     "name": categoryTitle,
     "description": categoryDescription,
     "isPartOf": {
       "@type": "WebSite",
       "name": "Team Synergy",
-      "url": "https://synergymmo.com"
+      "url": "https://b1aoo.github.io/team-site"
     },
     "mainEntity": {
       "@type": "Collection",
       "name": categoryTitle,
       "description": categoryDescription,
-      "inLanguage": "en",
+      "inLanguage": "zh-CN",
       "creator": {
         "@type": "Organization",
         "name": "Team Synergy",
-        "url": "https://synergymmo.com"
+        "url": "https://b1aoo.github.io/team-site"
       }
     }
   };
@@ -133,9 +133,9 @@ function generateOrganizationSchema() {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Team Synergy",
-    "url": "https://synergymmo.com",
-    "logo": "https://synergymmo.com/favicon.png",
-    "description": "A PokeMMO shiny hunting community dedicated to shiny collection, PVP competition, and gaming events.",
+    "url": "https://b1aoo.github.io/team-site",
+    "logo": "https://b1aoo.github.io/team-site/favicon.png",
+    "description": "专注于闪光收藏、PVP 对战与游戏活动的 PokeMMO 刷闪社区。",
     "sameAs": [
       "https://www.youtube.com/@ohypers",
       "https://discord.com/invite/2BEUq6fWAj"
@@ -143,7 +143,7 @@ function generateOrganizationSchema() {
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": "",
-      "contactType": "Community Support"
+      "contactType": "社群支持"
     }
   };
 }
@@ -162,7 +162,7 @@ function generateEventSchema(eventTitle, eventDescription) {
     "organizer": {
       "@type": "Organization",
       "name": "Team Synergy",
-      "url": "https://synergymmo.com"
+      "url": "https://b1aoo.github.io/team-site"
     }
   };
 }
@@ -172,12 +172,12 @@ function generateTrophySchema(trophyName) {
     "@context": "https://schema.org",
     "@type": "Award",
     "name": trophyName,
-    "description": `${trophyName} achievement earned by Team Synergy members in PokeMMO`,
-    "url": `https://synergymmo.com/trophy/${trophyName.toLowerCase().replace(/\s+/g, '-')}/`,
+    "description": `Team Synergy 成员在 PokeMMO 中获得的“${trophyName}”成就`,
+    "url": `https://b1aoo.github.io/team-site/trophy/${trophyName.toLowerCase().replace(/\s+/g, '-')}/`,
     "awardedBy": {
       "@type": "Organization",
       "name": "Team Synergy",
-      "url": "https://synergymmo.com"
+      "url": "https://b1aoo.github.io/team-site"
     },
     "isPartOf": {
       "@type": "AggregateOffer",
@@ -209,28 +209,28 @@ function generateCreatorSchema(route = '/') {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "Team Synergy",
-    "url": "https://synergymmo.com",
+    "url": "https://b1aoo.github.io/team-site",
     "creator": {
       "@type": "Organization",
       "name": "Team Synergy",
-      "url": "https://synergymmo.com",
+      "url": "https://b1aoo.github.io/team-site",
       "sameAs": [
         "https://www.youtube.com/@ohypers",
         "https://discord.com/invite/2BEUq6fWAj"
       ]
     },
-    "description": "A PokeMMO shiny hunting community dedicated to shiny collection, PVP competition, and gaming events.",
+    "description": "专注于闪光收藏、PVP 对战与游戏活动的 PokeMMO 刷闪社区。",
     "publisher": {
       "@type": "Organization",
       "name": "Team Synergy",
-      "url": "https://synergymmo.com",
-      "logo": "https://synergymmo.com/favicon.png"
+      "url": "https://b1aoo.github.io/team-site",
+      "logo": "https://b1aoo.github.io/team-site/favicon.png"
     }
   };
 }
 
 function generateWebPageSchema(route, title, description, image) {
-  const url = route === '/' ? 'https://synergymmo.com/' : `https://synergymmo.com${route}/`;
+  const url = route === '/' ? 'https://b1aoo.github.io/team-site/' : `https://b1aoo.github.io/team-site${route}/`;
   return {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -243,26 +243,26 @@ function generateWebPageSchema(route, title, description, image) {
     "isPartOf": {
       "@type": "WebSite",
       "name": "Team Synergy",
-      "url": "https://synergymmo.com"
+      "url": "https://b1aoo.github.io/team-site"
     },
     "publisher": {
       "@type": "Organization",
       "name": "Team Synergy",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://synergymmo.com/favicon.png"
+        "url": "https://b1aoo.github.io/team-site/favicon.png"
       }
     },
     "author": {
       "@type": "Organization",
       "name": "Team Synergy",
-      "url": "https://synergymmo.com"
+      "url": "https://b1aoo.github.io/team-site"
     }
   };
 }
 
 function generateCollectionPageSchema(route, title, description, image, itemCount) {
-  const url = route === '/' ? 'https://synergymmo.com/' : `https://synergymmo.com${route}/`;
+  const url = route === '/' ? 'https://b1aoo.github.io/team-site/' : `https://b1aoo.github.io/team-site${route}/`;
   return {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -274,12 +274,12 @@ function generateCollectionPageSchema(route, title, description, image, itemCoun
     "isPartOf": {
       "@type": "WebSite",
       "name": "Team Synergy",
-      "url": "https://synergymmo.com"
+      "url": "https://b1aoo.github.io/team-site"
     },
     "author": {
       "@type": "Organization",
       "name": "Team Synergy",
-      "url": "https://synergymmo.com"
+      "url": "https://b1aoo.github.io/team-site"
     }
   };
 }
@@ -309,8 +309,8 @@ function generateSocialMediaSchema(title, description, image, url) {
     "datePublished": new Date().toISOString(),
     "author": {
       "@type": "Person",
-      "name": "Team Synergy Staff",
-      "url": "https://synergymmo.com/player/Hyper/"
+      "name": "Team Synergy 管理团队",
+      "url": "https://b1aoo.github.io/team-site/player/Hyper/"
     },
     "sharedContent": {
       "@type": "CreativeWork",
@@ -322,7 +322,7 @@ function generateSocialMediaSchema(title, description, image, url) {
     "publisher": {
       "@type": "Organization",
       "name": "Team Synergy",
-      "url": "https://synergymmo.com"
+      "url": "https://b1aoo.github.io/team-site"
     }
   };
 }
@@ -332,12 +332,12 @@ function generateWebsiteSearchSchema() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "Team Synergy",
-    "url": "https://synergymmo.com",
+    "url": "https://b1aoo.github.io/team-site",
     "potentialAction": {
       "@type": "SearchAction",
       "target": {
         "@type": "EntryPoint",
-        "urlTemplate": "https://synergymmo.com/?search={search_term_string}"
+        "urlTemplate": "https://b1aoo.github.io/team-site/?search={search_term_string}"
       },
       "query-input": "required name=search_term_string"
     }

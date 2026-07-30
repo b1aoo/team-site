@@ -4,7 +4,7 @@ import styles from './SearchBar.module.css'
 export default function SearchBar({
   value,
   onChange,
-  placeholder = 'Search for a player...',
+  placeholder = '搜索训练家…',
   suggestions = [],
   onSuggestionSelect
 }) {

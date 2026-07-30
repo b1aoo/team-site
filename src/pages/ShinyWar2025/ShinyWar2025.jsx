@@ -2,7 +2,7 @@ import { useMemo, useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useDocumentHead } from '../../hooks/useDocumentHead'
 import { useDatabase } from '../../hooks/useDatabase'
-import { getLocalPokemonGif, onGifError } from '../../utils/pokemon'
+import { getLocalPokemonGif, onGifError, translatePokemonName } from '../../utils/pokemon'
 import { getAssetUrl } from '../../utils/assets'
 import warData from '../../data/shinywar2025.json'
 import styles from './ShinyWar2025.module.css'
@@ -39,7 +39,7 @@ export default function ShinyWar2025() {
     title: 'PokeMMO 2025 闪光大战战报',
     description: 'Team Synergy 在 2025 闪光大战中位列第 25 名，累计 1060 分，收获 111 只闪光宝可梦。查看分级、战果、排名与赛事详情。',
     canonicalPath: '/shiny-war-2025/',
-    ogImage: 'https://synergymmo.com/images/pokemon_gifs/tier_1/leafeon.gif',
+    ogImage: 'https://b1aoo.github.io/team-site/images/pokemon_gifs/tier_1/leafeon.gif',
     breadcrumbs: breadcrumbs
   })
 
@@ -156,7 +156,7 @@ export default function ShinyWar2025() {
                   )}
                   <img
                     src={getLocalPokemonGif(c.p)}
-                    alt={c.p}
+                    alt={translatePokemonName(c.p)}
                     className={styles.pokemonGif}
                     width="80"
                     height="80"
@@ -164,7 +164,7 @@ export default function ShinyWar2025() {
                     onError={onGifError(c.p)}
                   />
                   <div className={styles.pokemonInfo}>
-                    <span className={styles.pokemonName}>{c.p}</span>
+                    <span className={styles.pokemonName}>{translatePokemonName(c.p)}</span>
                     <span className={styles.pointsBadge}>{getPoints(c)} 分</span>
                   </div>
                 </Link>

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 
-const SEASONS_BY_MONTH = ['Spring', 'Summer', 'Autumn', 'Winter'];
+const SEASONS_BY_MONTH = ['春季', '夏季', '秋季', '冬季'];
 
 // Core in-game clock logic as a pure function
-function getInGameState(DAY_OFFSET = 0, IN_GAME_DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']) {
+function getInGameState(DAY_OFFSET = 0, IN_GAME_DAYS = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六']) {
   const now = Date.now();
   const utcMinutes = now / 60000;
   const currentUtcDate = new Date(now);
@@ -43,7 +43,7 @@ function getInGameState(DAY_OFFSET = 0, IN_GAME_DAYS = ['Sunday','Monday','Tuesd
 }
 
 // Reusable Hook
-export function useInGameClock(DAY_OFFSET = 0, IN_GAME_DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']) {
+export function useInGameClock(DAY_OFFSET = 0, IN_GAME_DAYS = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六']) {
   const [state, setState] = useState(() => getInGameState(DAY_OFFSET, IN_GAME_DAYS));
 
   useEffect(() => {

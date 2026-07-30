@@ -46,7 +46,7 @@ export function renderPalette() {
         if (totalGroups > MAX_DISPLAYED_GROUPS) {
             const warning = document.createElement('div');
             warning.className = 'grouping-warning';
-            warning.innerHTML = `Showing ${MAX_DISPLAYED_GROUPS} of ${totalGroups} groups. <br><small>Increase sensitivity to reduce groups.</small>`;
+            warning.innerHTML = `当前显示 ${totalGroups} 组中的 ${MAX_DISPLAYED_GROUPS} 组。<br><small>提高灵敏度可减少分组数量。</small>`;
             elements.paletteGrid.appendChild(warning);
         }
 
@@ -246,7 +246,7 @@ export async function loadPaletteSourceImage(file) {
 
 function updatePaletteSourceUI(img, fileName) {
     elements.paletteSourceContent.innerHTML = `
-        <img src="${img.src}" class="palette-source-preview" alt="Palette source">
+        <img src="${img.src}" class="palette-source-preview" alt="调色板来源">
         <p style="margin: 0; font-size: 11px; color: #4caf50;">✓ ${fileName}</p>
         <p style="margin: 2px 0 0; font-size: 10px; color: #888;">${state.sourcePaletteColors.size} colors extracted</p>
     `;
@@ -287,6 +287,6 @@ export function clearPaletteSource() {
     elements.paletteSourceUpload.classList.remove('has-image');
     elements.paletteSourceContent.innerHTML = `
         <div style="font-size: 24px;">🎨</div>
-        <p style="margin: 5px 0 0; font-size: 12px; color: #888;">Click to upload palette image</p>
+        <p style="margin: 5px 0 0; font-size: 12px; color: #888;">点击上传调色板图片</p>
     `;
 }

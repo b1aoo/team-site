@@ -6,13 +6,13 @@ import { slugify } from '../../utils/slugify'; // fixed path to your utils
 
 export default function TrophyBoard() {
   const breadcrumbs = [
-    { name: 'Home', url: '/' },
-    { name: 'Trophy Board', url: '/trophy-board' }
+    { name: '首页', url: '/' },
+    { name: '奖杯墙', url: '/trophy-board' }
   ];
 
   useDocumentHead({
-    title: 'PokeMMO Trophy Board - Team Synergy Achievements',
-    description: 'Team Synergy trophy board showcasing PokeMMO achievements, awards, and member accomplishments. Browse 12 trophy categories, celebrate milestones, and view championship wins.',
+    title: 'PokeMMO 奖杯墙－Team Synergy 成就',
+    description: 'Team Synergy 奖杯墙展示 PokeMMO 成就、奖项与成员荣誉。浏览 12 类奖杯、庆祝里程碑并查看冠军战绩。',
     canonicalPath: '/trophy-board/',
     breadcrumbs: breadcrumbs
   });
@@ -20,13 +20,13 @@ export default function TrophyBoard() {
   const { data, isLoading } = useTrophies();
   const navigate = useNavigate();
 
-  if (isLoading) return <div className="message">Loading...</div>;
+  if (isLoading) return <div className="message">加载中…</div>;
 
   const { trophies } = data;
 
   return (
     <div>
-      <h1>Trophy Board</h1>
+      <h1>奖杯墙</h1>
       <div className={styles.grid}>
         {Object.entries(trophies).map(([name, imgSrc]) => {
           const slug = slugify(name); // create a clean slug for the URL

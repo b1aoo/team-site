@@ -25,8 +25,8 @@ function ThemeDetail() {
 
   // Set document head for SEO
   useDocumentHead({
-    title: theme ? theme.name : 'Theme Detail',
-    description: theme && theme.description ? theme.description : 'View details for this PokeMMO theme.',
+    title: theme ? theme.name : '主题详情',
+    description: theme && theme.description ? theme.description : '查看此 PokeMMO 主题的详情。',
     canonicalPath: theme ? `/themes/${slug}/` : '/themes/'
   });
 
@@ -64,37 +64,37 @@ function ThemeDetail() {
     fetchThemeData();
   }, [slug]);
 
-  if (loading) return <div className={styles.detailPage}>Loading theme...</div>;
-  if (error || !theme) return <div className={styles.notFound}>Theme not found.</div>;
+  if (loading) return <div className={styles.detailPage}>正在加载主题…</div>;
+  if (error || !theme) return <div className={styles.notFound}>未找到主题。</div>;
 
   return (
     <div className={styles.detailPage}>
       <Link to="/themes/" className={styles.backButtonWrapper}>
-        &larr; Back to Themes
+        ← 返回主题列表
       </Link>
       <h1>{theme.name}</h1>
       <div className={styles.previewRow}>
         <img
-          src={theme.previewImage || '/placeholder.png'}
+          src={theme.previewImage || `${import.meta.env.BASE_URL}placeholder.png`}
           alt={theme.name}
           className={styles.previewImg}
         />
         <div className={styles.infoBox}>
-          <div><strong>Category:</strong> {theme.category}</div>
-          <div><strong>Author:</strong> {theme.author}</div>
+          <div><strong>分类：</strong>{theme.category}</div>
+          <div><strong>作者：</strong>{theme.author}</div>
         </div>
       </div>
       <p className={styles.desc}>{theme.description}</p>
       {/* Detailed Images Section */}
       {Array.isArray(theme.detailedImages) && theme.detailedImages.length > 0 && (
         <div className={styles.detailedImagesSection} style={{ margin: '2rem 0' }}>
-          <h2 style={{ marginBottom: '1rem' }}>Detailed Images</h2>
+          <h2 style={{ marginBottom: '1rem' }}>详细图片</h2>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', justifyContent: 'center' }}>
             {theme.detailedImages.map((img, idx) => (
               <div key={idx} className={styles.detailedImageCard} style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10)', borderRadius: 8, padding: 16, maxWidth: 340, minWidth: 220, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <img
                   src={img}
-                  alt={`Detailed view ${idx + 1}`}
+                  alt={`详细预览 ${idx + 1}`}
                   className={styles.detailedImageZoom}
                   style={{ width: '100%', maxWidth: 600, maxHeight: 600, objectFit: 'contain', borderRadius: 6, marginBottom: 12 }}
                 />
@@ -112,11 +112,10 @@ function ThemeDetail() {
             rel="noopener noreferrer"
             className={styles.linkButton}
           >
-            Link
+            前往资源
           </a>
         </div>
       )}
     </div>
   );
 }
-

@@ -3,17 +3,17 @@ import Autocomplete from './Autocomplete'
 import styles from '../Admin.module.css'
 
 const FLAG_FIELDS = [
-  { key: 'Egg', label: 'Egg' },
-  { key: 'Secret Shiny', label: 'Secret Shiny' },
-  { key: 'Safari', label: 'Safari' },
-  { key: 'Alpha', label: 'Alpha' },
-  { key: 'Event', label: 'Event' },
-  { key: 'MysteriousBall', label: 'Mystery Ball' },
-  { key: 'Honey Tree', label: 'Honey Tree' },
-  { key: 'Fossil', label: 'Fossil' },
-  { key: 'Swarm', label: 'Swarm' },
-  { key: 'Fishing', label: 'Fishing' },
-  { key: 'Headbutt', label: 'Headbutt' },
+  { key: 'Egg', label: '孵化' },
+  { key: 'Secret Shiny', label: '秘密闪光' },
+  { key: 'Safari', label: '狩猎地带' },
+  { key: 'Alpha', label: '头目' },
+  { key: 'Event', label: '活动' },
+  { key: 'MysteriousBall', label: '神秘球' },
+  { key: 'Honey Tree', label: '甜甜蜜树' },
+  { key: 'Fossil', label: '化石' },
+  { key: 'Swarm', label: '群聚' },
+  { key: 'Fishing', label: '垂钓' },
+  { key: 'Headbutt', label: '头锤树' },
 ]
 
 
@@ -66,9 +66,9 @@ export default function BulkAddReview({ entries, playerNames, allPokemonNames, o
   return (
     <div className={styles.dialogOverlay}>
       <div className={styles.dialogBox + ' ' + styles.bulkReviewFullWidth} style={{ maxHeight: '90vh', overflowY: 'auto' }}>
-        <h3>Confirm Bulk Add</h3>
+        <h3>确认批量添加</h3>
         <div className={styles.bulkReviewHeader}>
-          Player / Pokémon / Flags
+          训练家／宝可梦／标记
           <label style={{ float: 'right', fontWeight: 'normal', fontSize: 14 }}>
             <input
               type="checkbox"
@@ -76,7 +76,7 @@ export default function BulkAddReview({ entries, playerNames, allPokemonNames, o
               onChange={e => setUseCurrentMonth(e.target.checked)}
               style={{ marginRight: 4 }}
             />
-            Current Month
+            当前月份
           </label>
         </div>
         <div className={styles.bulkReviewList}>
@@ -88,7 +88,7 @@ export default function BulkAddReview({ entries, playerNames, allPokemonNames, o
                   value={entry.player}
                   onChange={val => handleFieldChange(idx, 'player', val)}
                   getOptions={() => playerNames}
-                  placeholder="Player"
+                  placeholder="训练家"
                 />
               </div>
               <div>
@@ -97,7 +97,7 @@ export default function BulkAddReview({ entries, playerNames, allPokemonNames, o
                   value={entry.Pokemon}
                   onChange={val => handleFieldChange(idx, 'Pokemon', val)}
                   getOptions={() => allPokemonNames}
-                  placeholder="Pokemon"
+                  placeholder="宝可梦"
                 />
               </div>
               {FLAG_FIELDS.map(f => (
@@ -124,17 +124,17 @@ export default function BulkAddReview({ entries, playerNames, allPokemonNames, o
                     padding: '4px 18px',
                   }}
                   onClick={() => handleRemove(idx)}
-                  title="Remove this entry"
+                  title="移除此条目"
                 >
-                  Remove
+                  移除
                 </button>
               </div>
             </div>
           ))}
         </div>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-          <button onClick={handleConfirm}>Confirm & Add</button>
-          <button onClick={onCancel}>Cancel</button>
+          <button onClick={handleConfirm}>确认并添加</button>
+          <button onClick={onCancel}>取消</button>
         </div>
       </div>
     </div>

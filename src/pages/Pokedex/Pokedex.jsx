@@ -13,7 +13,15 @@ import {
   getAlteringCaveRotationState,
   getAlteringCaveMoveWarning,
 } from '../../utils/alteringCave'
-import { normalizePokemonName, onGifError, getBasePokemonName } from '../../utils/pokemon'
+import { normalizePokemonName, onGifError, getBasePokemonName, translatePokemonName } from '../../utils/pokemon'
+import {
+  translateAbilityName,
+  translateEggGroupName,
+  translateLocationName,
+  translateMoveName,
+  translateRegionName,
+  translateTypeName,
+} from '../../utils/pokemonTermsZh'
 import {
   formatDangerousPokemonWarningTitle,
   getDangerousPokemonWarnings,
@@ -39,6 +47,13 @@ function parseLocationSearch(value) {
   }
 }
 
+function formatLocationSearchLabel(value) {
+  const { routeName, regionName } = parseLocationSearch(value)
+  const translatedRoute = translateLocationName(routeName)
+  const translatedRegion = translateRegionName(regionName)
+  return translatedRegion ? `${translatedRoute}－${translatedRegion}` : translatedRoute
+}
+
 function isAlteringCaveSearch(value) {
   return String(value || '').toLowerCase().replace(/-/g, ' ').includes('altering cave')
 }
@@ -51,15 +66,61 @@ function normalizeLocationValue(value) {
     .trim()
 }
 
+const ENCOUNTER_TYPE_LABELS = {
+  Horde: '群聚',
+  'Lure Encounters': '引虫香水遭遇',
+  Rares: '稀有单遇',
+  Singles: '普通单遇',
+  'Fishing Encounters': '钓鱼遭遇',
+  Headbutt: '头锤树',
+  Special: '特殊遭遇',
+}
+
+const ENCOUNTER_DETAIL_LABELS = {
+  Pheno: '摇草',
+  'Both Grass': '普通草丛 / 深色草丛',
+  Grass: '普通草丛',
+  'Dark Grass': '深色草丛',
+  Water: '水面',
+  'Rock Smash': '碎岩',
+  'Super Rod': '超级钓竿',
+  'Good Rod': '好钓竿',
+  'Old Rod': '破旧钓竿',
+  Headbutt: '头锤树',
+}
+
+function includesLocalizedTerm(rawValue, translatedValue, query) {
+  const normalizedQuery = String(query || '').trim().toLowerCase()
+  if (!normalizedQuery) return true
+  return String(rawValue || '').toLowerCase().includes(normalizedQuery)
+    || String(translatedValue || '').toLowerCase().includes(normalizedQuery)
+}
+
+function matchesPokemonSearch(name, normalizedName, query) {
+  return includesLocalizedTerm(name, translatePokemonName(name), query)
+    || String(normalizedName || '').toLowerCase().includes(String(query || '').trim().toLowerCase())
+}
+
+function matchesMoveSearch(moveName, query) {
+  return includesLocalizedTerm(moveName, translateMoveName(moveName), query)
+}
+
+function matchesAbilitySearch(abilityName, query) {
+  const normalizedQuery = String(query || '').toLowerCase().replace(/[\s-]/g, '')
+  if (!normalizedQuery) return true
+  return String(abilityName || '').toLowerCase().replace(/[\s-]/g, '').includes(normalizedQuery)
+    || translateAbilityName(abilityName).toLowerCase().replace(/[\s-]/g, '').includes(normalizedQuery)
+}
+
 export default function Pokedex() {
   const breadcrumbs = [
-    { name: 'Home', url: '/' },
-    { name: 'PokeMMO Pokédex', url: '/pokedex' }
+    { name: '首页', url: '/' },
+    { name: 'PokeMMO 宝可梦图鉴', url: '/pokedex' }
   ];
 
   useDocumentHead({
-    title: 'PokeMMO Pokédex Tracker - 731 Pokémon Encounter Locations & Tiers',
-    description: 'The ultimate PokeMMO Pokédex tracker for shiny hunters. Find all 731 Pokémon with PokeMMO encounter locations, tier rarities, abilities, and shiny hunting strategies. Track living dex progress.',
+    title: 'PokeMMO 宝可梦图鉴追踪器 - 731 种宝可梦的遭遇地点与分级',
+    description: '面向闪光猎人的 PokeMMO 图鉴追踪器。查询 731 种宝可梦的遭遇地点、分级稀有度、特性与刷闪策略，并追踪活体图鉴进度。',
     canonicalPath: '/pokedex/',
     breadcrumbs: breadcrumbs
   })
@@ -108,12 +169,11 @@ export default function Pokedex() {
   const searchTerm = search.trim().toLowerCase()
   const formatRarityKey = (value) => value.toLowerCase().trim().replace(/\s+/g, '_')
   const formatRarityLabel = (value) => {
-    if (value === 'all') return 'All Encounter Types'
-    if (value === 'fishing') return 'Fishing'
-    return value
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ')
+    const labels = {
+      all: '全部遭遇方式', fishing: '钓鱼', lure: '引虫香水', headbutt: '头锤树',
+      'horde 5x': '5 只群聚', 'horde 3x': '3 只群聚',
+    }
+    return labels[String(value).toLowerCase()] || value
   }
   const nameAliasMap = {
     darmanitan: 'darmanitan-standard'
@@ -169,14 +229,7 @@ export default function Pokedex() {
       && !isSpecialEncounter(encounter)
   }
 
-  const formatEggGroupName = (group) => {
-    if (!group) return ""
-    const lowerGroup = group.toLowerCase()
-    if (lowerGroup === "watera") return "Water A"
-    if (lowerGroup === "waterb") return "Water B"
-    if (lowerGroup === "waterc") return "Water C"
-    return group.charAt(0).toUpperCase() + group.slice(1).replace('-', ' ')
-  }
+  const formatEggGroupName = (group) => translateEggGroupName(group)
 
   const normalizeEncounterSeason = (seasonValue) => {
     const season = String(seasonValue || '').trim().toLowerCase()
@@ -302,13 +355,13 @@ export default function Pokedex() {
 
   const getEncounterTypeDesc = (type) => {
     const descriptions = {
-      'Horde': 'All Pokemon found within Hordes on the route',
-      'Lure Encounters': 'Any Pokemon using a lure',
-      'Rares': 'Rare tier Pokemon (Tier 0-2) found in singles',
-      'Singles': 'Common Pokemon (Tier 3+) found in singles (Very Common, Common, Uncommon, Rare, Very Rare)',
-      'Fishing Encounters': 'Any Pokemon caught within "Fishing"',
-      'Headbutt': 'Any Pokemon found by using Headbutt on trees',
-      'Special': 'Any Pokemon caught within "Special"'
+      Horde: '该地点可遇到的所有群聚宝可梦。',
+      'Lure Encounters': '使用引虫香水后可遇到的宝可梦。',
+      Rares: '单遇中可刷到的稀有分层宝可梦（第 0–2 阶）。',
+      Singles: '单遇中的常规分层宝可梦（第 3 阶及以上）。',
+      'Fishing Encounters': '通过钓鱼可遇到的宝可梦。',
+      Headbutt: '对树木使用头锤后可遇到的宝可梦。',
+      Special: '特殊遭遇方式可遇到的宝可梦。'
     }
     return descriptions[type] || ''
   }
@@ -943,29 +996,29 @@ const rarityOptions = useMemo(() => {
 
   const sliderIndex = mode === 'shiny' ? 0 : 1
 
-  if (isLoading) return <div className="message">Loading...</div>
+  if (isLoading) return <div className="message">加载中…</div>
 
   return (
     <div>
       <h1>
-        Team Synergy PokeDex
+        Team Synergy 宝可梦图鉴
         <Link to="/admin" className="invisible-link">!</Link>
       </h1>
 
-      <h5 className={styles.instructionText}>Click on the Pokemon for more details!</h5>
-      <img src={getAssetUrl('images/pagebreak.png')} alt="Page Break" className="pagebreak" />
+      <h5 className={styles.instructionText}>点击宝可梦可查看详细资料！</h5>
+      <img src={getAssetUrl('images/pagebreak.png')} alt="分隔线" className="pagebreak" />
 
       <button
         className={`${styles.filterToggleButton} ${isFilterPanelOpen ? styles.active : ''}`}
         onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-        aria-label="Toggle filters"
+        aria-label="展开或收起筛选器"
         aria-expanded={isFilterPanelOpen}
         data-filter-button
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
         </svg>
-        <span>Filters</span>
+        <span>筛选器</span>
         {activeFilterCount > 0 && (
           <span className={styles.filterBadge}>{activeFilterCount}</span>
         )}
@@ -977,10 +1030,10 @@ const rarityOptions = useMemo(() => {
 
             {/* Header */}
             <div className={styles.filterPanelHeader}>
-              <h2 className={styles.filterPanelTitle}>Filters</h2>
+              <h2 className={styles.filterPanelTitle}>筛选器</h2>
               {activeFilterCount > 0 && (
                 <button className={styles.filterResetBtn} onClick={clearAllFilters}>
-                  Reset all ({activeFilterCount})
+                  清除全部（{activeFilterCount}）
                 </button>
               )}
             </div>
@@ -989,11 +1042,11 @@ const rarityOptions = useMemo(() => {
             <div className={styles.filterTopRow}>
               {/* Location */}
               <div className={`${styles.filterSection} ${styles.filterLocationSection}`}>
-                <h4 className={styles.filterSectionTitle}>Location</h4>
+                <h4 className={styles.filterSectionTitle}>地点</h4>
                 <div className={styles.filterInputGroup}>
                   <input
                     type="text"
-                    placeholder="Search locations..."
+                    placeholder="搜索地点…"
                     value={locationSearchInput}
                     onChange={(e) => {
                       const value = e.target.value
@@ -1022,7 +1075,7 @@ const rarityOptions = useMemo(() => {
                           }}
                           className={styles.filterSuggestionItem}
                         >
-                          {loc}
+                          {formatLocationSearchLabel(loc)}
                         </button>
                       ))}
                     </div>
@@ -1036,7 +1089,7 @@ const rarityOptions = useMemo(() => {
                       }}
                       className={styles.filterClearBtn}
                     >
-                      Clear
+                      清除
                     </button>
                   )}
                 </div>
@@ -1044,13 +1097,13 @@ const rarityOptions = useMemo(() => {
 
               {/* Encounter Types */}
               <div className={styles.filterSection}>
-                <h4 className={styles.filterSectionTitle}>Encounter Types</h4>
+                <h4 className={styles.filterSectionTitle}>遭遇方式</h4>
                 <div className={styles.filterTagsRow}>
                   <button
                     onClick={() => setSelectedRarities([])}
                     className={`${styles.filterTag} ${selectedRarities.length === 0 ? styles.filterTagActive : ''}`}
                   >
-                    All
+                    全部
                   </button>
                   {rarityOptions.filter(o => o !== 'all').map(option => (
                     <button
@@ -1069,13 +1122,13 @@ const rarityOptions = useMemo(() => {
 
             {/* Types - Full Width */}
             <div className={styles.filterSection}>
-              <h4 className={styles.filterSectionTitle}>Types</h4>
+                <h4 className={styles.filterSectionTitle}>属性</h4>
               <div className={styles.filterTypesContainer}>
                 <button
                   className={`${styles.filterTypeLabel} ${selectedTypes.length === 0 ? styles.typeActive : ''}`}
                   onClick={() => setSelectedTypes([])}
                 >
-                  All
+                  全部
                 </button>
                 {typeOptions.filter(o => o !== 'all').map(option => (
                   <button
@@ -1088,7 +1141,7 @@ const rarityOptions = useMemo(() => {
                       )
                     }}
                   >
-                    {option.charAt(0).toUpperCase() + option.slice(1)}
+                    {translateTypeName(option)}
                   </button>
                 ))}
               </div>
@@ -1098,29 +1151,29 @@ const rarityOptions = useMemo(() => {
             <div className={styles.filterMidRow}>
               {/* Season */}
               <div className={styles.filterSection}>
-                <h4 className={styles.filterSectionTitle}>Season</h4>
+                <h4 className={styles.filterSectionTitle}>季节</h4>
                 <select
                   value={selectedSeason}
                   onChange={(e) => setSelectedSeason(e.target.value)}
                   className={`${styles.filterEssentialSelect} ${styles.seasonSelect}`}
                 >
-                  <option value="">All Seasons</option>
-                  <option value="Spring">Spring</option>
-                  <option value="Summer">Summer</option>
-                  <option value="Autumn">Autumn</option>
-                  <option value="Winter">Winter</option>
+                  <option value="">全部季节</option>
+                  <option value="Spring">春季</option>
+                  <option value="Summer">夏季</option>
+                  <option value="Autumn">秋季</option>
+                  <option value="Winter">冬季</option>
                 </select>
               </div>
 
               {/* Tiers */}
               <div className={styles.filterSection}>
-                <h4 className={styles.filterSectionTitle}>Tiers</h4>
+                <h4 className={styles.filterSectionTitle}>分级</h4>
                 <div className={styles.filterTagsRow}>
                   <button
                     onClick={() => setSelectedTiers([])}
                     className={`${styles.filterTag} ${selectedTiers.length === 0 ? styles.filterTagActive : ''}`}
                   >
-                    All
+                    全部
                   </button>
                   {tierOptions.filter(o => o !== 'all').map(option => (
                     <button
@@ -1138,7 +1191,7 @@ const rarityOptions = useMemo(() => {
 
               {/* Egg Groups */}
               <div className={styles.filterSection}>
-                <h4 className={styles.filterSectionTitle}>Egg Groups</h4>
+                <h4 className={styles.filterSectionTitle}>蛋组</h4>
                 <div className={styles.filterTagsRow}>
                   {selectedEggGroups.length > 0 && (
                     <select
@@ -1147,15 +1200,15 @@ const rarityOptions = useMemo(() => {
                       className={styles.filterEssentialSelect}
                       style={{ minWidth: '70px' }}
                     >
-                      <option value="any">Any of</option>
-                      <option value="both">Both</option>
+                      <option value="any">任一蛋组</option>
+                      <option value="both">同时属于</option>
                     </select>
                   )}
                   <button
                     onClick={() => setSelectedEggGroups([])}
                     className={`${styles.filterTag} ${selectedEggGroups.length === 0 ? styles.filterTagActive : ''}`}
                   >
-                    All
+                    全部
                   </button>
                   {eggGroupOptions.filter(o => o !== 'all').map(option => (
                     <button
@@ -1177,10 +1230,10 @@ const rarityOptions = useMemo(() => {
 
               {/* Ability + Alpha */}
               <div className={styles.filterSection}>
-                <h4 className={styles.filterSectionTitle}>Ability</h4>
+                <h4 className={styles.filterSectionTitle}>特性</h4>
                 <input
                   type="text"
-                  placeholder="Enter ability name..."
+                  placeholder="输入特性名称…"
                   value={abilitySearch}
                   onChange={(e) => setAbilitySearch(e.target.value)}
                   className={styles.filterInput}
@@ -1193,7 +1246,7 @@ const rarityOptions = useMemo(() => {
                     onChange={(e) => setFilterAlpha(e.target.checked)}
                     className={styles.filterAlphaCheckbox}
                   />
-                  <span>Alpha Only</span>
+                  <span>仅头目</span>
                 </label>
               </div>
             </div>
@@ -1206,9 +1259,9 @@ const rarityOptions = useMemo(() => {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: showAdvancedFilters ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
-              Advanced {showAdvancedFilters ? '(Moves & Base Stats)' : '— Moves & Base Stats'}
+              高级筛选 {showAdvancedFilters ? '（招式与种族值）' : '— 招式与种族值'}
               {(movesToFilterBy.some(m => m.trim()) || Object.values(statMinimums).some(v => v && v !== '0')) && (
-                <span className={styles.filterBadge} style={{ marginLeft: '6px' }}>active</span>
+                <span className={styles.filterBadge} style={{ marginLeft: '6px' }}>已启用</span>
               )}
             </button>
 
@@ -1217,13 +1270,13 @@ const rarityOptions = useMemo(() => {
               <div className={styles.filterAdvancedGrid}>
                 {/* Moves */}
                 <div className={styles.filterSection}>
-                  <h4 className={styles.filterSectionTitle}>Moves (up to 4)</h4>
+                  <h4 className={styles.filterSectionTitle}>招式（最多 4 个）</h4>
                   <div className={styles.filterInputGrid}>
                     {[0, 1, 2, 3].map((i) => (
                       <input
                         key={i}
                         type="text"
-                        placeholder={`Move ${i + 1}`}
+                        placeholder={`招式 ${i + 1}`}
                         value={movesToFilterBy[i]}
                         onChange={(e) => {
                           const newMoves = [...movesToFilterBy]
@@ -1236,22 +1289,22 @@ const rarityOptions = useMemo(() => {
                   </div>
                   {movesToFilterBy.some(m => m.trim()) && (
                     <button onClick={() => setMovesToFilterBy(['', '', '', ''])} className={styles.filterClearBtn}>
-                      Clear
+                      清除
                     </button>
                   )}
                 </div>
 
                 {/* Base Stats */}
                 <div className={styles.filterSection}>
-                  <h4 className={styles.filterSectionTitle}>Base Stats (minimum)</h4>
+                  <h4 className={styles.filterSectionTitle}>种族值（最低值）</h4>
                   <div className={styles.filterStatsGridVertical}>
                     {[
                       { label: 'HP', key: 'hp' },
-                      { label: 'Attack', key: 'attack' },
-                      { label: 'Defense', key: 'defense' },
-                      { label: 'Sp. Attack', key: 'spAtk' },
-                      { label: 'Sp. Defense', key: 'spDef' },
-                      { label: 'Speed', key: 'speed' }
+                      { label: '攻击', key: 'attack' },
+                      { label: '防御', key: 'defense' },
+                      { label: '特攻', key: 'spAtk' },
+                      { label: '特防', key: 'spDef' },
+                      { label: '速度', key: 'speed' }
                     ].map(({ label, key }) => (
                       <div key={key} className={styles.filterStatRow}>
                         <label className={styles.filterStatLabel}>{label}</label>
@@ -1272,7 +1325,7 @@ const rarityOptions = useMemo(() => {
                       onClick={() => setStatMinimums({ hp: '', attack: '', defense: '', spAtk: '', spDef: '', speed: '' })}
                       className={styles.filterClearBtn}
                     >
-                      Clear
+                      清除
                     </button>
                   )}
                 </div>
@@ -1285,7 +1338,7 @@ const rarityOptions = useMemo(() => {
       <SearchBar
         value={search}
         onChange={setSearch}
-        placeholder="Search Pokemon"
+        placeholder="搜索宝可梦"
         suggestions={searchSuggestions}
       />
 
@@ -1299,7 +1352,7 @@ const rarityOptions = useMemo(() => {
               transition: 'background-color 0.3s ease'
             }}
           >
-            {synergyDataToggle ? 'Synergy PokeDex Data: ON' : 'Synergy PokeDex Data: OFF'}
+            {synergyDataToggle ? 'Synergy 图鉴数据：开启' : 'Synergy 图鉴数据：关闭'}
           </button>
         </div>
       )}
@@ -1312,13 +1365,13 @@ const rarityOptions = useMemo(() => {
                 className={`${styles.option} ${mode === 'shiny' ? styles.active : ''}`}
                 onClick={() => setMode('shiny')}
               >
-                Shiny Dex
+                闪光图鉴
               </span>
               <span
                 className={`${styles.option} ${mode === 'living' ? styles.active : ''}`}
                 onClick={() => setMode('living')}
               >
-                Living Dex
+                活体图鉴
               </span>
               <div
                 className={styles.slider}
@@ -1332,7 +1385,7 @@ const rarityOptions = useMemo(() => {
               className={styles.toggleCompleteBtn}
               onClick={() => setHideComplete(!hideComplete)}
             >
-              {hideComplete ? 'Show Complete' : 'Hide Complete'}
+              {hideComplete ? '显示已完成' : '隐藏已完成'}
             </button>
           </div>
         </>
@@ -1388,9 +1441,7 @@ const rarityOptions = useMemo(() => {
             const isComplete = mode === 'shiny' ? speciesCompleteSet.has(lowerName) : globalShinies.has(lowerName)
             
             if (searchTerm) {
-              const matchesSearch =
-                lowerName.includes(searchTerm)
-                || normalized.includes(searchTerm)
+              const matchesSearch = matchesPokemonSearch(pokemon, normalized, searchTerm)
               if (!matchesSearch) return
             }
             if (locationSearch.trim()) {
@@ -1422,7 +1473,7 @@ const rarityOptions = useMemo(() => {
               const pokemonMoveNames = pokemonMovesRaw.map(m => typeof m === 'string' ? m : m.name).filter(Boolean)
               const matchesMove = filledMoves.every(moveFilter => 
                 pokemonMoveNames.some(pokemonMove => 
-                  pokemonMove.toLowerCase().includes(moveFilter.toLowerCase())
+                matchesMoveSearch(pokemonMove, moveFilter)
                 )
               )
               if (!matchesMove) return
@@ -1430,11 +1481,7 @@ const rarityOptions = useMemo(() => {
             if (abilitySearch.trim()) {
               const pokemonAbilitiesRaw = pokemonDetails.abilities || []
               const pokemonAbilityNames = pokemonAbilitiesRaw.map(a => a.ability_name).filter(Boolean)
-              const searchNormalized = abilitySearch.toLowerCase().replace(/[\s-]/g, '')
-              const matchesAbility = pokemonAbilityNames.some(pokemonAbility => {
-                const abilityNormalized = pokemonAbility.toLowerCase().replace(/[\s-]/g, '')
-                return abilityNormalized.includes(searchNormalized)
-              })
+              const matchesAbility = pokemonAbilityNames.some(pokemonAbility => matchesAbilitySearch(pokemonAbility, abilitySearch))
               if (!matchesAbility) return
             }
             if (!matchesStatSearch(pokemonDetails, shouldHideUnobtainable())) return
@@ -1461,7 +1508,7 @@ const rarityOptions = useMemo(() => {
             boxShadow: '0 8px 32px rgba(74,144,226,0.2), inset 0 1px 0 rgba(255,255,255,0.08)'
           }}>
             <div style={{ marginBottom: '14px', fontSize: '0.85rem', color: '#aaa', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-              {mode === 'shiny' ? '✨ Shiny Dex' : '🧬 Living Dex'} Progress
+              {mode === 'shiny' ? '✨ 闪光图鉴' : '🧬 活体图鉴'}进度
             </div>
             <div style={{
               width: '100%',
@@ -1495,7 +1542,7 @@ const rarityOptions = useMemo(() => {
               <span style={{ color: '#4a90e2' }}>{completedPokemon}</span> / <span style={{ color: '#aaa' }}>{totalPokemon}</span>
               <span style={{ color: '#888', marginLeft: '12px' }}>•</span>
               <span style={{ color: remaining > 0 ? '#ff9999' : '#4CAF50', marginLeft: '12px' }}>
-                {remaining} remaining
+                还差 {remaining} 种
               </span>
             </div>
           </div>
@@ -1539,7 +1586,7 @@ const rarityOptions = useMemo(() => {
                 const isComplete = mode === 'shiny' ? globalShinies.has(lowerName) : globalShinies.has(lowerName)
                 if (hideComplete && isComplete) return
                 if (searchTerm) {
-                  const matchesSearch = lowerName.includes(searchTerm) || normalized.includes(searchTerm)
+                  const matchesSearch = matchesPokemonSearch(pokemon, normalized, searchTerm)
                   if (!matchesSearch) return
                 }
                 
@@ -1572,7 +1619,7 @@ const rarityOptions = useMemo(() => {
                   const pokemonMoveNames = pokemonMovesRaw.map(m => typeof m === 'string' ? m : m.name).filter(Boolean)
                   const matchesMove = filledMoves.every(moveFilter => 
                     pokemonMoveNames.some(pokemonMove => 
-                      pokemonMove.toLowerCase().includes(moveFilter.toLowerCase())
+                      matchesMoveSearch(pokemonMove, moveFilter)
                     )
                   )
                   if (!matchesMove) return
@@ -1581,10 +1628,7 @@ const rarityOptions = useMemo(() => {
                 if (abilitySearch.trim()) {
                   const pokemonAbilitiesRaw = pokemonDetails.abilities || []
                   const pokemonAbilityNames = pokemonAbilitiesRaw.map(a => a.ability_name).filter(Boolean)
-                  const searchLower = abilitySearch.toLowerCase()
-                  const matchesAbility = pokemonAbilityNames.some(pokemonAbility => 
-                    pokemonAbility.toLowerCase().includes(searchLower)
-                  )
+                  const matchesAbility = pokemonAbilityNames.some(pokemonAbility => matchesAbilitySearch(pokemonAbility, abilitySearch))
                   if (!matchesAbility) return
                 }
                 
@@ -1638,7 +1682,7 @@ const rarityOptions = useMemo(() => {
                 if (hideComplete && isComplete) return false
 
                 if (searchTerm) {
-                  const matchesSearch = lowerName.includes(searchTerm) || normalized.includes(searchTerm)
+                  const matchesSearch = matchesPokemonSearch(pokemon.name, normalized, searchTerm)
                   if (!matchesSearch) return false
                 }
 
@@ -1677,7 +1721,7 @@ const rarityOptions = useMemo(() => {
                   const pokemonMoveNames = pokemonMovesRaw.map(m => typeof m === 'string' ? m : m.name).filter(Boolean)
                   const matchesMove = filledMoves.every(moveFilter =>
                     pokemonMoveNames.some(pokemonMove =>
-                      pokemonMove.toLowerCase().includes(moveFilter.toLowerCase())
+                      matchesMoveSearch(pokemonMove, moveFilter)
                     )
                   )
                   if (!matchesMove) return false
@@ -1686,10 +1730,7 @@ const rarityOptions = useMemo(() => {
                 if (abilitySearch.trim()) {
                   const pokemonAbilitiesRaw = details.abilities || []
                   const pokemonAbilityNames = pokemonAbilitiesRaw.map(a => a.ability_name).filter(Boolean)
-                  const searchLower = abilitySearch.toLowerCase()
-                  const matchesAbility = pokemonAbilityNames.some(ability =>
-                    ability.toLowerCase().includes(searchLower)
-                  )
+                  const matchesAbility = pokemonAbilityNames.some(ability => matchesAbilitySearch(ability, abilitySearch))
                   if (!matchesAbility) return false
                 }
 
@@ -1720,7 +1761,7 @@ const rarityOptions = useMemo(() => {
                     >
                       <img
                         src={API.pokemonSprite(normalized)}
-                        alt={pokemon.name}
+                        alt={translatePokemonName(pokemon.name)}
                         className={`${styles.pokemon} ${
                           synergyDataToggle
                             ? (isComplete ? styles.complete : styles.incomplete)
@@ -1733,9 +1774,9 @@ const rarityOptions = useMemo(() => {
                       />
                     </div>
                     <div className={styles.alteringCavePokemonMeta}>
-                      <strong>{pokemon.name}</strong>
-                      <span>Lvl {pokemon.levelRange[0]}-{pokemon.levelRange[1]}</span>
-                      {pokemon.repelTrickRarity && <span>{pokemon.repelTrickRarity} repel</span>}
+                      <strong>{translatePokemonName(pokemon.name)}</strong>
+                      <span>等级 {pokemon.levelRange[0]}-{pokemon.levelRange[1]}</span>
+                      {pokemon.repelTrickRarity && <span>{pokemon.repelTrickRarity} 喷雾剂技巧</span>}
                     </div>
                   </div>
                 )
@@ -1750,9 +1791,9 @@ const rarityOptions = useMemo(() => {
                 return (
                   <div key={`altering-${cycle.cycle}`} className={`${styles.generationSection} ${isCurrent ? styles.alteringCaveCurrentSection : ''}`}>
                     <div className={styles.alteringCaveSectionHeader}>
-                      <h2 className={styles.generationTitle}>{isCurrent ? `Current Rotation ${cycle.cycle}` : `Rotation ${cycle.cycle}`}</h2>
+                      <h2 className={styles.generationTitle}>{isCurrent ? `当前轮换 · 第 ${cycle.cycle} 轮` : `第 ${cycle.cycle} 轮轮换`}</h2>
                       <p>
-                        {cycle.repelTrick ? `Repel Trick: Lvl ${cycle.repelLevel}` : 'No repel trick route'}
+                        {cycle.repelTrick ? `喷雾剂技巧：Lv.${cycle.repelLevel}` : '暂无喷雾剂技巧路线'}
                       </p>
                     </div>
                     <div className={styles.locationGrid}>
@@ -1765,17 +1806,17 @@ const rarityOptions = useMemo(() => {
               return [
                 <div key="altering-header" className={styles.alteringCaveHeader}>
                   <div>
-                    <h1>Altering Cave</h1>
-                    <p>Current rotation changes every in-game day.</p>
+                    <h1>变化洞窟</h1>
+                    <p>当前轮换会在每个游戏日更替。</p>
                   </div>
                   <div className={styles.alteringCaveTimer}>
-                    <span>Next rotation in</span>
+                    <span>距下次轮换</span>
                     <strong>{formatRotationDuration(rotationState.msUntilSwap)}</strong>
                   </div>
                 </div>,
                 renderCycle(activeCycle, true),
                 <div key="altering-rest-header" className={styles.alteringCaveRestHeader}>
-                  Rest of Altering Cave Rotations
+                  其他变化洞窟轮换
                 </div>,
                 ...otherCycles.map(cycle => renderCycle(cycle)).filter(Boolean)
               ]
@@ -1783,8 +1824,8 @@ const rarityOptions = useMemo(() => {
 
             return [
               <div key="route-header" style={{ marginBottom: '20px', paddingBottom: '12px', borderBottom: '2px solid rgba(102, 126, 234, 0.5)' }}>
-                <h1 style={{ fontSize: '1.5rem', color: '#ea66cd', margin: '0 0 4px 0' }}>{routeName}</h1>
-                <p style={{ fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.6)', margin: '0' }}>{regionName}</p>
+                <h1 style={{ fontSize: '1.5rem', color: '#ea66cd', margin: '0 0 4px 0' }}>{translateLocationName(routeName)}</h1>
+                <p style={{ fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.6)', margin: '0' }}>{translateRegionName(regionName)}</p>
                 <div className={styles.routeSeasonPicker}>
                   {['All', 'Spring', 'Summer', 'Autumn', 'Winter'].map(season => (
                     <button
@@ -1795,7 +1836,7 @@ const rarityOptions = useMemo(() => {
                       onClick={() => setSelectedSeason(season === 'All' ? '' : season)}
                       aria-pressed={season === 'All' ? selectedSeason === '' : selectedSeason === season}
                     >
-                      {season}
+                      {{ All: '全部季节', Spring: '春季', Summer: '夏季', Autumn: '秋季', Winter: '冬季' }[season]}
                     </button>
                   ))}
                 </div>
@@ -1818,7 +1859,7 @@ const rarityOptions = useMemo(() => {
                 return (
                 <div key={type} className={styles.generationSection}>
                   <div style={{ marginBottom: '8px' }}>
-                    <h2 className={styles.generationTitle}>{type}</h2>
+                    <h2 className={styles.generationTitle}>{ENCOUNTER_TYPE_LABELS[type] || type}</h2>
                     <p style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.6)', margin: '4px 0 0 0' }}>
                       {getEncounterTypeDesc(type)}
                     </p>
@@ -1844,7 +1885,7 @@ const rarityOptions = useMemo(() => {
                                 >
                                   {dangerousWarnings.length > 0 && (
                                     <span className={styles.dangerousPokemonBadge}>
-                                      {dangerousWarnings.length === 1 ? dangerousWarnings[0].name : `${dangerousWarnings.length} Warnings`}
+                                      {dangerousWarnings.length === 1 ? dangerousWarnings[0].name : `${dangerousWarnings.length} 条提醒`}
                                     </span>
                                   )}
 
@@ -1882,7 +1923,7 @@ const rarityOptions = useMemo(() => {
                                           fontWeight: 'bold',
                                           fontSize: '0.78rem'
                                         }}>
-                                          {primaryRarity.replace(/\b\w/g, l => l.toUpperCase())}
+                                          {({ 'very common': '非常常见', common: '常见', uncommon: '不常见', rare: '稀有', 'very rare': '非常稀有' })[primaryRarity] || primaryRarity}
                                         </div>
                                       )}
                                       {(pokemonData.grassTypes || []).map((grassType, gIdx) => {
@@ -1905,7 +1946,7 @@ const rarityOptions = useMemo(() => {
                                             fontWeight: 'bold',
                                             fontSize
                                           }}>
-                                            {grassType}
+                                            {ENCOUNTER_DETAIL_LABELS[grassType] || grassType}
                                           </div>
                                         )
                                       })}
@@ -1958,8 +1999,8 @@ const rarityOptions = useMemo(() => {
                                       const imageName = rodImageMap[rodType]
                                       return imageName ? (
                                         <img
-                                          src={`/images/${imageName}`}
-                                          alt={rodType}
+                                          src={getAssetUrl(`images/${imageName}`)}
+                                          alt={ENCOUNTER_DETAIL_LABELS[rodType] || rodType}
                                           style={{
                                             position: 'absolute',
                                             bottom: '0',
@@ -2033,9 +2074,7 @@ const rarityOptions = useMemo(() => {
               const isComplete = mode === 'shiny' ? speciesCompleteSet.has(lowerName) : globalShinies.has(lowerName)
               if (hideComplete && isComplete) return false
               if (searchTerm) {
-                const matchesSearch =
-                  lowerName.includes(searchTerm)
-                  || normalized.includes(searchTerm)
+              const matchesSearch = matchesPokemonSearch(pokemon, normalized, searchTerm)
                 if (!matchesSearch) return false
               }
               if (filterAlpha && pokemonDetails.alpha !== 'yes') return false
@@ -2075,7 +2114,7 @@ const rarityOptions = useMemo(() => {
                 const pokemonMoveNames = pokemonMovesRaw.map(m => typeof m === 'string' ? m : m.name).filter(Boolean)
                 const matchesMove = filledMoves.every(moveFilter => 
                   pokemonMoveNames.some(pokemonMove => 
-                    pokemonMove.toLowerCase().includes(moveFilter.toLowerCase())
+                  matchesMoveSearch(pokemonMove, moveFilter)
                   )
                 )
                 if (!matchesMove) return false
@@ -2083,10 +2122,7 @@ const rarityOptions = useMemo(() => {
               if (abilitySearch.trim()) {
                 const pokemonAbilitiesRaw = pokemonDetails.abilities || []
                 const pokemonAbilityNames = pokemonAbilitiesRaw.map(a => a.ability_name).filter(Boolean)
-                const searchLower = abilitySearch.toLowerCase()
-                const matchesAbility = pokemonAbilityNames.some(pokemonAbility => 
-                  pokemonAbility.toLowerCase().includes(searchLower)
-                )
+              const matchesAbility = pokemonAbilityNames.some(pokemonAbility => matchesAbilitySearch(pokemonAbility, abilitySearch))
                 if (!matchesAbility) return false
               }
               if (!matchesStatSearch(pokemonDetails, shouldHideUnobtainable())) return false
@@ -2124,7 +2160,7 @@ const rarityOptions = useMemo(() => {
                     >
                       <img
                         src={API.pokemonSprite(normalized)}
-                        alt={pokemon}
+                        alt={translatePokemonName(pokemon)}
                         className={`${styles.pokemon} ${
                           synergyDataToggle
                             ? (isComplete ? styles.complete : styles.incomplete)

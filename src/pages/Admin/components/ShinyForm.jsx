@@ -1,41 +1,47 @@
 import { useReducer, useEffect, useMemo } from 'react'
 import Autocomplete from './Autocomplete'
 import pokemonData from '../../../data/pokemmo_data/pokemon-data.json'
+import { translateLocationName } from '../../../utils/pokemonTermsZh'
+import { translatePokemonName } from '../../../utils/pokemon'
 
 
 
 
 const MONTHS = [ 'January','February','March','April','May','June','July','August','September','October','November','December']
+const MONTHS_ZH = { January: '一月', February: '二月', March: '三月', April: '四月', May: '五月', June: '六月', July: '七月', August: '八月', September: '九月', October: '十月', November: '十一月', December: '十二月' }
 const YEARS = ['2025','2026','2027','2028','2029','2030']
 const ENCOUNTER_TYPES = [
-  { value: '5x horde', label: '5x Horde' },
-  { value: '3x horde', label: '3x Horde' },
-  { value: 'single', label: 'Single' },
-  { value: 'fishing', label: 'Fishing' },
-  { value: 'honey tree', label: 'Honey Tree' },
-  { value: 'egg', label: 'Egg' },
-  { value: 'safari', label: 'Safari' },
-  { value: 'fossil', label: 'Fossil' },
-  { value: 'swarm', label: 'Swarm' },
-  { value: 'gift', label: 'Gift' },
+  { value: '5x horde', label: '5只群聚' },
+  { value: '3x horde', label: '3只群聚' },
+  { value: 'single', label: '单只遭遇' },
+  { value: 'fishing', label: '垂钓' },
+  { value: 'honey tree', label: '甜甜蜜树' },
+  { value: 'egg', label: '孵化' },
+  { value: 'safari', label: '狩猎地带' },
+  { value: 'fossil', label: '化石' },
+  { value: 'swarm', label: '群聚' },
+  { value: 'gift', label: '赠送' },
 ]
 const NATURES = [ 'Adamant','Bashful','Bold','Brave','Calm','Careful','Docile','Gentle','Hardy','Hasty','Impish','Jolly','Lax','Lonely','Mild','Modest','Naive','Naughty','Quiet','Quirky','Rash','Relaxed','Sassy','Serious','Timid']
+const NATURE_NAMES_ZH = {
+  Adamant: '固执', Bashful: '害羞', Bold: '大胆', Brave: '勇敢', Calm: '沉着', Careful: '慎重', Docile: '坦率', Gentle: '温和', Hardy: '勤奋', Hasty: '急躁', Impish: '淘气', Jolly: '爽朗', Lax: '乐天', Lonely: '孤独', Mild: '慢吞吞', Modest: '内敛', Naive: '天真', Naughty: '顽皮', Quiet: '冷静', Quirky: '浮躁', Rash: '马虎', Relaxed: '悠闲', Sassy: '自大', Serious: '认真', Timid: '胆小',
+}
 const YES_NO_FIELDS = [
-  { key: 'Egg', label: 'Egg' },
-  { key: 'Favourite', label: 'Favourite' },
-  { key: 'Secret Shiny', label: 'Secret Shiny' },
-  { key: 'Alpha', label: 'Alpha' },
-  { key: 'Sold', label: 'Sold' },
-  { key: 'Event', label: 'Event' },
-  { key: 'Reaction', label: 'Reaction' },
-  { key: 'MysteriousBall', label: 'Mysterious Ball' },
-  { key: 'Safari', label: 'Safari' },
-  { key: 'Honey Tree', label: 'Honey Tree' },
-  { key: 'Fossil', label: 'Fossil' },
-  { key : 'Swarm', label: 'Swarm' },
-  { key: 'Fishing', label: 'Fishing' },
-  { key: 'Headbutt', label: 'Headbutt' },
-  { key: 'Legendary', label: 'Legendary' },
+  { key: 'Egg', label: '孵化' },
+  { key: 'Favourite', label: '收藏' },
+  { key: 'Secret Shiny', label: '秘密闪光' },
+  { key: 'Alpha', label: '头目' },
+  { key: 'Sold', label: '已售出' },
+  { key: 'Event', label: '活动' },
+  { key: 'Reaction', label: '反应' },
+  { key: 'MysteriousBall', label: '神秘球' },
+  { key: 'Safari', label: '狩猎地带' },
+  { key: 'Honey Tree', label: '甜甜蜜树' },
+  { key: 'Fossil', label: '化石' },
+  { key : 'Swarm', label: '群聚' },
+  { key: 'Fishing', label: '垂钓' },
+  { key: 'Headbutt', label: '头锤树' },
+  { key: 'Legendary', label: '传说宝可梦' },
 ]
 
 const POKEMON_KEY_MAP = {}
@@ -185,81 +191,81 @@ export default function ShinyForm({ initialData, onSubmit, submitLabel='Add', al
 
   return (
     <form onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
-      <label>Pokemon Name:</label>
+      <label>宝可梦名称：</label>
       <Autocomplete
         id="shinyFormPokemon"
         value={form.Pokemon}
         className="autocomplete-input"
         onChange={handlePokemonChange}
-        getOptions={() => allPokemonNames}
-        placeholder="mew"
+        getOptions={() => allPokemonNames.map((name) => ({ value: name, label: translatePokemonName(name) }))}
+        placeholder="梦幻"
       />
 
-      <label>Encounter Type:</label>
+      <label>遭遇方式：</label>
       <select value={form.encounter_method} onChange={e=>dispatch({ type:'SET_FIELD', field:'encounter_method', value:e.target.value })}>
-        <option value="">Select a method</option>
+        <option value="">选择遭遇方式</option>
         {ENCOUNTER_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
       </select>
 
-      <label>Location:</label>
+      <label>地点：</label>
       {locationOptions.length > 0 ? (
         <select value={form.location} onChange={e=>handleLocationChange(e.target.value)}>
-          <option value="">Select a location</option>
-          {locationOptions.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+          <option value="">选择地点</option>
+          {locationOptions.map(loc => <option key={loc} value={loc}>{translateLocationName(loc)}</option>)}
         </select>
       ) : (
-        <input type="text" value={form.location} onChange={e=>handleLocationChange(e.target.value)} placeholder="Enter location" />
+        <input type="text" value={form.location} onChange={e=>handleLocationChange(e.target.value)} placeholder="输入地点" />
       )}
 
-      <label>Encounter Count:</label>
-      <input type="number" min="0" value={form.encounter_count ?? ''} onChange={e=>dispatch({ type:'SET_FIELD', field:'encounter_count', value:e.target.value })} placeholder="e.g. 3240" />
+      <label>遭遇次数：</label>
+      <input type="number" min="0" value={form.encounter_count ?? ''} onChange={e=>dispatch({ type:'SET_FIELD', field:'encounter_count', value:e.target.value })} placeholder="如：3240" />
 
-      <label>Month:</label>
+      <label>月份：</label>
       <select value={form.Month||''} onChange={e=>dispatch({ type:'SET_FIELD', field:'Month', value:e.target.value })}>
-        <option value="">Select month</option>
-        {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
+        <option value="">选择月份</option>
+        {MONTHS.map(m => <option key={m} value={m}>{MONTHS_ZH[m]}</option>)}
       </select>
 
-      <label>Year:</label>
+      <label>年份：</label>
       <select value={form.Year||''} onChange={e=>dispatch({ type:'SET_FIELD', field:'Year', value:e.target.value })}>
-        <option value="">Select year</option>
+        <option value="">选择年份</option>
         {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
       </select>
 
-      <label>Date Caught:</label>
+      <label>获得日期：</label>
       <input type="date" value={form.date_caught||''} onChange={e=>handleDateCaughtChange(e.target.value)} />
 
-      <label>Nature:</label>
+      <label>性格：</label>
       <select value={form.nature} onChange={e=>dispatch({ type:'SET_FIELD', field:'nature', value:e.target.value })}>
-        <option value="">Select a nature</option>
-        {NATURES.map(n => <option key={n} value={n}>{n}</option>)}
+        <option value="">选择性格</option>
+        {NATURES.map(n => <option key={n} value={n}>{NATURE_NAMES_ZH[n] || n}</option>)}
       </select>
 
-      <label>IVs:</label>
+      <label>个体值：</label>
       <input type="text" value={form.ivs} onChange={e=>dispatch({ type:'SET_FIELD', field:'ivs', value:formatIVs(e.target.value) })} placeholder="31/31/31/31/31/31" maxLength={17} />
 
-      <label>Nickname:</label>
-      <input type="text" value={form.nickname} onChange={e=>dispatch({ type:'SET_FIELD', field:'nickname', value:e.target.value })} placeholder="Optional nickname" />
+      <label>昵称：</label>
+      <input type="text" value={form.nickname} onChange={e=>dispatch({ type:'SET_FIELD', field:'nickname', value:e.target.value })} placeholder="可选昵称" />
 
-      <label>Variant:</label>
-      <input type="text" value={form.variant} onChange={e=>dispatch({ type:'SET_FIELD', field:'variant', value:e.target.value })} placeholder="Optional variant" />
+      <label>形态：</label>
+      <input type="text" value={form.variant} onChange={e=>dispatch({ type:'SET_FIELD', field:'variant', value:e.target.value })} placeholder="可选形态" />
 
       {YES_NO_FIELDS.map(({key,label})=>(
         <div key={key}>
           <label>{label}:</label>
           <select value={form[key]} onChange={e=>dispatch({ type:'SET_FIELD', field:key, value:e.target.value })}>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
+            <option value="Yes">是</option>
+            <option value="No">否</option>
           </select>
         </div>
       ))}
 
-      <label>Reaction Link:</label>
-      <input type="text" value={form['Reaction Link']} onChange={e=>dispatch({ type:'SET_FIELD', field:'Reaction Link', value:e.target.value })} placeholder="Optional URL" />
+      <label>反应链接：</label>
+      <input type="text" value={form['Reaction Link']} onChange={e=>dispatch({ type:'SET_FIELD', field:'Reaction Link', value:e.target.value })} placeholder="可选 URL" />
 
       <div style={{ display:'flex', gap:10, marginTop:16 }}>
-        <button type="submit" disabled={isMutating || !form.Pokemon.trim()}>{isMutating ? 'Saving...' : submitLabel}</button>
-        <button type="button" onClick={() => dispatch({ type:'RESET' })} style={{ backgroundColor:'#555' }}>Reset</button>
+        <button type="submit" disabled={isMutating || !form.Pokemon.trim()}>{isMutating ? '保存中…' : submitLabel}</button>
+        <button type="button" onClick={() => dispatch({ type:'RESET' })} style={{ backgroundColor:'#555' }}>重置</button>
       </div>
     </form>
   )

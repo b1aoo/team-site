@@ -4,11 +4,11 @@ import styles from "../Admin.module.css";
 import ConfirmDialog from "./ConfirmDialog";
 
 const COMMON_TIME_ZONES = [
-  { value: "America/New_York", label: "EST / EDT - Eastern Time" },
-  { value: "America/Chicago", label: "CST / CDT - Central Time" },
-  { value: "America/Denver", label: "MST / MDT - Mountain Time" },
-  { value: "America/Los_Angeles", label: "PST / PDT - Pacific Time" },
-  { value: "Europe/London", label: "GMT / BST - UK Time" },
+  { value: "America/New_York", label: "EST / EDT－北美东部时间" },
+  { value: "America/Chicago", label: "CST / CDT－北美中部时间" },
+  { value: "America/Denver", label: "MST / MDT－北美山区时间" },
+  { value: "America/Los_Angeles", label: "PST / PDT－北美太平洋时间" },
+  { value: "Europe/London", label: "GMT / BST－英国时间" },
   { value: "UTC", label: "UTC" },
 ];
 
@@ -49,7 +49,7 @@ function buildTimeZoneOptions(userTimeZone) {
     options.push(option);
   };
 
-  addOption({ value: userTimeZone, label: `${getTimeZoneLabel(userTimeZone)} (your timezone)` });
+  addOption({ value: userTimeZone, label: `${getTimeZoneLabel(userTimeZone)}（你的时区）` });
   COMMON_TIME_ZONES.forEach(addOption);
   allTimeZones.forEach((timeZone) => addOption({ value: timeZone, label: getTimeZoneLabel(timeZone) }));
 
@@ -311,16 +311,16 @@ export default function EventsTab({ eventDB, onCreate, onEdit, onDelete, isMutat
   };
 
   const renderEventList = (events) => {
-    if (!events.length) return <p className={styles.hintText}>No events</p>;
+    if (!events.length) return <p className={styles.hintText}>暂无活动</p>;
     return (
       <table className={styles.shinyTable}>
         <thead>
           <tr>
-            <th>Title</th>
-            <th>Event Type</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Actions</th>
+            <th>标题</th>
+            <th>活动类型</th>
+            <th>开始</th>
+            <th>结束</th>
+            <th>操作</th>
           </tr>
         </thead>
         <tbody>
@@ -328,11 +328,11 @@ export default function EventsTab({ eventDB, onCreate, onEdit, onDelete, isMutat
             <tr key={e.id}>
               <td>{e.title}</td>
               <td>{e.eventType}</td>
-              <td>{e.startDate ? new Date(e.startDate).toLocaleString() : "-"}</td>
-              <td>{e.endDate ? new Date(e.endDate).toLocaleString() : "-"}</td>
+              <td>{e.startDate ? new Date(e.startDate).toLocaleString('zh-CN') : "-"}</td>
+              <td>{e.endDate ? new Date(e.endDate).toLocaleString('zh-CN') : "-"}</td>
               <td className={styles.actionBtns}>
-                <button className={styles.editBtn} onClick={() => handleEdit(e)}>Edit</button>
-                <button className={styles.deleteBtn} onClick={() => setConfirmDelete(e.id)}>Delete</button>
+                <button className={styles.editBtn} onClick={() => handleEdit(e)}>编辑</button>
+                <button className={styles.deleteBtn} onClick={() => setConfirmDelete(e.id)}>删除</button>
               </td>
             </tr>
           ))}
@@ -356,7 +356,7 @@ export default function EventsTab({ eventDB, onCreate, onEdit, onDelete, isMutat
 
   const renderTimeZoneSelector = () => (
     <>
-      <label>Timezone:</label>
+      <label>时区：</label>
       <select
         className={styles.adminInput}
         value={selectedTimeZone}
@@ -369,29 +369,29 @@ export default function EventsTab({ eventDB, onCreate, onEdit, onDelete, isMutat
         ))}
       </select>
       <p className={styles.hintText}>
-        Pick the timezone first, then enter the event time in that timezone. It will be saved as UTC automatically.
+        请先选择时区，再按该时区填写活动时间；系统会自动换算并以 UTC 保存。
       </p>
     </>
   );
 
   return (
     <div>
-      <h3>{editingId ? "Edit Event" : "Create Event"}</h3>
+      <h3>{editingId ? "编辑活动" : "创建活动"}</h3>
 
       <div className={styles.editSection}>
         {/* Event Type */}
-        <label>Event Type:</label>
+        <label>活动类型：</label>
         <select
           className={styles.adminInput}
           value={eventData.eventType || ""}
           onChange={(e) => setEventData({ ...eventData, eventType: e.target.value })}
         >
-          <option value="" disabled hidden>Select Event Type</option>
-          <option value="catchevent">Catch Event</option>
-          <option value="metronome">Metronome</option>
-          <option value="grouphunt">Group Hunt</option>
+          <option value="" disabled hidden>选择活动类型</option>
+          <option value="catchevent">捕捉活动</option>
+          <option value="metronome">挥指</option>
+          <option value="grouphunt">团体狩猎</option>
 
-          <option value="hideandseek">Hide and Seek</option>
+          <option value="hideandseek">捉迷藏</option>
         </select>
 
 
@@ -402,10 +402,10 @@ export default function EventsTab({ eventDB, onCreate, onEdit, onDelete, isMutat
             onChange={e => setEventData({ ...eventData, published: e.target.checked })}
             style={{ marginRight: '8px' }}
           />
-          Published
+          已发布
         </label>
 
-        <label>Name:</label>
+        <label>名称：</label>
         <input
           type="text"
           className={styles.adminInput}
@@ -413,7 +413,7 @@ export default function EventsTab({ eventDB, onCreate, onEdit, onDelete, isMutat
           onChange={(e) => setEventData({ ...eventData, title: e.target.value })}
         />
 
-        <label>Image Link:</label>
+        <label>图片链接：</label>
         <input
           type="text"
           className={styles.adminInput}
@@ -422,7 +422,7 @@ export default function EventsTab({ eventDB, onCreate, onEdit, onDelete, isMutat
         />
 
 
-      <label>Location:</label>
+      <label>地点：</label>
       <input
         type="text"
         className={styles.adminInput}
@@ -430,7 +430,7 @@ export default function EventsTab({ eventDB, onCreate, onEdit, onDelete, isMutat
         onChange={(e) => setEventData({ ...eventData, location: e.target.value })}
       />
 
-        <label>Duration:</label>
+        <label>时长：</label>
         <input
           type="text"
           className={styles.adminInput}
@@ -440,14 +440,14 @@ export default function EventsTab({ eventDB, onCreate, onEdit, onDelete, isMutat
 
         {eventData.eventType === "hideandseek" && (
           <>
-            <label>Description:</label>
+            <label>说明：</label>
             <textarea
               className={styles.adminInput}
               value={eventData.hideAndSeekDescription || ""}
               onChange={e => setEventData({ ...eventData, hideAndSeekDescription: e.target.value })}
             />
 
-            <label>Date/Time:</label>
+            <label>日期与时间：</label>
             {renderTimeZoneSelector()}
             <input
               type="datetime-local"
@@ -457,53 +457,53 @@ export default function EventsTab({ eventDB, onCreate, onEdit, onDelete, isMutat
               onFocus={e => e.target.showPicker?.()}
             />
 
-            <label>Participating Staff:</label>
+            <label>参与工作人员：</label>
             {eventData.participatingStaff.map((s, i) => (
               <div key={i} className={styles.inputRow}>
                 <input
-                  placeholder="Staff Name"
+                  placeholder="工作人员名称"
                   className={styles.adminInput}
                   value={s || ""}
                   onChange={e => updateListItem("participatingStaff", i, e.target.value)}
                 />
-                <button className={styles.deleteBtn} onClick={() => removeListItem("participatingStaff", i)}>Remove</button>
+                <button className={styles.deleteBtn} onClick={() => removeListItem("participatingStaff", i)}>移除</button>
               </div>
             ))}
-            <button className={styles.editBtn} onClick={() => addListItem("participatingStaff")}>Add Staff</button>
+            <button className={styles.editBtn} onClick={() => addListItem("participatingStaff")}>添加工作人员</button>
 
-            <label>Rounds:</label>
+            <label>回合：</label>
             {(eventData.hideAndSeekRounds || []).map((round, i) => (
               <div key={i} className={styles.inputRow}>
                 <input
-                  placeholder="Prize"
+                  placeholder="奖品"
                   className={styles.adminInput}
                   value={round.prize || ""}
                   onChange={e => updateHideAndSeekRound(i, "prize", e.target.value)}
                 />
                 <input
-                  placeholder="Prize Image (URL)"
+                  placeholder="奖品图片（URL）"
                   className={styles.adminInput}
                   value={round.prizeImage || ""}
                   onChange={e => updateHideAndSeekRound(i, "prizeImage", e.target.value)}
                 />
                 <input
-                  placeholder="Host"
+                  placeholder="主持人"
                   className={styles.adminInput}
                   value={round.host || ""}
                   onChange={e => updateHideAndSeekRound(i, "host", e.target.value)}
                 />
                 <input
-                  placeholder="Winner"
+                  placeholder="获胜者"
                   className={styles.adminInput}
                   value={round.winner || ""}
                   onChange={e => updateHideAndSeekRound(i, "winner", e.target.value)}
                 />
-                <button className={styles.deleteBtn} onClick={() => removeHideAndSeekRound(i)}>Remove</button>
+                <button className={styles.deleteBtn} onClick={() => removeHideAndSeekRound(i)}>移除</button>
               </div>
             ))}
-            <button className={styles.editBtn} onClick={addHideAndSeekRound}>Add Round</button>
+            <button className={styles.editBtn} onClick={addHideAndSeekRound}>添加回合</button>
 
-            <label>Rules:</label>
+            <label>规则：</label>
             <textarea
               className={styles.adminInput}
               value={eventData.hideAndSeekRules || ""}
@@ -513,7 +513,7 @@ export default function EventsTab({ eventDB, onCreate, onEdit, onDelete, isMutat
         )}
         {eventData.eventType === "catchevent" && (
           <>
-            <label>Scoring:</label>
+            <label>计分规则：</label>
             <input
               type="text"
               className={styles.adminInput}
@@ -527,7 +527,7 @@ export default function EventsTab({ eventDB, onCreate, onEdit, onDelete, isMutat
           <>
             {renderTimeZoneSelector()}
 
-            <label>Start Date & Time:</label>
+            <label>开始日期与时间：</label>
             <input
               type="datetime-local"
               className={styles.adminInput}
@@ -536,7 +536,7 @@ export default function EventsTab({ eventDB, onCreate, onEdit, onDelete, isMutat
               onFocus={(e) => e.target.showPicker?.()}
             />
 
-            <label>End Date & Time:</label>
+            <label>结束日期与时间：</label>
             <input
               type="datetime-local"
               className={styles.adminInput}
@@ -549,127 +549,127 @@ export default function EventsTab({ eventDB, onCreate, onEdit, onDelete, isMutat
 
         {eventData.eventType === "catchevent" && (
           <>
-            <label>Nature Bonus:</label>
+            <label>性格加分：</label>
             {eventData.natureBonus.map((n, i) => (
               <div key={i} className={styles.inputRow}>
                 <input
-                  placeholder="Nature"
+                  placeholder="性格"
                   className={styles.adminInput}
                   value={n.nature || ""}
                   onChange={(e) => updateNatureBonus(i, "nature", e.target.value)}
                 />
                 <input
-                  placeholder="Bonus"
+                  placeholder="加分"
                   className={styles.adminInput}
                   value={n.bonus || ""}
                   onChange={(e) => updateNatureBonus(i, "bonus", e.target.value)}
                 />
-                <button className={styles.deleteBtn} onClick={() => removeNatureBonus(i)}>Remove</button>
+                <button className={styles.deleteBtn} onClick={() => removeNatureBonus(i)}>移除</button>
               </div>
             ))}
-            <button className={styles.editBtn} onClick={addNatureBonus}>Add Nature</button>
+            <button className={styles.editBtn} onClick={addNatureBonus}>添加性格</button>
 
-            <label>Valid Pokémon:</label>
+            <label>可用宝可梦：</label>
             {eventData.validPokemon.map((p, i) => (
               <div key={i} className={styles.inputRow}>
                 <input
-                  placeholder="Pokémon"
+                  placeholder="宝可梦"
                   className={styles.adminInput}
                   value={p.pokemon || ""}
                   onChange={(e) => updateValidPokemon(i, "pokemon", e.target.value)}
                 />
                 <input
-                  placeholder="Bonus"
+                  placeholder="加分"
                   className={styles.adminInput}
                   value={p.bonus || ""}
                   onChange={(e) => updateValidPokemon(i, "bonus", e.target.value)}
                 />
-                <button className={styles.deleteBtn} onClick={() => removeValidPokemon(i)}>Remove</button>
+                <button className={styles.deleteBtn} onClick={() => removeValidPokemon(i)}>移除</button>
               </div>
             ))}
-            <button className={styles.editBtn} onClick={addValidPokemon}>Add Pokémon</button>
+            <button className={styles.editBtn} onClick={addValidPokemon}>添加宝可梦</button>
           </>
         )}
 
         {eventData.eventType === "grouphunt" && (
           <>
-            <label>Target Pokémon(s):</label>
+            <label>目标宝可梦：</label>
             {eventData.targetPokemon.map((t, i) => (
               <div key={i} className={styles.inputRow}>
                 <input
-                  placeholder="Pokémon"
+                  placeholder="宝可梦"
                   className={styles.adminInput}
                   value={t.pokemon || ""}
                   onChange={(e) => updateTargetPokemon(i, "pokemon", e.target.value)}
                 />
                 <input
-                  placeholder="Location"
+                  placeholder="地点"
                   className={styles.adminInput}
                   value={t.location || ""}
                   onChange={(e) => updateTargetPokemon(i, "location", e.target.value)}
                 />
                 <input
-                  placeholder="Duration"
+                  placeholder="时长"
                   className={styles.adminInput}
                   value={t.duration || ""}
                   onChange={(e) => updateTargetPokemon(i, "duration", e.target.value)}
                 />
-                <button className={styles.deleteBtn} onClick={() => removeTargetPokemon(i)}>Remove</button>
+                <button className={styles.deleteBtn} onClick={() => removeTargetPokemon(i)}>移除</button>
               </div>
             ))}
-            <button className={styles.editBtn} onClick={addTargetPokemon}>Add Target Pokémon</button>
+            <button className={styles.editBtn} onClick={addTargetPokemon}>添加目标宝可梦</button>
           </>
         )}
 
         {eventData.eventType !== "hideandseek" && (
           <>
-            <label>Participating Staff:</label>
+            <label>参与工作人员：</label>
             {eventData.participatingStaff.map((s, i) => (
               <div key={i} className={styles.inputRow}>
                 <input
-                  placeholder="Staff Name"
+                  placeholder="工作人员名称"
                   className={styles.adminInput}
                   value={s || ""}
                   onChange={(e) => updateListItem("participatingStaff", i, e.target.value)}
                 />
-                <button className={styles.deleteBtn} onClick={() => removeListItem("participatingStaff", i)}>Remove</button>
+                <button className={styles.deleteBtn} onClick={() => removeListItem("participatingStaff", i)}>移除</button>
               </div>
             ))}
-            <button className={styles.editBtn} onClick={() => addListItem("participatingStaff")}>Add Staff</button>
+            <button className={styles.editBtn} onClick={() => addListItem("participatingStaff")}>添加工作人员</button>
 
             {["firstPlaceWinners", "secondPlaceWinners", "thirdPlaceWinners", "fourthPlaceWinners"].map((field, idx) => (
               <div key={field}>
-                <label>{["1st", "2nd", "3rd", "4th"][idx]} Place Winner(s):</label>
+                <label>{["第一名", "第二名", "第三名", "第四名"][idx]}获胜者：</label>
                 {eventData[field].map((w, i) => (
                   <div key={i} className={styles.inputRow}>
                     <input
-                      placeholder="Winner Name"
+                      placeholder="获胜者名称"
                       className={styles.adminInput}
                       value={w || ""}
                       onChange={(e) => updateListItem(field, i, e.target.value)}
                     />
-                    <button className={styles.deleteBtn} onClick={() => removeListItem(field, i)}>Remove</button>
+                    <button className={styles.deleteBtn} onClick={() => removeListItem(field, i)}>移除</button>
                   </div>
                 ))}
-                <button className={styles.editBtn} onClick={() => addListItem(field)}>Add Winner</button>
+                <button className={styles.editBtn} onClick={() => addListItem(field)}>添加获胜者</button>
               </div>
             ))}
 
             {["firstPlacePrize", "secondPlacePrize", "thirdPlacePrize", "fourthPlacePrize"].map((field, idx) => (
               <div key={field}>
-                <label>{["1st", "2nd", "3rd", "4th"][idx]} Place Prize(s):</label>
+                <label>{["第一名", "第二名", "第三名", "第四名"][idx]}奖品：</label>
                 {eventData[field].map((p, i) => (
                   <div key={i} className={styles.inputRow}>
                     <input
-                      placeholder="Prize"
+                      placeholder="奖品"
                       className={styles.adminInput}
                       value={p || ""}
                       onChange={(e) => updateListItem(field, i, e.target.value)}
                     />
-                    <button className={styles.deleteBtn} onClick={() => removeListItem(field, i)}>Remove</button>
+                    <button className={styles.deleteBtn} onClick={() => removeListItem(field, i)}>移除</button>
                   </div>
                 ))}
-                <button className={styles.editBtn} onClick={() => addListItem(field)}>Add Prize</button>
+                <button className={styles.editBtn} onClick={() => addListItem(field)}>添加奖品</button>
               </div>
             ))}
           </>
@@ -680,24 +680,24 @@ export default function EventsTab({ eventDB, onCreate, onEdit, onDelete, isMutat
           onClick={handleCreateOrUpdate}
           disabled={isMutating || !eventData.title || !eventData.startDate}
         >
-          {isMutating ? "Saving..." : editingId ? "Save Changes" : "Create Event"}
+          {isMutating ? "保存中…" : editingId ? "保存修改" : "创建活动"}
         </button>
       </div>
 
       {/* Event Lists */}
-      <h3>Ongoing Events</h3>
+      <h3>进行中的活动</h3>
       {renderEventList(categorizedEvents.ongoing)}
-      <h3>Upcoming Events</h3>
+      <h3>即将开始的活动</h3>
       {renderEventList(categorizedEvents.upcoming)}
-      <h3>Past Events</h3>
+      <h3>已结束的活动</h3>
       {renderEventList(categorizedEvents.past)}
 
       {/* Confirm Delete */}
       {confirmDelete && (
         <ConfirmDialog
-          title="Delete Event"
-          message="Are you sure you want to delete this event?"
-          confirmLabel="Delete"
+          title="删除活动"
+          message="确定要删除这个活动吗？"
+          confirmLabel="删除"
           onConfirm={handleConfirmDelete}
           onCancel={() => setConfirmDelete(null)}
         />

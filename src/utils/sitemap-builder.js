@@ -1,7 +1,7 @@
 // src/sitemap-builder.js
 import fs from 'fs';
 
-const baseUrl = 'https://synergymmo.com';
+const baseUrl = 'https://b1aoo.github.io/team-site';
 const databaseUrl = 'https://adminpage.hypersmmo.workers.dev/admin/database';
 const pokemonDataPath = new URL('../data/pokemmo_data/pokemon-data.json', import.meta.url);
 const pokemonData = JSON.parse(fs.readFileSync(pokemonDataPath, 'utf-8'));

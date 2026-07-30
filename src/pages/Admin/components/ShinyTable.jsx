@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { API } from '../../../api/endpoints'
-import { onGifError } from '../../../utils/pokemon'
+import { onGifError, translatePokemonName } from '../../../utils/pokemon'
 import styles from '../Admin.module.css'
 
 export default function ShinyTable({ shinies, onEdit, onDelete, onReorder }) {
@@ -10,7 +10,7 @@ export default function ShinyTable({ shinies, onEdit, onDelete, onReorder }) {
   const [draggedOverId, setDraggedOverId] = useState(null)
 
   if (entries.length === 0) {
-    return <p className={styles.hintText}>No shinies found for this player.</p>
+    return <p className={styles.hintText}>该训练家尚未收录闪光宝可梦。</p>
   }
 
   const handleDragStart = (id) => {
@@ -65,32 +65,32 @@ export default function ShinyTable({ shinies, onEdit, onDelete, onReorder }) {
         <thead>
           <tr>
             <th>#</th>
-            <th>Sprite</th>
-            <th>Pokemon</th>
-            <th>Month</th>
-            <th>Year</th>
-            <th>Traits</th>
-            <th>Actions</th>
+            <th>图像</th>
+            <th>宝可梦</th>
+            <th>月份</th>
+            <th>年份</th>
+            <th>特征</th>
+            <th>操作</th>
           </tr>
         </thead>
         <tbody>
           {entries.map(([id, shiny]) => {
             const traits = []
-            if (shiny['Secret Shiny'] === 'Yes') traits.push({ label: 'Secret', cls: 'traitSecret' })
-            if (shiny.Alpha === 'Yes') traits.push({ label: 'Alpha', cls: 'traitAlpha' })
-            if (shiny.Egg === 'Yes') traits.push({ label: 'Egg', cls: 'traitEgg' })
-            if (shiny.Safari === 'Yes') traits.push({ label: 'Safari', cls: 'traitSafari' })
-            if (shiny['Honey Tree'] === 'Yes') traits.push({ label: 'Honey', cls: 'traitHoney' })
-            if (shiny.Fossil === 'Yes') traits.push({ label: 'Fossil', cls: 'traitFossil' })
-            if (shiny.Fishing === 'Yes') traits.push({ label: 'Fishing', cls: 'traitFishing' })
-            if (shiny.Swarm === 'Yes') traits.push({ label: 'Swarm', cls: 'traitSwarm' })
-            if (shiny.Headbutt === 'Yes') traits.push({ label: 'Headbutt', cls: 'traitHeadbutt' })
-            if (shiny.Sold === 'Yes') traits.push({ label: 'Sold', cls: 'traitSold' })
-            if (shiny.Event === 'Yes') traits.push({ label: 'Event', cls: 'traitEvent' })
-            if (shiny.Favourite === 'Yes') traits.push({ label: 'Favourite', cls: 'traitFav' })
-            if (shiny.Legendary === 'Yes') traits.push({ label: 'Legend', cls: 'traitLegend' })
-            if (shiny.MysteriousBall === 'Yes') traits.push({ label: 'Mystery', cls: 'traitMystery' })
-            if (shiny.Reaction === 'Yes') traits.push({ label: 'Reaction', cls: 'traitReaction' })
+            if (shiny['Secret Shiny'] === 'Yes') traits.push({ label: '秘密闪光', cls: 'traitSecret' })
+            if (shiny.Alpha === 'Yes') traits.push({ label: '头目', cls: 'traitAlpha' })
+            if (shiny.Egg === 'Yes') traits.push({ label: '孵化', cls: 'traitEgg' })
+            if (shiny.Safari === 'Yes') traits.push({ label: '狩猎地带', cls: 'traitSafari' })
+            if (shiny['Honey Tree'] === 'Yes') traits.push({ label: '甜甜蜜树', cls: 'traitHoney' })
+            if (shiny.Fossil === 'Yes') traits.push({ label: '化石', cls: 'traitFossil' })
+            if (shiny.Fishing === 'Yes') traits.push({ label: '垂钓', cls: 'traitFishing' })
+            if (shiny.Swarm === 'Yes') traits.push({ label: '群聚', cls: 'traitSwarm' })
+            if (shiny.Headbutt === 'Yes') traits.push({ label: '头锤树', cls: 'traitHeadbutt' })
+            if (shiny.Sold === 'Yes') traits.push({ label: '已售出', cls: 'traitSold' })
+            if (shiny.Event === 'Yes') traits.push({ label: '活动', cls: 'traitEvent' })
+            if (shiny.Favourite === 'Yes') traits.push({ label: '收藏', cls: 'traitFav' })
+            if (shiny.Legendary === 'Yes') traits.push({ label: '传说', cls: 'traitLegend' })
+            if (shiny.MysteriousBall === 'Yes') traits.push({ label: '神秘球', cls: 'traitMystery' })
+            if (shiny.Reaction === 'Yes') traits.push({ label: '反应', cls: 'traitReaction' })
 
             const spriteName = shiny.Pokemon.toLowerCase().replace(/[^a-z0-9-]/g, '')
 
@@ -113,7 +113,7 @@ export default function ShinyTable({ shinies, onEdit, onDelete, onReorder }) {
                 <td>
                   <img
                     src={API.pokemonSprite(spriteName)}
-                    alt={shiny.Pokemon}
+                    alt={translatePokemonName(shiny.Pokemon)}
                     className={styles.spriteImg}
                     width="80"
                     height="80"
@@ -121,7 +121,7 @@ export default function ShinyTable({ shinies, onEdit, onDelete, onReorder }) {
                     onError={onGifError(spriteName)}
                   />
                 </td>
-                <td>{shiny.Pokemon}</td>
+                <td>{translatePokemonName(shiny.Pokemon)}</td>
                 <td>{shiny.Month || '-'}</td>
                 <td>{shiny.Year || '-'}</td>
                 <td>
@@ -134,8 +134,8 @@ export default function ShinyTable({ shinies, onEdit, onDelete, onReorder }) {
                 </td>
                 <td>
                   <div className={styles.actionBtns}>
-                    <button className={styles.editBtn} onClick={() => onEdit(id, shiny)}>Edit</button>
-                    <button className={styles.deleteBtn} onClick={() => onDelete(id, shiny)}>Delete</button>
+                    <button className={styles.editBtn} onClick={() => onEdit(id, shiny)}>编辑</button>
+                    <button className={styles.deleteBtn} onClick={() => onDelete(id, shiny)}>删除</button>
                   </div>
                 </td>
               </tr>
