@@ -31,13 +31,13 @@ const BASE = import.meta.env.BASE_URL || '/'
 
 export default function ShinyWar2025() {
   const breadcrumbs = [
-    { name: 'Home', url: '/' },
-    { name: 'Shiny Wars 2025', url: '/shiny-war-2025' }
+    { name: '首页', url: '/' },
+    { name: '2025 闪光大战', url: '/shiny-war-2025' }
   ];
 
   useDocumentHead({
-    title: 'PokeMMO Shiny Wars 2025 Results - Team Synergy',
-    description: 'Team Synergy Shiny Wars 2025 results: #25 placement with 1060 points and 111 shiny Pokémon caught. View tier breakdowns, all catches, rankings, and competition details.',
+    title: 'PokeMMO 2025 闪光大战战报',
+    description: 'Team Synergy 在 2025 闪光大战中位列第 25 名，累计 1060 分，收获 111 只闪光宝可梦。查看分级、战果、排名与赛事详情。',
     canonicalPath: '/shiny-war-2025/',
     ogImage: 'https://synergymmo.com/images/pokemon_gifs/tier_1/leafeon.gif',
     breadcrumbs: breadcrumbs
@@ -87,7 +87,7 @@ export default function ShinyWar2025() {
 
   return (
     <div>
-      <h1>Shiny Wars 2025</h1>
+      <h1>2025 闪光大战</h1>
       <img src={getAssetUrl('images/pagebreak.png')} alt="" className="pagebreak" />
 
       <div className={styles.teamHeader}>
@@ -97,8 +97,8 @@ export default function ShinyWar2025() {
           </a>
         </h2>
         <div className={styles.teamStatsStack}>
-          <span className={styles.teamPoints}>{warData.points} Points</span>
-          <span className={styles.teamCount}>{warData.catches.length} Shinies</span>
+          <span className={styles.teamPoints}>{warData.points} 分</span>
+          <span className={styles.teamCount}>{warData.catches.length} 只闪光宝可梦</span>
         </div>
       </div>
 
@@ -126,7 +126,7 @@ export default function ShinyWar2025() {
               {medal && <span className={styles.medal}>{medal}</span>}
               {!medal && <span className={styles.sparkle}>&#10024;</span>}
             </div>
-            <div className={styles.playerStats}>{player.totalPoints} pts</div>
+            <div className={styles.playerStats}>{player.totalPoints} 分</div>
             <div className={styles.pokemonGrid}>
               {player.catches.map((c, i) => (
                 <Link
@@ -140,7 +140,7 @@ export default function ShinyWar2025() {
                     <img
                       src={`${BASE}images/Shiny Showcase/egg.png`}
                       className={styles.eggIcon}
-                      alt="Hatched"
+                      alt="孵化获得"
                       width="20"
                       height="20"
                     />
@@ -149,7 +149,7 @@ export default function ShinyWar2025() {
                     <img
                       src={`${BASE}images/Shiny Showcase/secretshiny.png`}
                       className={styles.secretIcon}
-                      alt="Secret Shiny"
+                      alt="隐藏闪光"
                       width="20"
                       height="20"
                     />
@@ -165,7 +165,7 @@ export default function ShinyWar2025() {
                   />
                   <div className={styles.pokemonInfo}>
                     <span className={styles.pokemonName}>{c.p}</span>
-                    <span className={styles.pointsBadge}>{getPoints(c)} pts</span>
+                    <span className={styles.pointsBadge}>{getPoints(c)} 分</span>
                   </div>
                 </Link>
               ))}

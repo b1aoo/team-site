@@ -16,22 +16,22 @@ import {
 
 export default function ShinyOdds() {
   useDocumentHead({
-    title: 'Advanced Shiny Odds Calculator',
-    description: 'Deep shiny odds calculator with boosts, progress tracking, and probability graph.',
+    title: '闪光概率计算器',
+    description: '结合加成、当前进度与概率曲线，计算你的闪光遭遇概率。',
     canonicalPath: '/shiny-odds',
     breadcrumbs: [
-      { name: 'Home', url: '/' },
-      { name: 'Tools', url: '/tools' },
-      { name: 'Shiny Odds', url: '/shiny-odds' }
+      { name: '首页', url: '/' },
+      { name: '工具', url: '/tools' },
+      { name: '闪光概率', url: '/shiny-odds' }
     ]
   });
 
   return (
     <div className={styles.shinyOddsPage}>
-      <h1>Shiny Odds Calculator</h1>
+      <h1>闪光概率计算器</h1>
 
       <p className={styles.copingCenter}>
-        <strong>I'm not coping, you're coping!</strong>
+        <strong>不是我在嘴硬，是概率在说话！</strong>
       </p>
 
       <ShinyProbabilityCalculator />
@@ -93,19 +93,19 @@ function ShinyProbabilityCalculator() {
 
   return (
     <div style={{ marginTop: '2em' }}>
-      <h2>Boost Options</h2>
+      <h2>概率加成</h2>
       <label>
         <input type="checkbox" checked={donator} onChange={() => setDonator(!donator)} className={styles.shinyInput} />
-        Donator Status (+10%)
+        捐赠者状态（+10%）
       </label>
       <br />
       <label>
         <input type="checkbox" checked={charm} onChange={() => setCharm(!charm)} className={styles.shinyInput} />
-        Shiny Charm (+10%)
+        闪耀护符（+10%）
       </label>
       <br />
       <label>
-        Custom Boost (%):{' '}
+        自定义加成（%）：{' '}
         <input
           type="number"
           value={customBoost}
@@ -117,9 +117,9 @@ function ShinyProbabilityCalculator() {
 
       <hr />
 
-      <h2>Encounters</h2>
+      <h2>遭遇次数</h2>
       <label>
-        Your Current Encounters:{' '}
+        当前遭遇次数：{' '}
         <input
           type="number"
           value={currentEncountersInput}
@@ -130,17 +130,17 @@ function ShinyProbabilityCalculator() {
 
       <hr />
 
-      <h2>Results</h2>
-      <p><strong>Effective shiny rate:</strong> 1 / {Math.round(effectiveDenominator).toLocaleString()}</p>
-      <p><strong>Out of 1.000.000 players:</strong> {Math.round(percentile).toLocaleString()} people have hit</p>
-      <p><strong>50% odds:</strong> {Math.round(expected50).toLocaleString()} encounters</p>
-      <p><strong>90% odds:</strong> {Math.round(expected90).toLocaleString()} encounters</p>
-      <p><strong>99% odds:</strong> {Math.round(expected99).toLocaleString()} encounters</p>
+      <h2>计算结果</h2>
+      <p><strong>实际闪光概率：</strong>1 / {Math.round(effectiveDenominator).toLocaleString()}</p>
+      <p><strong>每 100 万名玩家中：</strong>约有 {Math.round(percentile).toLocaleString()} 人已出闪</p>
+      <p><strong>达到 50% 概率：</strong>{Math.round(expected50).toLocaleString()} 次遭遇</p>
+      <p><strong>达到 90% 概率：</strong>{Math.round(expected90).toLocaleString()} 次遭遇</p>
+      <p><strong>达到 99% 概率：</strong>{Math.round(expected99).toLocaleString()} 次遭遇</p>
 
       <hr />
 
       {/* Chart */}
-      <h2>Shiny Distribution (Out of 1.000,000 People)</h2>
+      <h2>闪光概率分布（以 100 万人为样本）</h2>
       <div style={{ width: "100%", maxWidth: 900, height: 400, margin: "0 auto" }}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>
@@ -157,10 +157,10 @@ function ShinyProbabilityCalculator() {
                 return (
                   <div className={styles.customTooltip}>
                     <div>
-                      <strong>Encounters:</strong> {d.encounters.toLocaleString()}
+                      <strong>遭遇次数：</strong> {d.encounters.toLocaleString()}
                     </div>
                     <div>
-                      <strong>People who have found a shiny:</strong>{" "}
+                      <strong>已出闪玩家数：</strong>{" "}
                       {Math.round(d.people).toLocaleString()}
                     </div>
                   </div>
@@ -196,7 +196,7 @@ function ShinyProbabilityCalculator() {
                 x={sanitizedCurrentEncounters}
                 stroke="#e11d48"
                 strokeDasharray="4 2"
-                label={{ value: "You", position: "top", fill: "#e11d48", fontWeight: "bold" }}
+                label={{ value: "你的位置", position: "top", fill: "#e11d48", fontWeight: "bold" }}
               />
             )}
             <ReferenceLine x={expected50} stroke="green" label="50%" />
@@ -207,13 +207,13 @@ function ShinyProbabilityCalculator() {
       </div>
 
       <div className="indexLegend" style={{ marginTop: "1.5em" }}>
-        <h3>Index</h3>
+        <h3>图例</h3>
         <ul>
-          <li><span className="indicator line-main"></span> <strong>Purple</strong> — Shiny odds distribution (main line)</li>
-          <li><span className="indicator line-50"></span> <strong>Green</strong> — 50% odds (vertical line)</li>
-          <li><span className="indicator line-90"></span> <strong>Orange</strong> — 90% odds (vertical line)</li>
-          <li><span className="indicator line-99"></span> <strong>Red</strong> — 99% odds (vertical line)</li>
-          <li><span className="indicator line-user"></span> <strong>Pink Dashed</strong> — Your current encounters (dashed vertical line)</li>
+          <li><span className="indicator line-main"></span> <strong>紫色</strong> — 闪光概率分布（主曲线）</li>
+          <li><span className="indicator line-50"></span> <strong>绿色</strong> — 50% 概率（竖线）</li>
+          <li><span className="indicator line-90"></span> <strong>橙色</strong> — 90% 概率（竖线）</li>
+          <li><span className="indicator line-99"></span> <strong>红色</strong> — 99% 概率（竖线）</li>
+          <li><span className="indicator line-user"></span> <strong>粉色虚线</strong> — 你当前的遭遇次数</li>
         </ul>
       </div>
     </div>

@@ -3,14 +3,14 @@ import { useDocumentHead } from '../../hooks/useDocumentHead'
 
 export default function NotFound() {
   useDocumentHead({
-    title: 'Page Not Found',
-    description: "This page doesn't exist on Team Synergy's PokeMMO site.",
+    title: '未找到页面',
+    description: '此页面不存在于 Team Synergy 的 PokeMMO 网站中。',
   })
   return (
     <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-      <h1>404 - Page Not Found</h1>
+      <h1>404 - 未找到页面</h1>
       <p style={{ color: '#aaa', marginTop: '16px', fontSize: '1.1rem' }}>
-        The page you're looking for doesn't exist.
+        你访问的页面不存在。
       </p>
       <Link
         to="/"
@@ -27,7 +27,7 @@ export default function NotFound() {
           transition: 'all 0.3s ease',
         }}
       >
-        Back to Showcase
+        返回首页
       </Link>
     </div>
   )

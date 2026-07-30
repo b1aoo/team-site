@@ -50,13 +50,13 @@ function normalizeShiniesForCard(shinies) {
 
 export default function SHOTM() {
   const breadcrumbs = [
-    { name: 'Home', url: '/' },
-    { name: 'Shiny Hunters of the Month', url: '/shotm' }
+    { name: '首页', url: '/' },
+    { name: '本月闪光猎人', url: '/shotm' }
   ];
 
   useDocumentHead({
-    title: 'Shiny Hunters of the Month - PokeMMO Rankings | Team Synergy',
-    description: 'Monthly rankings of top shiny hunters in PokeMMO. Track highest catches, tier points, and all-time stats for Team Synergy members. Competitive shiny hunting leaderboard.',
+    title: '本月闪光猎人 - PokeMMO 排行榜',
+    description: '查看 PokeMMO 顶尖闪光猎人的月度排名、获得数量、分级积分与 Team Synergy 成员的历史数据。',
     canonicalPath: '/shotm/',
     breadcrumbs: breadcrumbs
   })
@@ -189,14 +189,14 @@ export default function SHOTM() {
 
   // If current selection is before January 2026, show nothing
   if (getMonthKey(currentMonth, currentYear) < MIN_MONTH_KEY) {
-    return <div className="message">No data available before January 2026.</div>;
+    return <div className="message">2026 年 1 月前暂无数据。</div>;
   }
-  if (selectedIsCurrent && isLoading) return <div className="message">Loading...</div>
+  if (selectedIsCurrent && isLoading) return <div className="message">加载中…</div>
 
   return (
     <div>
       <h1>Team Synergy SHOTM <Link to="/admin" className="invisible-link">!</Link></h1>
-      <img src={getAssetUrl('images/pagebreak.png')} alt="Page Break" className="pagebreak" />
+      <img src={getAssetUrl('images/pagebreak.png')} alt="分隔线" className="pagebreak" />
 
       {/* Collapsible sections */}
       <div className={styles.alltimeContainer}>
@@ -205,7 +205,7 @@ export default function SHOTM() {
           if (showPoints) { setClosingPoints(true); setTimeout(() => { setShowPoints(false); setClosingPoints(false) }, 300) }
           else { setShowPoints(true) }
         }}>
-          How Points are Calculated {showPoints ? '\u25B2' : '\u25BC'}
+          积分计算方式 {showPoints ? '\u25B2' : '\u25BC'}
         </button>
         {(showPoints || closingPoints) && (
           <div className={`${styles.pointsContent} ${closingPoints ? styles.slideUp : ''}`}>
@@ -227,7 +227,7 @@ export default function SHOTM() {
               }
             }}
           >
-            ✨ Tier 3+ Shiny Highlights ✨ {showTiers ? '\u25B2' : '\u25BC'}
+            ✨ 第 3 级以上闪光亮点 ✨ {showTiers ? '\u25B2' : '\u25BC'}
           </button>
 
 
@@ -264,14 +264,14 @@ export default function SHOTM() {
 
       {/* Month navigation and rankings */}
       <div className={styles.shotmPage}>
-        <h1>Shiny Hunters of the Month</h1>
+        <h1>本月闪光猎人</h1>
         <div className={styles.monthNav}>
           <h2 className={styles.monthTitle}>
             {currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1)} {currentYear}
           </h2>
           <div className={styles.monthButtons}>
-            {hasPrevData && <button onClick={goPrev} className={styles.monthBtn}>&#9664; Previous</button>}
-            {!selectedIsCurrent && <button onClick={goNext} className={styles.monthBtn}>Next &#9654;</button>}
+            {hasPrevData && <button onClick={goPrev} className={styles.monthBtn}>&#9664; 上个月</button>}
+            {!selectedIsCurrent && <button onClick={goNext} className={styles.monthBtn}>下个月 &#9654;</button>}
           </div>
         </div>
 
@@ -311,4 +311,3 @@ export default function SHOTM() {
     </div>
   )
 }
-

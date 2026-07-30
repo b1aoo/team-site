@@ -4,42 +4,42 @@ import { getAssetUrl } from '../../utils/assets'
 import styles from './Navbar.module.css'
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Home' },
+  { to: '/', label: '首页' },
     {
-    label: 'Team Synergy',
+    label: 'Synergy 公会',
     submenu: [
-      { to: '/shiny-showcase/', label: 'Shiny Showcase' },
-      { to: '/shotm/', label: 'SHOTM' },
-      { to: '/team-statistics/', label: 'Team Statistics' },
-      { to: '/streamers/', label: 'Streamers' },
-      { to: '/trophy-board/', label: 'Trophy Board' },
-      { to: '/bounties/', label: 'Bounties' },
-      { to: '/events/', label: 'Events' },
-      { to: '/dex-helper/', label: 'Dex Helper' },
-      { to: '/official-shiny-wars-planner/', label: 'Official Shiny Wars Planner' },
-      { to: '/shiny-war-2025/', label: 'Shiny Wars 2025' },
+      { to: '/shiny-showcase/', label: '闪光收藏展示' },
+      { to: '/shotm/', label: '本月闪光' },
+      { to: '/team-statistics/', label: '公会统计' },
+      { to: '/streamers/', label: '主播' },
+      { to: '/trophy-board/', label: '荣誉墙' },
+      { to: '/bounties/', label: '悬赏' },
+      { to: '/events/', label: '活动' },
+      { to: '/dex-helper/', label: '图鉴助手' },
+      { to: '/official-shiny-wars-planner/', label: '官方闪光大战规划器' },
+      { to: '/shiny-war-2025/', label: '2025 闪光大战' },
     ]
   },
-  { to: '/pokedex/', label: 'PokeDex' },
-  { to: '/safari-zones/', label: 'Safari Zones' },
-  { to: '/altering-cave-rotations/', label: 'Altering Cave' },
-  { to: '/region-maps/', label: 'Region Maps' },
-  { to: '/official-event-calendar/', label: 'Official Event Calendar' },
-  { to: '/catching-calculator/', label: 'Catching Calculator' },
+  { to: '/pokedex/', label: '宝可梦图鉴' },
+  { to: '/safari-zones/', label: '狩猎地带' },
+  { to: '/altering-cave-rotations/', label: '变化洞窟' },
+  { to: '/region-maps/', label: '地区地图' },
+  { to: '/official-event-calendar/', label: '官方活动日历' },
+  { to: '/catching-calculator/', label: '捕捉计算器' },
   {
-    label: 'Tools',
+    label: '工具',
     submenu: [
-      { to: '/counter-generator/', label: 'Counter Generator' },
-      { to: '/egg-move-calculator/', label: 'Egg Move Calculator' },
-      { to: '/player-card-generator/', label: 'Player Card Generator' },
-      { to: '/random-pokemon-generator/', label: 'Random Pokemon Generator' },
-      { to: '/shiny-odds/', label: 'Shiny Odds' },
-      { to: '/sprite-recolour/', label: 'Sprite Recolour' },
-      { to: '/particle-viewer/', label: 'Particle Viewer' },
+      { to: '/counter-generator/', label: '计数器生成器' },
+      { to: '/egg-move-calculator/', label: '遗传招式计算器' },
+      { to: '/player-card-generator/', label: '玩家卡片生成器' },
+      { to: '/random-pokemon-generator/', label: '随机宝可梦生成器' },
+      { to: '/shiny-odds/', label: '闪光概率' },
+      { to: '/sprite-recolour/', label: '精灵图改色' },
+      { to: '/particle-viewer/', label: '粒子效果预览' },
     ]
   },
-  { to: '/themes/', label: 'Themes' },
-  { to: '/resources/', label: 'Resources' },
+  { to: '/themes/', label: '主题' },
+  { to: '/resources/', label: '资料库' },
 ]
 
 
@@ -57,7 +57,7 @@ export default function Navbar() {
       <button
         className={styles.hamburger}
         onClick={() => setMenuOpen(!menuOpen)}
-        aria-label="Toggle menu"
+        aria-label="切换菜单"
       >
         <span></span>
         <span></span>
@@ -173,10 +173,9 @@ export default function Navbar() {
           onClick={handleLinkClick}
         >
           <img src={getAssetUrl('images/discord.png')} alt="Discord" width="32" height="32" />
-          Join Discord
+          加入 Discord
         </a>
       </div>
     </nav>
   )
 }
-

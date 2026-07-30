@@ -2,31 +2,31 @@ import { useRef, useEffect, useMemo } from 'react'
 import styles from './InfoBox.module.css'
 
 const TRAIT_CHECKS = [
-  { key: 'Secret Shiny', label: 'Secret', cls: 'tagSecret' },
-  { key: 'Alpha', label: 'Alpha', cls: 'tagAlpha' },
-  { key: 'Egg', label: 'Egg', cls: 'tagEgg' },
-  { key: 'Safari', label: 'Safari', cls: 'tagSafari' },
-  { key: 'Honey Tree', label: 'Honey', cls: 'tagHoney' },
-  { key: 'Fossil', label: 'Fossil', cls: 'tagFossil' },
-  { key: 'Fishing', label: 'Fishing', cls: 'tagFishing' },
-  { key: 'Swarm', label: 'Swarm', cls: 'tagSwarm' },
-  { key: 'Headbutt', label: 'Headbutt', cls: 'tagHeadbutt' },
-  { key: 'Event', label: 'Event', cls: 'tagEvent' },
-  { key: 'Favourite', label: 'Favourite', cls: 'tagFav' },
-  { key: 'Legendary', label: 'Legend', cls: 'tagLegend' },
-  { key: 'MysteriousBall', label: 'Mystery', cls: 'tagMystery' },
-  { key: 'Reaction', label: 'Reaction', cls: 'tagReaction' },
+  { key: 'Secret Shiny', label: '隐藏闪光', cls: 'tagSecret' },
+  { key: 'Alpha', label: '头目', cls: 'tagAlpha' },
+  { key: 'Egg', label: '孵化', cls: 'tagEgg' },
+  { key: 'Safari', label: '狩猎地带', cls: 'tagSafari' },
+  { key: 'Honey Tree', label: '甜甜蜜树', cls: 'tagHoney' },
+  { key: 'Fossil', label: '化石复原', cls: 'tagFossil' },
+  { key: 'Fishing', label: '钓鱼', cls: 'tagFishing' },
+  { key: 'Swarm', label: '大量出现', cls: 'tagSwarm' },
+  { key: 'Headbutt', label: '撞树', cls: 'tagHeadbutt' },
+  { key: 'Event', label: '活动', cls: 'tagEvent' },
+  { key: 'Favourite', label: '收藏', cls: 'tagFav' },
+  { key: 'Legendary', label: '传说', cls: 'tagLegend' },
+  { key: 'MysteriousBall', label: '神秘球', cls: 'tagMystery' },
+  { key: 'Reaction', label: '反应', cls: 'tagReaction' },
 ] 
 
 const API_FIELDS = [
   { key: 'ivs', label: 'IVs' },
-  { key: 'nature', label: 'Nature' },
-  { key: 'location', label: 'Location', fallback: 'Location' },
-  { key: 'encounter_method', label: 'Method', fallback: 'Encounter Type' },
-  { key: 'date_caught', label: 'Caught' },
-  { key: 'encounter_count', label: 'Encounters', fallback: 'Encounter Count' },
-  { key: 'nickname', label: 'Nickname' },
-  { key: 'variant', label: 'Variant' },
+  { key: 'nature', label: '性格' },
+  { key: 'location', label: '地点', fallback: 'Location' },
+  { key: 'encounter_method', label: '遭遇方式', fallback: 'Encounter Type' },
+  { key: 'date_caught', label: '获得日期' },
+  { key: 'encounter_count', label: '遭遇次数', fallback: 'Encounter Count' },
+  { key: 'nickname', label: '昵称' },
+  { key: 'variant', label: '形态' },
 ]
 
 // Format date to readable format

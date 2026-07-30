@@ -15,18 +15,18 @@ function getUserGmtString() {
 
 // Each row: { label, period, startHour, cells: [cell for each tz] }
 const PERIODS = [
-  { label: 'Morning', period: 'morning', startHour: 13 },
-  { label: 'Day', period: 'day', startHour: 14.75 },
-  { label: 'Night', period: 'night', startHour: 17.25 },
-  { label: 'Morning', period: 'morning', startHour: 19 },
-  { label: 'Day', period: 'day', startHour: 20.75 },
-  { label: 'Night', period: 'night', startHour: 23.15 },
-  { label: 'Morning', period: 'morning', startHour: 1 },
-  { label: 'Day', period: 'day', startHour: 2.75 },
-  { label: 'Night', period: 'night', startHour: 5.15 },
-  { label: 'Morning', period: 'morning', startHour: 7 },
-  { label: 'Day', period: 'day', startHour: 8.75 },
-  { label: 'Night', period: 'night', startHour: 11.15 },
+  { label: '清晨', period: 'morning', startHour: 13 },
+  { label: '白天', period: 'day', startHour: 14.75 },
+  { label: '夜晚', period: 'night', startHour: 17.25 },
+  { label: '清晨', period: 'morning', startHour: 19 },
+  { label: '白天', period: 'day', startHour: 20.75 },
+  { label: '夜晚', period: 'night', startHour: 23.15 },
+  { label: '清晨', period: 'morning', startHour: 1 },
+  { label: '白天', period: 'day', startHour: 2.75 },
+  { label: '夜晚', period: 'night', startHour: 5.15 },
+  { label: '清晨', period: 'morning', startHour: 7 },
+  { label: '白天', period: 'day', startHour: 8.75 },
+  { label: '夜晚', period: 'night', startHour: 11.15 },
 ];
 
 // Helper to format hour as 4-digit string (e.g. 13.00 -> 1300, 1.15 -> 0115)
@@ -74,16 +74,16 @@ export default function TimeDisplayTable() {
 
   return (
     <div className={styles['timedisplay-table-container']}>
-      <h2 style={{textAlign:'center',marginBottom:'1rem'}}>In-Game Time Table by Timezone</h2>
+      <h2 style={{textAlign:'center',marginBottom:'1rem'}}>按时区查看游戏内时间表</h2>
       <div style={{textAlign:'center', marginBottom:'1rem'}}>
         <button
           className={styles['showAllBtn']}
           onClick={() => setShowAll(v => !v)}
         >
-          {showAll ? 'Hide extra timezones' : 'Display all timezones'}
+          {showAll ? '隐藏其他时区' : '显示全部时区'}
         </button>
         <div style={{marginTop:'0.5em', color:'#aaa', fontSize:'0.95em'}}>
-          Showing: <b>{showAll ? 'All Timezones' : `${userGmt} (Your Timezone)`}</b>
+          正在显示：<b>{showAll ? '全部时区' : `${userGmt}（你的时区）`}</b>
         </div>
       </div>
       <div style={{overflowX:'auto'}}>
@@ -110,8 +110,8 @@ export default function TimeDisplayTable() {
         </table>
       </div>
       <p style={{ fontSize: '0.95em', color: '#aaa', marginTop: '1.5rem', textAlign:'center' }}>
-        Each row shows the in-game period and the corresponding in-game time for every timezone.<br/>
-        Colors match Morning, Day, and Night periods. Read horizontally for your timezone.
+        每一行显示游戏内时段，以及各时区对应的游戏内时间。<br/>
+        颜色分别对应清晨、白天和夜晚；请横向查找你的时区。
       </p>
     </div>
   );

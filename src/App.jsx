@@ -59,7 +59,7 @@ export default function App() {
       "name": "Team Synergy",
       "url": "https://synergymmo.com",
       "logo": "https://synergymmo.com/favicon.png",
-      "description": "Team Synergy is a PokeMMO shiny hunting team. Browse our shiny dex, view shiny collections, watch our streamers, and generate encounter counter themes.",
+      "description": "Team Synergy 是 PokeMMO 闪光狩猎公会；在这里查看闪光图鉴、成员收藏、主播与遇敌计数器主题。",
       "sameAs": [
         "https://discord.gg/2BEUq6fWAj",
       ],
@@ -100,7 +100,7 @@ export default function App() {
       <section className="background" />
       <StarField />
       <main id="main-container">
-        <Suspense fallback={<div className="message">Loading...</div>}>
+        <Suspense fallback={<div className="message">加载中…</div>}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/shiny-showcase" element={<ShinyShowcase />} />
@@ -148,4 +148,3 @@ export default function App() {
     </>
   )
 }
-

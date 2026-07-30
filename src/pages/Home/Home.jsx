@@ -25,12 +25,12 @@ function InGameClockDisplay() {
           <span className={styles.clockDay}>{state.day}</span>
           <span className={styles.clockDay}>{state.season}</span>
           <span className={`${styles.clockPeriod} ${styles[`period${state.period}`]}`}>{state.period}</span>
-          <span className={styles.clockCountdown}>{countdownStr} until next period</span>
+          <span className={styles.clockCountdown}>距离下个时段还有 {countdownStr}</span>
         </div>
       </div>
       <div className={styles.clockButtonRow}>
         <Link to="/time-display/" className={styles.clockButton}>
-          View In-Game Time Table
+          查看游戏内时间表
         </Link>
       </div>
     </div>
@@ -39,8 +39,8 @@ function InGameClockDisplay() {
 
 export default function Home() {
   useDocumentHead({
-    title: 'Team Synergy - PokeMMO Shiny Hunting Community',
-    description: 'Team Synergy is the ultimate PokeMMO shiny hunting community. Browse 140+ player shiny collections, track completion with our Pokédex, watch live Twitch streamers, and join competitions.',
+    title: 'Team Synergy - PokeMMO 闪光狩猎社区',
+    description: 'Team Synergy 是 PokeMMO 闪光狩猎社区。浏览 140 多位玩家的闪光收藏，用图鉴追踪进度，观看 Twitch 直播并参与竞赛。',
     canonicalPath: '/',
     robots: 'index, follow, max-image-preview:large',
   })
@@ -48,37 +48,36 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <h1 className="seo-optimized">
-        Team Synergy: PokeMMO Shiny Hunting Community
+        Team Synergy：PokeMMO 闪光狩猎社区
       </h1>
       
       <p className="seo-intro">
-        The ultimate PokeMMO shiny hunting hub. Browse 140+ player collections, explore our detailed Pokédex, watch live Twitch streamers, and join competitions.
+        PokeMMO 闪光狩猎的一站式据点：浏览 140 多位玩家的收藏，查阅详尽图鉴，观看 Twitch 直播，并参与各类竞赛。
       </p>
 
-      <img src={getAssetUrl('images/pagebreak.png')} alt="Page Break" className="pagebreak" />
+      <img src={getAssetUrl('images/pagebreak.png')} alt="分隔线" className="pagebreak" />
 
       <RoamingLegendaries />
 
       <InGameClockDisplay />
 
-      <img src={getAssetUrl('images/pagebreak.png')} alt="Page Break" className="pagebreak" />
+      <img src={getAssetUrl('images/pagebreak.png')} alt="分隔线" className="pagebreak" />
 
       <section className={styles.featuresSection}>
-        <h2>Welcome to Team Synergy</h2>
+        <h2>欢迎来到 Team Synergy</h2>
         <img
           src={getAssetUrl('images/teamsyn.gif')}
           alt="Team Synergy"
           className={styles.teamSynGif}
         />
         <p>
-          Team Synergy is a PokeMMO community dedicated to shiny hunting. Our members hunt together, create fun events and share our excitement for PokeMMO!
+          Team Synergy 是一个专注于刷闪的 PokeMMO 社区。我们一起狩猎、举办有趣的活动，并分享对 PokeMMO 的热爱！
         </p>
         <p>
-          With streamers, competitive events, and an expanding community website, Team Synergy brings together players from all over the world to enjoy PokeMMO as a community. Whether you're a casual hunter or a competitive shiny chaser, there's a place for you in Team Synergy!
+          借助主播、竞赛活动和不断完善的社区网站，Team Synergy 将来自世界各地的玩家聚在一起，共同享受 PokeMMO。无论你是休闲刷闪，还是追求名次的闪光猎人，这里都有你的位置！
         </p>
         <p>
-          Team Synergy is a thriving PokeMMO shiny hunting community. Join thousands of players tracking their shiny
-          collections, competing in events, and hunting together.
+          Team Synergy 是充满活力的 PokeMMO 闪光狩猎社区。加入数千名玩家，一起记录闪光收藏、参加活动、共同刷闪。
         </p>
 
         <div className={styles.featuresGrid}>
@@ -86,74 +85,74 @@ export default function Home() {
             <div className={styles.featureIcon}>
               <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/reuniclus.gif" alt="Reuniclus" />
             </div>
-            <h3>Shiny Showcase</h3>
-            <p>Browse 140+ members' shiny collections and track rankings</p>
+            <h3>闪光收藏展示</h3>
+            <p>浏览 140 多位成员的闪光收藏，并查看排名</p>
           </Link>
 
           <Link to="/pokedex/" className={styles.featureCard}>
             <div className={styles.featureIcon}>
               <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/pikachu.gif" alt="Pikachu" />
             </div>
-            <h3>PokéDex</h3>
-            <p>Explore shiny hunting locations, alphas, and detailed Pokémon data</p>
+            <h3>宝可梦图鉴</h3>
+            <p>查询刷闪地点、头目宝可梦与详尽的宝可梦资料</p>
           </Link>
 
           <Link to="/streamers/" className={styles.featureCard}>
             <div className={styles.featureIcon}>
               <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/rotom.gif" alt="Rotom" />
             </div>
-            <h3>Streamers</h3>
-            <p>Watch live Twitch streams from Team Synergy members</p>
+            <h3>主播</h3>
+            <p>观看 Team Synergy 成员的 Twitch 直播</p>
           </Link>
 
           <Link to="/resources/" className={styles.featureCard}>
             <div className={styles.featureIcon}>
               <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/porygon.gif" alt="Porygon" />
             </div>
-            <h3>Resources</h3>
-            <p>Read all the useful Resources about PokeMMO</p>
+            <h3>资料库</h3>
+            <p>查阅实用的 PokeMMO 攻略与资料</p>
           </Link>
 
           <Link to="/safari-zones/" className={styles.featureCard}>
             <div className={styles.featureIcon}>
               <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/riolu.gif" alt="Riolu" />
             </div>
-            <h3>Safari Zones</h3>
-            <p>Explore detailed Safari Zone information for all regions</p>
+            <h3>狩猎地带</h3>
+            <p>查看各地区狩猎地带的详细资料</p>
           </Link>
 
           <Link to="/roaming-legendaries/" className={styles.featureCard}>
             <div className={styles.featureIcon}>
               <img src="https://img.pokemondb.net/sprites/black-white/anim/shiny/suicune.gif" alt="Suicune" />
             </div>
-            <h3>Roaming Legendaries</h3>
-            <p>Track roaming legendary schedules</p>
+            <h3>游走传说宝可梦</h3>
+            <p>追踪游走传说宝可梦的出现周期</p>
           </Link>
         </div>
       </section>
-      <img src={getAssetUrl('images/pagebreak.png')} alt="Page Break" className="pagebreak" />
+      <img src={getAssetUrl('images/pagebreak.png')} alt="分隔线" className="pagebreak" />
 
       <section className={styles.applySection}>
-        <h2>How to Apply</h2>
+        <h2>如何申请加入</h2>
         <p>
-          Interested in joining Team Synergy? We're always looking for dedicated and friendly PokeMMO players to join our ranks. Here's how you can apply:
+          想加入 Team Synergy 吗？我们始终欢迎投入、友善的 PokeMMO 玩家。申请方式如下：
         </p>
-        <h3>Requirements</h3>
+        <h3>申请条件</h3>
         <ul>
-          <li><strong>Age:</strong> 18+</li>
-          <li><strong>All 5 Regions completed</strong></li>
-          <li><strong>Minimum of 500 hours playtime</strong></li>
-          <li><strong>Minimum of 3 shinies</strong></li>
+          <li><strong>年龄：</strong>18 岁以上</li>
+          <li><strong>完成全部 5 个地区的主线</strong></li>
+          <li><strong>游戏时长至少 500 小时</strong></li>
+          <li><strong>至少拥有 3 只闪光宝可梦</strong></li>
         </ul>
-        <h3>How to Apply</h3>
+        <h3>申请步骤</h3>
         <ol>
-          <li>Join our <a href="https://discord.gg/2BEUq6fWAj" target="_blank" rel="noopener noreferrer">Discord server</a></li>
-          <li>Check the #applications channel and check if our applications are currently Open</li>
-          <li>Fill out the application form</li>
-          <li>Our staff team will review your application</li>
+          <li>加入我们的 <a href="https://discord.gg/2BEUq6fWAj" target="_blank" rel="noopener noreferrer">Discord 服务器</a></li>
+          <li>查看 #applications 频道，确认当前是否开放申请</li>
+          <li>填写申请表</li>
+          <li>管理团队会审核你的申请</li>
         </ol>
         <p>
-          If you meet the requirements above and share our passion for PokeMMO, we'd love to hear from you!
+          如果你符合以上条件，也热爱 PokeMMO，我们期待你的申请！
         </p>
       </section>
 

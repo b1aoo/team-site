@@ -13,16 +13,16 @@ import styles from './OfficialShinyWarsPlanner.module.css'
 const methodJsonUsed = false
 const TIER_ORDER = [7, 6, 5, 4, 3, 2, 1, 0]
 const VIEW_TABS = [
-  { id: 'grid', label: 'Tier Grid' },
-  { id: 'caught', label: 'Caught Shinies' },
+  { id: 'grid', label: '分级总览' },
+  { id: 'caught', label: '已获得闪光' },
 ]
 const GRID_FILTER_TABS = [
-  { id: 'all', label: 'All' },
-  { id: '5x Horde', label: '5x Horde' },
-  { id: '3x Horde', label: '3x Horde' },
-  { id: 'Fishing', label: 'Fishing' },
-  { id: 'Single Encounter', label: 'Single Encounters' },
-  { id: 'Fossils', label: 'Fossils' },
+  { id: 'all', label: '全部' },
+  { id: '5x Horde', label: '5 只群聚' },
+  { id: '3x Horde', label: '3 只群聚' },
+  { id: 'Fishing', label: '钓鱼' },
+  { id: 'Single Encounter', label: '单只遭遇' },
+  { id: 'Fossils', label: '化石复原' },
 ]
 const OSW_METHOD_KEYS = {
   five_x_horde: '5x Horde',
@@ -301,8 +301,8 @@ export default function OfficialShinyWarsPlanner() {
   const [activeGridFilter, setActiveGridFilter] = useState('all')
 
   useDocumentHead({
-    title: 'Official Shiny Wars Planner - Team Synergy',
-    description: 'Track Official Shiny Wars shiny catches for Team Synergy Tryhard and Casual teams by shiny tier.',
+    title: '官方闪光大战规划器',
+    description: '按闪光分级追踪 Team Synergy 竞赛组与休闲组在官方闪光大战中的战果。',
     canonicalPath: '/official-shiny-wars-planner/',
   })
 
@@ -319,8 +319,8 @@ export default function OfficialShinyWarsPlanner() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <h1>Official Shiny Wars Planner</h1>
-        <div className={styles.tabs} role="tablist" aria-label="Official Shiny Wars teams">
+        <h1>官方闪光大战规划器</h1>
+        <div className={styles.tabs} role="tablist" aria-label="官方闪光大战队伍">
           {teams.map(team => (
             <button
               key={team.id}
@@ -334,11 +334,11 @@ export default function OfficialShinyWarsPlanner() {
             </button>
           ))}
         </div>
-        <div className={styles.summary} aria-label={`${activeTeam.label} progress`}>
-          <span>{summary.caughtPokemon} / {summary.totalPokemon} Pokemon</span>
-          <span>{summary.caughtPoints} / {summary.totalPoints} Raw Points</span>
+        <div className={styles.summary} aria-label={`${activeTeam.label} 进度`}>
+          <span>{summary.caughtPokemon} / {summary.totalPokemon} 种宝可梦</span>
+          <span>{summary.caughtPoints} / {summary.totalPoints} 基础分</span>
         </div>
-        <div className={styles.viewTabs} role="tablist" aria-label={`${activeTeam.label} planner views`}>
+        <div className={styles.viewTabs} role="tablist" aria-label={`${activeTeam.label} 规划视图`}>
           {VIEW_TABS.map(tab => (
             <button
               key={tab.id}
@@ -358,7 +358,7 @@ export default function OfficialShinyWarsPlanner() {
         <div
           className={styles.gridFilters}
           role="tablist"
-          aria-label="Official Shiny Wars encounter method filters"
+          aria-label="官方闪光大战遭遇方式筛选"
         >
           {GRID_FILTER_TABS.map(tab => (
             <button
@@ -375,7 +375,7 @@ export default function OfficialShinyWarsPlanner() {
         </div>
       )}
 
-      {activeView === 'grid' && <section className={styles.grid} aria-label={`${activeTeam.label} shiny wars tier planner`}>
+      {activeView === 'grid' && <section className={styles.grid} aria-label={`${activeTeam.label} 闪光大战分级规划`}>
         {TIER_ORDER.map(tier => {
           const tierPokemon = filteredTierColumns[tier]
           const tierCaught = tierPokemon.filter(pokemon => caughtSet.has(pokemon.id)).length
@@ -384,8 +384,8 @@ export default function OfficialShinyWarsPlanner() {
           return (
             <article key={tier} className={styles.tierColumn}>
               <div className={styles.tierHeader}>
-                <span>Tier {tier}</span>
-                <span>{points} Points</span>
+                <span>第 {tier} 级</span>
+                <span>{points} 分</span>
               </div>
               <div className={styles.tierProgress}>{tierCaught} / {tierPokemon.length}</div>
               <div className={styles.pokemonList}>
@@ -397,7 +397,7 @@ export default function OfficialShinyWarsPlanner() {
                       key={pokemon.id}
                       to={`/pokemon/${pokemon.id}/`}
                       className={`${styles.pokemonTile} ${isCaught ? styles.caught : ''}`}
-                      aria-label={`${pokemon.name}${isCaught ? ' caught' : ''}`}
+                      aria-label={`${pokemon.name}${isCaught ? '，已获得' : ''}`}
                     >
                       <img
                         src={getLocalPokemonGif(pokemon.id)}
@@ -413,7 +413,7 @@ export default function OfficialShinyWarsPlanner() {
                   )
                 })}
                 {tierPokemon.length === 0 && (
-                  <div className={styles.emptyTier}>No Pokemon in this filter</div>
+                  <div className={styles.emptyTier}>此筛选条件下没有宝可梦</div>
                 )}
               </div>
             </article>
@@ -422,10 +422,10 @@ export default function OfficialShinyWarsPlanner() {
       </section>}
 
       {activeView === 'caught' && (
-        <section className={styles.caughtSection} aria-label={`${activeTeam.label} caught shinies`}>
+        <section className={styles.caughtSection} aria-label={`${activeTeam.label} 已获得闪光`}>
           <div className={styles.spotsHeader}>
-            <h2>Caught Shinies</h2>
-            <p>{caughtPokemon.length === 0 ? 'No caught shinies have been entered for this team yet.' : `${caughtPokemon.length} caught shinies entered for ${activeTeam.label}.`}</p>
+            <h2>已获得闪光</h2>
+            <p>{caughtPokemon.length === 0 ? '该队伍暂未录入任何闪光战果。' : `${activeTeam.label} 已录入 ${caughtPokemon.length} 只闪光宝可梦。`}</p>
           </div>
           <div className={styles.caughtGrid}>
             {caughtPokemon.map((pokemon, index) => (
@@ -440,8 +440,8 @@ export default function OfficialShinyWarsPlanner() {
                   onError={onGifError(pokemon.id)}
                 />
                 <span>{pokemon.name}</span>
-                {pokemon.player && <small>Caught by {pokemon.player}</small>}
-                <small>Tier {pokemon.tier} - {pokemon.points} raw pts</small>
+                {pokemon.player && <small>获得者：{pokemon.player}</small>}
+                <small>第 {pokemon.tier} 级 · {pokemon.points} 基础分</small>
               </Link>
             ))}
           </div>
