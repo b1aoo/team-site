@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 const DEFAULT_SITE_NAME = 'Team Synergy - PokeMMO';
-const DEFAULT_BASE_URL = 'https://synergymmo.com';
+const DEFAULT_BASE_URL = 'https://b1aoo.github.io/team-site';
 const DEFAULT_IMAGE = `${DEFAULT_BASE_URL}/images/openGraph.jpg`;
 const DEFAULT_DESCRIPTION =
   'Team Synergy is a PokeMMO shiny hunting team. Browse our shiny dex, view shiny collections, watch our streamers, and generate encounter counter themes.';
@@ -136,4 +136,3 @@ export function useDocumentHead({
     author,
   ]);
 }
-

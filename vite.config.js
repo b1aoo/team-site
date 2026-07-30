@@ -3,7 +3,8 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig(({ mode }) => ({
   plugins: [react()],
-  base: '/',
+  // This fork is published as a GitHub Pages project site.
+  base: '/team-site/',
   resolve: {
     dedupe: ['react', 'react-dom'],
   },

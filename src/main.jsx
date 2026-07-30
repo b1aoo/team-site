@@ -40,7 +40,7 @@ const queryClient = new QueryClient({
     const canonical = document.querySelector('link[rel="canonical"]')
     if (canonical) {
       const currentPath = window.location.pathname + window.location.search + window.location.hash
-      canonical.href = `https://synergymmo.com${currentPath}`
+      canonical.href = `https://b1aoo.github.io${currentPath}`
     }
   }
   
@@ -94,7 +94,7 @@ window.addEventListener('error', (event) => {
 // Register service worker for caching (production only)
 if (!import.meta.env.DEV && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
+    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}service-worker.js`)
       .catch((error) => {
         console.error('Service Worker registration failed:', error)
       })
@@ -105,7 +105,7 @@ const rootElement = document.getElementById('root')
 const app = (
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <BrowserRouter basename={import.meta.env.BASE_URL} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <AdminProvider>
           <App />
         </AdminProvider>
