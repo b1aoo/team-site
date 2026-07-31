@@ -37,7 +37,7 @@ function buildIndexedFrame(frame) {
     if (paletteIndex === undefined) {
       if (palette.length >= maxVisibleColors + (hasTransparency ? 1 : 0)) {
         throw new Error(
-          'This GIF frame uses more than 256 colors after editing, so it cannot be exported losslessly as a GIF.'
+          '编辑后的 GIF 帧使用了超过 256 种颜色，因此无法无损导出为 GIF。'
         );
       }
 
@@ -117,7 +117,7 @@ function buildIndexedFrameWithPalette(frame, globalPalette) {
     const paletteIndex = globalPalette.colorToIndex.get(color);
 
     if (paletteIndex === undefined) {
-      throw new Error('A frame used a color that was missing from the GIF palette.');
+      throw new Error('某一帧使用了 GIF 调色板中不存在的颜色。');
     }
 
     indexedPixels[pixelIndex] = paletteIndex;

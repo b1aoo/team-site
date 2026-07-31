@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 import { Link } from 'react-router-dom';
 import styles from './ThemesPage.module.css';
+import { formatThemeDescription } from '../../utils/contentZh';
 
 const tabList = [
   { key: 'Themes', label: '主题' }, { key: 'Encounter Counters', label: '遇敌计数器' },
@@ -28,7 +29,7 @@ export default function ThemesPage() {
       setError(null);
       try {
         const res = await fetch(WORKER_THEME_ENDPOINT);
-        if (!res.ok) throw new Error(`Failed to fetch theme data: ${res.status}`);
+        if (!res.ok) throw new Error(`主题资料加载失败：${res.status}`);
         const data = await res.json();
         setThemeData(data);
       } catch (err) {
@@ -92,7 +93,7 @@ export default function ThemesPage() {
             />
             <div className={styles.label}>
               <span className={styles.itemName}>{item.name}</span>
-              <div className={styles.itemDesc}>{item.description}</div>
+              <div className={styles.itemDesc}>{formatThemeDescription(item)}</div>
               <div className={styles.itemAuthor}>作者：{item.author}</div>
             </div>
           </Link>

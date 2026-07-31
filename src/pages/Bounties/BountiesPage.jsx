@@ -8,34 +8,47 @@ import styles from './BountiesPage.module.css';
 import MarshMondayPopup from './MarshMondayPopup';
 import { translatePokemonName } from '../../utils/pokemonNamesZh';
 
-const POKEMON_NAME_OVERRIDES = {
-  'mr-mime':    'Mr. Mime',
-  'mime-jr':    'Mime Jr.',
-  'farfetch-d': "Farfetch'd",
-  'porygon-z':  'Porygon-Z',
-  'ho-oh':      'Ho-Oh',
-  'nidoran-f':  'Nidoran♀',
-  'nidoran-m':  'Nidoran♂',
-  'jangmo-o':   'Jangmo-o',
-  'hakamo-o':   'Hakamo-o',
-  'kommo-o':    'Kommo-o',
-};
-
 function formatPokemonName(slugOrList) {
   if (!slugOrList) return '';
   if (Array.isArray(slugOrList)) {
     return slugOrList.map((slug) => formatPokemonName(slug)).join(', ');
   }
-  const lower = String(slugOrList).trim().toLowerCase();
-  if (!lower) return '';
-  if (POKEMON_NAME_OVERRIDES[lower]) return POKEMON_NAME_OVERRIDES[lower];
-  return translatePokemonName(lower);
+  const name = String(slugOrList).trim();
+  return name ? translatePokemonName(name) : '';
 }
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
+const MONTH_NAMES_ZH = Object.freeze({
+  January: '一月', February: '二月', March: '三月', April: '四月', May: '五月', June: '六月',
+  July: '七月', August: '八月', September: '九月', October: '十月', November: '十一月', December: '十二月',
+  Perm: '常驻', Uncategorized: '未分类',
+});
+
+function hasChineseText(value) {
+  return /[\u3400-\u9fff]/.test(String(value || ''));
+}
+
+function formatBountyMonth(value) {
+  return MONTH_NAMES_ZH[value] || value || '未分类';
+}
+
+function formatBountyTitle(bounty) {
+  if (hasChineseText(bounty?.title)) return bounty.title;
+  const targets = formatPokemonName(bounty?.pokemon);
+  return targets ? `闪光悬赏：${targets}` : '闪光悬赏';
+}
+
+function formatBountyDescription(description) {
+  if (hasChineseText(description)) return String(description).replace(/<[^>]*>/g, '');
+  return description ? '详细条件请向悬赏发布者确认。' : '';
+}
+
+function formatBountyReward(reward) {
+  return hasChineseText(reward) ? reward : (reward ? '奖励详情请向发布者确认。' : '未注明');
+}
 
 function sortMonthCategories(categories) {
   const unique = Array.from(new Set(categories.filter(Boolean)));
@@ -124,7 +137,7 @@ function PokemonSpriteSingle({ name }) {
     <img
       className={styles['bounty-pokemon-sprite']}
       src={gifUrl}
-      alt={name}
+      alt={formatPokemonName(name)}
     />
   );
 }
@@ -226,8 +239,8 @@ export default function BountiesPage() {
     canonicalPath: '/bounties/',
     ogImage,
     url: 'https://b1aoo.github.io/team-site/bounties/',
-    keywords: 'PokeMMO bounties, shiny bounties, Team Synergy bounties, monthly bounties, permanent bounties, shiny hunting challenges, PokeMMO events, Team Synergy rewards',
-    author: 'Team Synergy - PokeMMO Community',
+    keywords: 'PokeMMO 悬赏, 闪光悬赏, Team Synergy, 月度悬赏, 常驻悬赏, 刷闪挑战, PokeMMO 活动, 社区奖励',
+    author: 'Team Synergy PokeMMO 社区',
   });
 
   return (
@@ -261,7 +274,7 @@ export default function BountiesPage() {
           ) : (
             <span />
           )}
-          <h2>{selectedMonth}</h2>
+          <h2>{formatBountyMonth(selectedMonth)}</h2>
           {nextMonth ? (
             <button onClick={() => setSelectedMonth(nextMonth)}>下个月 &gt;</button>
           ) : (
@@ -279,7 +292,7 @@ export default function BountiesPage() {
             <h3>
               {selectedMonth === new Date().toLocaleString('default', { month: 'long' })
                 ? '本月悬赏'
-                : `${selectedMonth} 悬赏（已不可领取）`}
+                : `${formatBountyMonth(selectedMonth)}悬赏（已不可领取）`}
             </h3>
             {currentMonthBounties.length === 0 ? <p>本月暂无悬赏。</p> : (
               <>
@@ -296,10 +309,10 @@ export default function BountiesPage() {
                           >
                             <Link to={`/pokemon/${primaryPokemon || ''}/`} className={styles['bounty-card-inner']}>
                               <PokemonSprite name={b.pokemon} />
-                              <div className={styles['bounty-title']}>{Array.isArray(b.pokemon) && b.pokemon.length > 1 ? b.title : formatPokemonName(b.pokemon)}</div>
+                              <div className={styles['bounty-title']}>{formatBountyTitle(b)}</div>
                               <div className={styles['bounty-host']}>发布者：{b.host}</div>
-                              <div className={styles['bounty-reward']}>奖励：{b.reward}</div>
-                              <div className={styles['bounty-description']} dangerouslySetInnerHTML={{ __html: b.description ? b.description.replace(/\n/g, '<br>') : '' }} />
+                              <div className={styles['bounty-reward']}>奖励：{formatBountyReward(b.reward)}</div>
+                              <div className={styles['bounty-description']}>{formatBountyDescription(b.description)}</div>
                             </Link>
                           </li>
                         );
@@ -321,10 +334,10 @@ export default function BountiesPage() {
                           >
                             <Link to={`/pokemon/${primaryPokemon || ''}/`} className={styles['bounty-card-inner']}>
                               <PokemonSprite name={b.pokemon} />
-                              <div className={styles['bounty-title']}>{Array.isArray(b.pokemon) && b.pokemon.length > 1 ? b.title : formatPokemonName(b.pokemon)}</div>
+                              <div className={styles['bounty-title']}>{formatBountyTitle(b)}</div>
                               <div className={styles['bounty-host']}>发布者：{b.host}</div>
-                              <div className={styles['bounty-reward']}>奖励：{b.reward}</div>
-                              <div className={styles['bounty-description']} dangerouslySetInnerHTML={{ __html: b.description ? b.description.replace(/\n/g, '<br>') : '' }} />
+                              <div className={styles['bounty-reward']}>奖励：{formatBountyReward(b.reward)}</div>
+                              <div className={styles['bounty-description']}>{formatBountyDescription(b.description)}</div>
                             </Link>
 
                             <div className={styles['bounty-claimed']}><em>完成者：{b.claimed}</em></div>
@@ -361,10 +374,10 @@ export default function BountiesPage() {
                         >
                           <Link to={`/pokemon/${primaryPokemon || ''}/`} className={styles['bounty-card-inner']}>
                             <PokemonSprite name={b.pokemon} />
-                            <div className={styles['bounty-title']}>{Array.isArray(b.pokemon) && b.pokemon.length > 1 ? b.title : formatPokemonName(b.pokemon)}</div>
+                            <div className={styles['bounty-title']}>{formatBountyTitle(b)}</div>
                             <div className={styles['bounty-host']}>发布者：{b.host}</div>
-                            <div className={styles['bounty-reward']}>奖励：{b.reward}</div>
-                            <div className={styles['bounty-description']} dangerouslySetInnerHTML={{ __html: b.description ? b.description.replace(/\n/g, '<br>') : '' }} />
+                            <div className={styles['bounty-reward']}>奖励：{formatBountyReward(b.reward)}</div>
+                            <div className={styles['bounty-description']}>{formatBountyDescription(b.description)}</div>
                           </Link>
                         </li>
                       );
@@ -388,10 +401,10 @@ export default function BountiesPage() {
                         >
                           <Link to={`/pokemon/${primaryPokemon || ''}/`} className={styles['bounty-card-inner']}>
                             <PokemonSprite name={b.pokemon} />
-                            <div className={styles['bounty-title']}>{Array.isArray(b.pokemon) && b.pokemon.length > 1 ? b.title : formatPokemonName(b.pokemon)}</div>
+                            <div className={styles['bounty-title']}>{formatBountyTitle(b)}</div>
                             <div className={styles['bounty-host']}>发布者：{b.host}</div>
-                            <div className={styles['bounty-reward']}>奖励：{b.reward}</div>
-                            <div className={styles['bounty-description']} dangerouslySetInnerHTML={{ __html: b.description ? b.description.replace(/\n/g, '<br>') : '' }} />
+                            <div className={styles['bounty-reward']}>奖励：{formatBountyReward(b.reward)}</div>
+                            <div className={styles['bounty-description']}>{formatBountyDescription(b.description)}</div>
                           </Link>
 
                           <div className={styles['bounty-claimed']}><em>完成者：{b.claimed}</em></div>

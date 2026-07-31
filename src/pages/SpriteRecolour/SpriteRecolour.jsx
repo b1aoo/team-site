@@ -195,7 +195,7 @@ async function parseSpriteFile(file) {
     const frames = decompressFrames(gif, true);
 
     if (!frames.length) {
-      throw new Error(`Could not parse GIF frames for ${file.name}.`);
+      throw new Error(`无法解析 ${file.name} 的 GIF 帧。`);
     }
 
     const width = gif.lsd.width;
@@ -251,7 +251,7 @@ async function parseSpriteFile(file) {
   }
 
   if (!file.type.startsWith("image/")) {
-    throw new Error(`Unsupported file type for ${file.name}.`);
+    throw new Error(`不支持的文件类型：${file.name}`);
   }
 
   const objectUrl = URL.createObjectURL(file);
@@ -260,7 +260,7 @@ async function parseSpriteFile(file) {
     const image = await new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error(`Could not load ${file.name}.`));
+      img.onerror = () => reject(new Error(`无法加载 ${file.name}。`));
       img.src = objectUrl;
     });
 
@@ -761,8 +761,8 @@ export default function SpriteRecolour() {
       URL.revokeObjectURL(url);
 
     } catch (error) {
-      console.error("ZIP generation failed:", error);
-      alert("Failed to generate mod ZIP.");
+      console.error("模组 ZIP 生成失败：", error);
+      alert("模组 ZIP 生成失败。请确认已同时加载正面与背面精灵图。");
     }
   }
   useEffect(() => {
@@ -783,7 +783,7 @@ export default function SpriteRecolour() {
     try {
       const animatedSprites =
         pokemonSprites[pokemonName]?.sprites?.versions?.["generation-v"]?.["black-white"]?.animated;
-      if (!animatedSprites) throw new Error("No sprites available");
+      if (!animatedSprites) throw new Error("没有可用的精灵图资源。");
 
       const url = shinySprite ? animatedSprites.front_shiny : animatedSprites.front_default;
       const res = await fetch(url);
@@ -916,7 +916,7 @@ async function handlePokemonSelect(selectionLabel) {
   const pokemonName = matchedOption?.value || pokemonLabelToValue[selectionLabel];
 
   if (!pokemonName) {
-    alert("Choose a Pokemon from the autocomplete list, or upload your own GIF.");
+    alert("请从自动补全列表中选择宝可梦，或上传自己的 GIF。");
     return;
   }
 
@@ -928,21 +928,21 @@ async function handlePokemonSelect(selectionLabel) {
       pokemonSprites[pokemonName]?.sprites?.versions?.["generation-v"]?.["black-white"]?.animated;
 
     if (!animatedSprites?.front_default || !animatedSprites?.back_default) {
-      alert("This Pokémon does not have both front and back GIFs available.");
+      alert("该宝可梦没有同时提供正面与背面 GIF。");
       return;
     }
 
     const gifUrl = shinySprite ? animatedSprites.front_shiny : animatedSprites.front_default;
 
     const res = await fetch(gifUrl);
-    if (!res.ok) throw new Error("Failed to fetch GIF");
+    if (!res.ok) throw new Error("无法获取 GIF 文件。");
     const buffer = await res.arrayBuffer();
     const file = new File([buffer], `${pokemonName}.gif`, { type: "image/gif" });
 
     await loadFile(file, matchedOption?.label || selectionLabel);
   } catch (error) {
     console.error(error);
-    alert("Failed to load Pokémon GIF.");
+    alert("宝可梦 GIF 加载失败。");
   } finally {
     setLoading(false);
   }
@@ -1080,7 +1080,7 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
     // If fileOrUrl is a URL string, fetch it
     if (typeof fileOrUrl === "string") {
       const response = await fetch(fileOrUrl, { mode: "cors" });
-      if (!response.ok) throw new Error(`Failed to load ${side} sprite from URL`);
+      if (!response.ok) throw new Error(`无法从网址加载${side === 'front' ? '正面' : '背面'}精灵图。`);
       const buffer = await response.arrayBuffer();
       file = new File([buffer], `${side}.gif`, { type: "image/gif" });
     }
@@ -1104,8 +1104,8 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
       [side]: finalSprite,
     }));
   } catch (error) {
-    console.error(`${side} sprite load failed:`, error);
-    alert(error.message || `Failed to load the ${side} sprite.`);
+    console.error(`${side}精灵图加载失败：`, error);
+    alert(error.message || `无法加载${side === 'front' ? '正面' : '背面'}精灵图。`);
   } finally {
     setModLoadingKey("");
   }
@@ -1166,7 +1166,7 @@ const handleModFileChange = React.useCallback(async (side, fileOrUrl) => {
     try {
       // Fetch front and back GIFs
       const [frontResponse, backResponse] = await Promise.all([fetch(frontUrl), fetch(backUrl)]);
-      if (!frontResponse.ok || !backResponse.ok) throw new Error(`Unable to load front/back GIFs for ${selectedLabel}.`);
+      if (!frontResponse.ok || !backResponse.ok) throw new Error(`无法加载${selectedLabel}的正面或背面 GIF。`);
 
       const [frontBuffer, backBuffer] = await Promise.all([frontResponse.arrayBuffer(), backResponse.arrayBuffer()]);
 

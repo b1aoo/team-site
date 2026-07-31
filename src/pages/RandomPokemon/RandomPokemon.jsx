@@ -148,7 +148,7 @@ export default function RandomPokemon() {
 
     if (shinies.length > 0) {
       setUserShinies(shinies)
-      setLoadResult(`Loaded ${shinies.length} shiny Pokemon for ${username}`)
+      setLoadResult(`已为 ${username} 载入 ${shinies.length} 只闪光宝可梦。`)
       return
     }
 
@@ -159,7 +159,7 @@ export default function RandomPokemon() {
       const fetched = []
       while (hasNext) {
         const res = await fetch(`https://shinyboard.net/api/users/${username}/shinies?page=${page}`)
-        if (!res.ok) throw new Error('Failed to fetch user')
+        if (!res.ok) throw new Error('无法获取训练家资料')
         const data = await res.json()
         const names = data.shinies
           .filter(s => s.status === 'owned' && s.pokemon?.name)
@@ -169,10 +169,10 @@ export default function RandomPokemon() {
         else hasNext = false
       }
       setUserShinies(fetched)
-      setLoadResult(`Loaded ${fetched.length} shiny Pokemon for ${username}`)
+      setLoadResult(`已为 ${username} 载入 ${fetched.length} 只闪光宝可梦。`)
     } catch {
       setUserShinies([])
-      setLoadResult(`Failed to fetch user ${username}`)
+      setLoadResult(`无法获取训练家 ${username} 的闪光资料。`)
     }
   }
 

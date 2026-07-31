@@ -52,7 +52,7 @@ export default function AdminPanel() {
   async function handleUndo() {
     const ok = await db.undo()
     if (ok) showToast('已撤销操作！', 'success')
-    else showToast('Undo failed.', 'error')
+    else showToast('撤销操作失败。', 'error')
   }
 
   if (db.isLoading) {

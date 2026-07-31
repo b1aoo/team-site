@@ -160,7 +160,7 @@ export function applyEditEntry(entry) {
 
 export function exportCurrentFrame() {
     if (state.currentFrames.length === 0) {
-        alert('No image loaded!');
+        alert('尚未加载图像。');
         return;
     }
 
@@ -185,7 +185,7 @@ export function exportCurrentFrame() {
 
 export async function exportPngSequence() {
     elements.exportPngBtn.disabled = true;
-    elements.exportPngBtn.textContent = '⏳ Exporting...';
+    elements.exportPngBtn.textContent = '⏳ 正在导出…';
 
     try {
         if (state.currentFrames.length === 1) {
@@ -227,11 +227,11 @@ export async function exportPngSequence() {
             URL.revokeObjectURL(url);
         }
     } catch (error) {
-        console.error('Export error:', error);
-        alert('Error exporting PNGs: ' + error.message);
+        console.error('PNG 导出失败：', error);
+        alert('PNG 导出失败：' + error.message);
     } finally {
         elements.exportPngBtn.disabled = false;
-        elements.exportPngBtn.textContent = '🖼️ Export PNGs';
+        elements.exportPngBtn.textContent = '🖼️ 导出 PNG';
     }
 }
 
@@ -245,12 +245,12 @@ export function exportPreset() {
     ));
 
     if (exportedEdits.length === 0) {
-        alert('No edits to export! Make some changes first.');
+        alert('没有可导出的编辑。请先进行修改。');
         return;
     }
 
     const preset = {
-        name: 'Edit Preset',
+        name: '编辑预设',
         created: new Date().toISOString(),
         version: 4,
         edits: exportedEdits,
@@ -279,7 +279,7 @@ export async function importPreset(e, updateSwapHistoryDisplay) {
         const hasSwaps = Array.isArray(preset.swaps);
 
         if (!hasEdits && !hasSwaps) {
-            alert('Invalid preset file format');
+            alert('预设文件格式无效。');
             return;
         }
 
@@ -319,7 +319,7 @@ export async function importPreset(e, updateSwapHistoryDisplay) {
             extractPalette();
             renderCurrentFrame();
             updateSwapHistoryDisplay();
-            alert(`Preset applied!\n✅ ${appliedEditCount} edits applied\n⏭️ ${skippedEditCount} edits skipped`);
+            alert(`已应用预设！\n✅ 已应用 ${appliedEditCount} 项编辑\n⏭️ 已跳过 ${skippedEditCount} 项编辑`);
             e.target.value = '';
             return;
         }
@@ -342,10 +342,10 @@ export async function importPreset(e, updateSwapHistoryDisplay) {
         extractPalette();
         renderCurrentFrame();
         updateSwapHistoryDisplay();
-        alert(`Preset applied!\n✅ ${appliedCount} color swaps applied\n⏭️ ${skippedCount} colors not found (skipped)`);
+        alert(`已应用预设！\n✅ 已应用 ${appliedCount} 项颜色替换\n⏭️ 未找到并跳过 ${skippedCount} 种颜色`);
     } catch (error) {
-        console.error('Error importing preset:', error);
-        alert('Error reading preset file: ' + error.message);
+        console.error('预设导入失败：', error);
+        alert('读取预设文件失败：' + error.message);
     }
     e.target.value = '';
 }

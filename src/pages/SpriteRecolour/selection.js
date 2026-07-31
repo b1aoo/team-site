@@ -42,21 +42,21 @@ export function updateSelectionInfo() {
 
     if (!hasSelection) {
         if (state.currentTool === 'none') {
-              if (elements.selectionInfo) elements.selectionInfo.textContent = 'No selection - color swaps will apply to entire image';
+              if (elements.selectionInfo) elements.selectionInfo.textContent = '未选择区域－换色将应用到整张图像';
         } else if (state.currentTool === 'rect') {
-              if (elements.selectionInfo) elements.selectionInfo.textContent = 'Click and drag to create a rectangle selection';
+              if (elements.selectionInfo) elements.selectionInfo.textContent = '按住并拖动以创建矩形选区';
         } else if (state.currentTool === 'poly') {
-              if (elements.selectionInfo) elements.selectionInfo.textContent = 'Click to add points, double-click or press Enter to close polygon';
+              if (elements.selectionInfo) elements.selectionInfo.textContent = '单击添加顶点，双击或按 Enter 键闭合多边形';
         } else if (state.currentTool === 'pencil') {
-              if (elements.selectionInfo) elements.selectionInfo.textContent = 'Click and drag to draw 1x1 pixels with the selected color';
+              if (elements.selectionInfo) elements.selectionInfo.textContent = '按住并拖动以用选定颜色绘制 1×1 像素';
         } else if (state.currentTool === 'eraser') {
-              if (elements.selectionInfo) elements.selectionInfo.textContent = 'Click and drag to erase 1x1 pixels to transparency';
+              if (elements.selectionInfo) elements.selectionInfo.textContent = '按住并拖动以擦除为透明的 1×1 像素';
         }
     } else {
         const selectedCount = state.selectionMask.filter(v => v === 1).length;
         const totalPixels = state.gifWidth * state.gifHeight;
         const percent = ((selectedCount / totalPixels) * 100).toFixed(1);
-           if (elements.selectionInfo) elements.selectionInfo.textContent = `${selectedCount} pixels selected (${percent}% of image)`;
+           if (elements.selectionInfo) elements.selectionInfo.textContent = `已选中 ${selectedCount} 个像素（占图像 ${percent}%）`;
     }
 }
 

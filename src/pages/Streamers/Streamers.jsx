@@ -2,6 +2,11 @@ import { Link } from 'react-router-dom'
 import { useStreamers } from '../../hooks/useStreamers'
 import { useDocumentHead } from '../../hooks/useDocumentHead'
 import styles from './Streamers.module.css'
+import { hasChineseText } from '../../utils/contentZh'
+
+function formatStreamTitle(title) {
+  return hasChineseText(title) ? title : '正在直播 PokeMMO'
+}
 
 export default function Streamers() {
   const breadcrumbs = [
@@ -30,7 +35,7 @@ export default function Streamers() {
   }
 
   if (error) {
-  console.error("Error loading streamers:", error)
+  console.error("主播资料加载失败：", error)
   return <div className="message">主播数据加载失败：{error.message}</div>
 }
 
@@ -65,7 +70,7 @@ export default function Streamers() {
                     loading="lazy"
                   />
                   <p className={styles.playerName}>{stream.pokeName}</p>
-                  <p className={styles.streamTitle}>{stream.last_stream_title}</p>
+                  <p className={styles.streamTitle}>{formatStreamTitle(stream.last_stream_title)}</p>
                   <p className={styles.viewerCount}>{stream.last_viewer_count} 位观众</p>
                 </div>
               </a>

@@ -3,6 +3,7 @@ import { useDocumentHead } from '../../hooks/useDocumentHead';
 import { useParams, Link } from 'react-router-dom';
 import styles from './ThemeDetail.module.css';
 import BackButton from '../../components/BackButton/BackButton';
+import { formatThemeDescription, translateThemeCategory } from '../../utils/contentZh';
 
 const WORKER_THEME_ENDPOINT = 'https://adminpage.hypersmmo.workers.dev/admin/themes';
 
@@ -26,7 +27,7 @@ function ThemeDetail() {
   // Set document head for SEO
   useDocumentHead({
     title: theme ? theme.name : '主题详情',
-    description: theme && theme.description ? theme.description : '查看此 PokeMMO 主题的详情。',
+    description: theme ? formatThemeDescription(theme) : '查看此 PokeMMO 主题的详情。',
     canonicalPath: theme ? `/themes/${slug}/` : '/themes/'
   });
 
@@ -37,7 +38,7 @@ function ThemeDetail() {
       setError(null);
       try {
         const res = await fetch(WORKER_THEME_ENDPOINT);
-        if (!res.ok) throw new Error(`Failed to fetch theme data: ${res.status}`);
+        if (!res.ok) throw new Error(`主题资料加载失败：${res.status}`);
         const data = await res.json();
         setThemeData(data);
 
@@ -80,11 +81,11 @@ function ThemeDetail() {
           className={styles.previewImg}
         />
         <div className={styles.infoBox}>
-          <div><strong>分类：</strong>{theme.category}</div>
+          <div><strong>分类：</strong>{translateThemeCategory(theme.category)}</div>
           <div><strong>作者：</strong>{theme.author}</div>
         </div>
       </div>
-      <p className={styles.desc}>{theme.description}</p>
+      <p className={styles.desc}>{formatThemeDescription(theme)}</p>
       {/* Detailed Images Section */}
       {Array.isArray(theme.detailedImages) && theme.detailedImages.length > 0 && (
         <div className={styles.detailedImagesSection} style={{ margin: '2rem 0' }}>

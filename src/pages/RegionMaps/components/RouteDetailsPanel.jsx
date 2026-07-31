@@ -2,6 +2,7 @@ import styles from '../RegionMaps.module.css'
 import { getLocalPokemonGif, onGifError, translatePokemonName } from '../../../utils/pokemon'
 import { translateEncounterTerm, translateLocationName, translateTypeName } from '../../../utils/pokemonTermsZh'
 import { getSpawnRarityValues } from './mapHelpers'
+import { chineseOrFallback } from '../../../utils/contentZh'
 
 const SPAWN_CATEGORIES = [
   {
@@ -212,7 +213,9 @@ export default function RouteDetailsPanel({
     <section className={styles.panelCard}>
       <h2 className={styles.panelTitle}>{translateLocationName(selectedArea.name)}</h2>
       <p className={styles.areaKind}>{translateEncounterTerm(selectedArea.kind)}</p>
-      <p className={styles.panelSubtle}>{selectedArea.notes}</p>
+      <p className={styles.panelSubtle}>
+        {chineseOrFallback(selectedArea.notes, selectedArea.notes ? '特殊出现条件与注意事项请以游戏内实际情况为准。' : '暂无特别备注。')}
+      </p>
 
       <h3 className={styles.sectionHeading}>宝可梦出现池</h3>
       {filteredSpawns.length > 0 ? (

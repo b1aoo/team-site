@@ -9,6 +9,7 @@ import { useState } from "react";
 
 const PVP_PREFIX_REGEX = /^\[(Doubles|UU|OU|NU)\]/i
 const CATCH_REGEX = /\bcatch(?:ing)?\b/i
+const PVP_FORMAT_NAMES_ZH = Object.freeze({ Doubles: '双打', UU: 'UU', OU: 'OU', NU: 'NU' })
 
 const MONTH_INDEX = {
   january: 0, february: 1, march: 2, april: 3, may: 4, june: 5,
@@ -324,6 +325,20 @@ function buildRows(events) {
   }))
 }
 
+function formatOfficialEventTitle(type, sourceTitle, eventDate) {
+  const dateLabel = eventDate
+    ? new Intl.DateTimeFormat('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' }).format(eventDate)
+    : ''
+
+  if (type === 'pvp') {
+    const format = String(sourceTitle || '').match(PVP_PREFIX_REGEX)?.[1]
+    const formatLabel = PVP_FORMAT_NAMES_ZH[format] || '对战'
+    return `${formatLabel} 对战活动${dateLabel ? `（${dateLabel}）` : ''}`
+  }
+
+  return `捕捉活动${dateLabel ? `（${dateLabel}）` : ''}`
+}
+
 function EventCell({ event, now }) {
   if (!event) return <td className={styles.emptyCell}></td>;
   const countdown = (event?.tag === '今天' || event?.tag === '明天')
@@ -339,7 +354,7 @@ function EventCell({ event, now }) {
         rel="noopener noreferrer"
         className={styles.eventLink}
       >
-        {event.title}
+        {event.displayTitle}
       </a>
 
       {event.tag && <span className={styles.tag}>{event.tag}</span>}
@@ -355,14 +370,10 @@ function EventCell({ event, now }) {
 
 
       {/* Details section */}
-      {event.details?.length > 0 && (
+      {event.hasDetails && (
         <div className={styles.detailsSection}>
           <strong>详情：</strong>
-          <ul>
-            {event.details.map((line, index) => (
-              <li key={index}>{line}</li>
-            ))}
-          </ul>
+          <span>详细规则、赛制与报名要求请查看官方原帖。</span>
         </div>
       )}
 
@@ -461,7 +472,7 @@ export default function OfficialEventCalendar() {
       const hasShinyReward = rewards.some(r => r.shiny)
 
       return {
-        title: item.title,
+        displayTitle: formatOfficialEventTitle(type, item.title, eventDate),
         link: item.link,
         type,
         eventDate,
@@ -469,7 +480,7 @@ export default function OfficialEventCalendar() {
         localStartLabel: convertUtcToLocalLabel(eventDate, utcTime),
         sortStamp: utcTime ? utcTime.hours*60 + utcTime.minutes : Number.MAX_SAFE_INTEGER,
         participatingStaff, 
-        details,
+        hasDetails: details.length > 0,
         utcTime,
         rewards: rewards,
         hasShinyReward,
@@ -513,7 +524,7 @@ export default function OfficialEventCalendar() {
   })
 
   if (isLoading) return <div className="message">正在载入官方活动日历…</div>
-  if (error) return <div className="message">{error.message}</div>
+  if (error) return <div className="message">官方活动日历加载失败，请稍后重试。</div>
 
   return (
     <section className={styles.page}>

@@ -4,7 +4,7 @@ import { API } from '../api/endpoints'
 async function fetchOfficialEvents() {
   const res = await fetch(API.officialEvents)
   if (!res.ok) {
-    throw new Error('Failed to load official events')
+    throw new Error('官方活动数据加载失败')
   }
   const data = await res.json()
   return data

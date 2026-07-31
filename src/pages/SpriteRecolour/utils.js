@@ -36,7 +36,7 @@ export function loadImageFromFile(file) {
         };
         img.onerror = () => {
             URL.revokeObjectURL(img.src);
-            reject(new Error(`Failed to load image: ${file.name}`));
+            reject(new Error(`无法加载图像：${file.name}`));
         };
         img.src = URL.createObjectURL(file);
     });

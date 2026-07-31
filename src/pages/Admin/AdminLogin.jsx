@@ -23,7 +23,7 @@ export default function AdminLogin() {
       })
 
       if (!res.ok) {
-        setMessage(`Server error: ${res.status}`)
+        setMessage(`服务器响应异常：${res.status}`)
         return
       }
 

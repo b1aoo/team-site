@@ -7,6 +7,7 @@ import { useDocumentHead } from '../../hooks/useDocumentHead'
 import { slugify } from '../../utils/slugify'
 import { translatePokemonName } from '../../utils/pokemon'
 import { translateLocationName } from '../../utils/pokemonTermsZh'
+import { formatCommunityEventText, formatCommunityEventTitle, translateNatureName } from '../../utils/contentZh'
 
 export default function EventsDetail() {
   const { slug } = useParams()
@@ -16,14 +17,14 @@ export default function EventsDetail() {
   const breadcrumbs = [
     { name: '首页', url: '/' },
     { name: '活动', url: '/events' },
-    { name: event?.title || '活动', url: `/event/${slug}` }
+    { name: formatCommunityEventTitle(event?.title), url: `/event/${slug}` }
   ];
 
   const eventSchema = event ? {
     "@context": "https://schema.org",
     "@type": "Event",
-    "name": event.title,
-    "description": event.description,
+    "name": formatCommunityEventTitle(event.title),
+    "description": formatCommunityEventText(event.description),
     "startDate": event.startDate,
     "endDate": event.endDate,
     "url": `https://b1aoo.github.io/team-site/event/${slug}`,
@@ -38,8 +39,8 @@ export default function EventsDetail() {
   } : null;
 
   useDocumentHead({
-    title: event?.title ? `${event.title}｜PokeMMO 活动` : '正在加载活动…',
-    description: event?.description || '参加 Team Synergy 的 PokeMMO 活动：闪光狩猎竞赛、比赛与公会挑战。',
+    title: event?.title ? `${formatCommunityEventTitle(event.title)}｜PokeMMO 活动` : '正在加载活动…',
+    description: event ? formatCommunityEventText(event.description, '参加 Team Synergy 的 PokeMMO 活动：闪光狩猎竞赛、比赛与公会挑战。') : '参加 Team Synergy 的 PokeMMO 活动：闪光狩猎竞赛、比赛与公会挑战。',
     canonicalPath: `/event/${slug}/`,
     url: `https://b1aoo.github.io/team-site/event/${slug}/`,
     ogImage: event?.imageLink || 'https://b1aoo.github.io/team-site/images/openGraph.jpg',
@@ -52,7 +53,7 @@ export default function EventsDetail() {
     async function fetchEvent() {
       try {
         const res = await fetch('https://adminpage.hypersmmo.workers.dev/admin/events')
-        if (!res.ok) throw new Error(`Failed to fetch events: ${res.status}`)
+        if (!res.ok) throw new Error(`活动资料加载失败：${res.status}`)
         const data = await res.json()
         const found = data.find(e => slugify(e.title) === slug)
         setEvent(found || null)
@@ -95,11 +96,11 @@ export default function EventsDetail() {
   return (
     <div className={styles.container}>
       <BackButton to="/events/" label="← 返回活动列表" />
-      <h1 className={styles.title}>{event.title}</h1>
+      <h1 className={styles.title}>{formatCommunityEventTitle(event.title)}</h1>
 
       {event.imageLink && (
         <div className={styles.imageWrapper}>
-          <img src={event.imageLink} alt={event.title} className={styles.image} />
+          <img src={event.imageLink} alt={formatCommunityEventTitle(event.title)} className={styles.image} />
         </div>
       )}
 
@@ -112,7 +113,7 @@ export default function EventsDetail() {
               <div>
                 {event.hideAndSeekDescription.split(/\r?\n/).map((line, idx) => (
                   <span key={idx}>
-                    {line}
+                  {formatCommunityEventText(line)}
                     <br />
                   </span>
                 ))}
@@ -145,7 +146,7 @@ export default function EventsDetail() {
                   }
                   return (
                     <div key={i} className={styles.roundCard}>
-                      <div className={styles.roundPrize}><b>奖品：</b> {round.prize}</div>
+                      <div className={styles.roundPrize}><b>奖品：</b> {formatCommunityEventText(round.prize, '奖品详情请向主办方确认。')}</div>
                       {round.prizeImage && (
                         <div className={styles.roundPrizeImage}>
                           <img
@@ -180,7 +181,7 @@ export default function EventsDetail() {
               <div>
                 {event.hideAndSeekRules.split(/\r?\n/).map((line, idx) => (
                   <span key={idx}>
-                    {line}
+                  {formatCommunityEventText(line)}
                     <br />
                   </span>
                 ))}
@@ -209,13 +210,13 @@ export default function EventsDetail() {
             {event.duration && (
               <div className={styles.infoItem}>
                 <span>持续时间：</span>
-                <div>{event.duration}</div>
+                <div>{formatCommunityEventText(event.duration)}</div>
               </div>
             )}
             {event.scoring && (
               <div className={styles.infoItem}>
                 <span>计分方式：</span>
-                <div>{event.scoring}</div>
+                <div>{formatCommunityEventText(event.scoring)}</div>
               </div>
             )}
           </div>
@@ -231,7 +232,7 @@ export default function EventsDetail() {
               const bonus = Number(n.bonus)
               return (
                 <div key={i} className={styles.natureCard}>
-                  <span className={styles.natureName}>{n.nature}</span>
+                  <span className={styles.natureName}>{translateNatureName(n.nature)}</span>
                   <span
                     className={styles.natureBonus}
                     style={{
@@ -278,7 +279,7 @@ export default function EventsDetail() {
                   </div>
                   <img
                     src={imgUrl}
-                    alt={name}
+                    alt={translatePokemonName(name)}
                     className={styles.pokemonImg}
                     onError={(e) => { e.currentTarget.style.display = 'none' }}
                   />
@@ -303,13 +304,13 @@ export default function EventsDetail() {
                   <div key={i} className={styles.pokemonCard}>
                       <img
                       src={imgUrl}
-                      alt={name}
+                      alt={translatePokemonName(name)}
                       className={styles.pokemonImg}
                       onError={(e) => { e.currentTarget.style.display = 'none' }}
                     />
                     <span className={styles.pokemonName}>{translatePokemonName(name)}</span>
                     {t.location && <span className={styles.pokemonLocation}>地点：{translateLocationName(t.location)}</span>}
-                    {t.duration && <span className={styles.pokemonDuration}> {t.duration}</span>}
+                    {t.duration && <span className={styles.pokemonDuration}> {formatCommunityEventText(t.duration)}</span>}
                   </div>
                 )
               })}
@@ -346,7 +347,7 @@ export default function EventsDetail() {
             <div className={`${styles.prizeGroup} ${styles.firstPlace}`}>
               <div className={styles.prizeTitle}>🏆 第一名</div>
               {event.firstPlacePrize.filter(p => p?.trim()).map((prize, i) => (
-                <div key={`first-${i}`} className={styles.prizeItem}>{prize}</div>
+                <div key={`first-${i}`} className={styles.prizeItem}>{formatCommunityEventText(prize, '活动奖品详情请向主办方确认。')}</div>
               ))}
             </div>
           )}
@@ -355,7 +356,7 @@ export default function EventsDetail() {
             <div className={`${styles.prizeGroup} ${styles.secondPlace}`}>
               <div className={styles.prizeTitle}>🥈 第二名</div>
               {event.secondPlacePrize.filter(p => p?.trim()).map((prize, i) => (
-                <div key={`second-${i}`} className={styles.prizeItem}>{prize}</div>
+                <div key={`second-${i}`} className={styles.prizeItem}>{formatCommunityEventText(prize, '活动奖品详情请向主办方确认。')}</div>
               ))}
             </div>
           )}
@@ -364,7 +365,7 @@ export default function EventsDetail() {
             <div className={`${styles.prizeGroup} ${styles.thirdPlace}`}>
               <div className={styles.prizeTitle}>🥉 第三名</div>
               {event.thirdPlacePrize.filter(p => p?.trim()).map((prize, i) => (
-                <div key={`third-${i}`} className={styles.prizeItem}>{prize}</div>
+                <div key={`third-${i}`} className={styles.prizeItem}>{formatCommunityEventText(prize, '活动奖品详情请向主办方确认。')}</div>
               ))}
             </div>
           )}
@@ -373,7 +374,7 @@ export default function EventsDetail() {
             <div className={`${styles.prizeGroup} ${styles.fourthPlace}`}>
               <div className={styles.prizeTitle}>🏅 第四名</div>
               {event.fourthPlacePrize.filter(p => p?.trim()).map((prize, i) => (
-                <div key={`fourth-${i}`} className={styles.prizeItem}>{prize}</div>
+                <div key={`fourth-${i}`} className={styles.prizeItem}>{formatCommunityEventText(prize, '活动奖品详情请向主办方确认。')}</div>
               ))}
             </div>
           )}

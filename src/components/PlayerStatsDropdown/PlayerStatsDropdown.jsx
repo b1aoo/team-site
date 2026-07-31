@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import styles from './PlayerStatsDropdown.module.css'
+import { translatePokemonName } from '../../utils/pokemon'
+import { translateLocationName } from '../../utils/pokemonTermsZh'
 
 export default function PlayerStatsDropdown({ winners, data }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -22,50 +24,50 @@ export default function PlayerStatsDropdown({ winners, data }) {
 
   const stats = [
     {
-      title: 'The Luckiest Player!',
-      subtitle: '(The Player with the least Average per Shiny)',
+      title: '最欧皇训练家',
+      subtitle: '平均每只闪光的遇敌次数最低',
       player: winners.luckiest,
-      value: `${winners.luckiest.averageEncounter.toFixed(0)} avg encounters`,
+      value: `平均 ${winners.luckiest.averageEncounter.toFixed(0)} 次遭遇`,
     },
     {
-      title: 'The Unluckiest Player!',
-      subtitle: '(The Player with the highest Average Per Shiny)',
+      title: '最非酋训练家',
+      subtitle: '平均每只闪光的遇敌次数最高',
       player: winners.unluckiest,
-      value: `${winners.unluckiest.averageEncounter.toFixed(0)} avg encounters`,
+      value: `平均 ${winners.unluckiest.averageEncounter.toFixed(0)} 次遭遇`,
     },
     {
-      title: 'The Highest Dry Streak!',
-      subtitle: '(The Player with the highest Encounter Shiny)',
+      title: '最长未闪纪录',
+      subtitle: '单只闪光所需遭遇次数最高',
       player: winners.highestDryStreak,
-      value: `${winners.highestDryStreak.maxEncounter.toLocaleString()} encounters`,
+      value: `${winners.highestDryStreak.maxEncounter.toLocaleString()} 次遭遇`,
       pokemon: winners.highestDryStreak.maxEncounterPokemon,
     },
     {
-      title: 'The Least Encounter Pokemon!',
-      subtitle: '(The Player with the least encounter shiny)',
+      title: '最快出闪纪录',
+      subtitle: '单只闪光所需遭遇次数最低',
       player: winners.leastEncounter,
-      value: `${winners.leastEncounter.minEncounter.toLocaleString()} encounters`,
+      value: `${winners.leastEncounter.minEncounter.toLocaleString()} 次遭遇`,
       pokemon: winners.leastEncounter.minEncounterPokemon,
     },
     {
-      title: 'Most Rares!',
-      subtitle: '(The Player with the most shinies with Tier 2, 1 or 0)',
+      title: '稀有闪光最多',
+      subtitle: '第 0、1、2 级闪光数量最多',
       player: winners.mostRares,
-      value: `${winners.mostRares.rareCount} rare shinies`,
+      value: `${winners.mostRares.rareCount} 只稀有闪光`,
       pokemons: winners.mostRares.rarePokemons,
     },
     {
-      title: 'Most Phases!',
-      subtitle: '(The Player with the most shinies caught in a single route)',
+      title: '同地点相位最多',
+      subtitle: '在同一地点获得的闪光数量最多',
       player: winners.mostPhases,
-      value: `${winners.mostPhases.phasesCount} shinies`,
+      value: `${winners.mostPhases.phasesCount} 只闪光`,
       route: winners.mostPhases.topRoute,
     },
     {
-      title: 'Most Shinies in a Week!',
-      subtitle: '(The Player who caught the most shinies within a single 7-day period)',
+      title: '单周闪光最多',
+      subtitle: '连续 7 天内获得的闪光数量最多',
       player: winners.mostInWeek,
-      value: `${winners.mostInWeek.mostInWeekCount} shinies`,
+      value: `${winners.mostInWeek.mostInWeekCount} 只闪光`,
       pokemons: winners.mostInWeek.mostInWeekPokemons,
     },
   ]
@@ -78,7 +80,7 @@ export default function PlayerStatsDropdown({ winners, data }) {
         aria-expanded={isOpen}
         aria-label="展开或收起玩家统计"
       >
-        Player Leaderboards {isOpen ? '▼' : '►'}
+        玩家排行榜 {isOpen ? '▼' : '►'}
       </button>
 
       {isOpen && (
@@ -92,17 +94,17 @@ export default function PlayerStatsDropdown({ winners, data }) {
                 <div className={styles.value}>{stat.value}</div>
                 {stat.pokemon && (
                   <div className={styles.pokemon}>
-                    Pokémon: <strong>{stat.pokemon}</strong>
+                    宝可梦：<strong>{translatePokemonName(stat.pokemon)}</strong>
                   </div>
                 )}
                 {stat.pokemons && stat.pokemons.length > 0 && (
                   <div className={styles.pokemons}>
-                    Pokémon: <strong>{stat.pokemons.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(', ')}</strong>
+                    宝可梦：<strong>{stat.pokemons.map(translatePokemonName).join('、')}</strong>
                   </div>
                 )}
                 {stat.route && (
                   <div className={styles.route}>
-                    Top Route: <strong>{stat.route}</strong>
+                    最多地点：<strong>{translateLocationName(stat.route)}</strong>
                   </div>
                 )}
               </div>

@@ -39,7 +39,7 @@ export function renderPalette() {
         const displayedGroups = Math.min(totalGroups, MAX_DISPLAYED_GROUPS);
 
             if (elements.colorCount) elements.colorCount.textContent = totalGroups;
-            if (elements.colorCountLabel) elements.colorCountLabel.textContent = `groups (${state.colorPalette.size} colors)`;
+            if (elements.colorCountLabel) elements.colorCountLabel.textContent = `组（共 ${state.colorPalette.size} 种颜色）`;
         elements.paletteGrid.classList.add('grouped-mode');
 
         // Show warning if too many groups
@@ -60,7 +60,7 @@ export function renderPalette() {
             // Group label
             const label = document.createElement('div');
             label.className = 'group-label';
-                label.textContent = `Group ${groupIndex + 1} (${groupKeys.length} color${groupKeys.length > 1 ? 's' : ''})`;
+                label.textContent = `第 ${groupIndex + 1} 组（${groupKeys.length} 种颜色）`;
             groupContainer.appendChild(label);
 
             // Render colors in group (already sorted by lightness)
@@ -82,7 +82,7 @@ export function renderPalette() {
     } else {
         // Original non-grouped behavior
             if (elements.colorCount) elements.colorCount.textContent = state.colorPalette.size;
-            if (elements.colorCountLabel) elements.colorCountLabel.textContent = 'colors';
+            if (elements.colorCountLabel) elements.colorCountLabel.textContent = '种颜色';
         elements.paletteGrid.classList.remove('grouped-mode');
         state.selectedGroup = null;
 
@@ -143,7 +143,7 @@ export function selectColor(colorKey, element) {
     elements.newColorHex.value = hexColor.toUpperCase();
 
     // Reset label to "Original" for single color mode
-        if (elements.originalColorLabel) elements.originalColorLabel.textContent = 'Original';
+        if (elements.originalColorLabel) elements.originalColorLabel.textContent = '原始颜色';
     elements.originalColorLabel.classList.remove('anchor-label');
 
     elements.applySwapBtn.disabled = false;
@@ -194,7 +194,7 @@ export function selectGroup(groupIndex, anchorColorKey = null) {
     elements.newColorHex.value = hexColor.toUpperCase();
 
     // Update label to show "Anchor"
-    elements.originalColorLabel.textContent = 'Anchor';
+    elements.originalColorLabel.textContent = '锚点颜色';
     elements.originalColorLabel.classList.add('anchor-label');
 
     elements.applySwapBtn.disabled = false;
@@ -239,8 +239,8 @@ export async function loadPaletteSourceImage(file) {
         updatePaletteSourceUI(img, file.name);
         renderSourcePalette();
     } catch (error) {
-        console.error('Error loading palette source:', error);
-        alert('Error loading image: ' + error.message);
+        console.error('调色板图片加载失败：', error);
+        alert('调色板图片加载失败：' + error.message);
     }
 }
 
@@ -248,7 +248,7 @@ function updatePaletteSourceUI(img, fileName) {
     elements.paletteSourceContent.innerHTML = `
         <img src="${img.src}" class="palette-source-preview" alt="调色板来源">
         <p style="margin: 0; font-size: 11px; color: #4caf50;">✓ ${fileName}</p>
-        <p style="margin: 2px 0 0; font-size: 10px; color: #888;">${state.sourcePaletteColors.size} colors extracted</p>
+        <p style="margin: 2px 0 0; font-size: 10px; color: #888;">已提取 ${state.sourcePaletteColors.size} 种颜色</p>
     `;
     elements.paletteSourceUpload.classList.add('has-image');
     elements.sourcePaletteContainer.classList.remove('hidden');

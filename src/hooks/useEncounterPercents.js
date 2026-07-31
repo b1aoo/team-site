@@ -5,7 +5,7 @@ import encounterPercentsFallback from '../data/encounter_percents.json'
 async function fetchEncounterPercents() {
   const response = await fetch(API.encounterPercents)
   if (!response.ok) {
-    throw new Error(`Failed to load encounter percents: ${response.status}`)
+    throw new Error(`遭遇率数据加载失败：${response.status}`)
   }
 
   return response.json()

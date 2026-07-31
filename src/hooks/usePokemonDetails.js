@@ -151,7 +151,7 @@ export function usePokemonDetails(pokemonName) {
   useEffect(() => {
     if (!pokemonName) {
       setIsLoading(false)
-      setError(new Error('No Pokémon name provided'))
+      setError(new Error('未提供宝可梦名称'))
       return
     }
 
@@ -457,7 +457,7 @@ export function usePokemonDetails(pokemonName) {
       
       setData(formattedData)
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred'
+      const errorMessage = err instanceof Error ? err.message : '发生未知错误'
       const newError = new Error(errorMessage)
       setError(newError)
       console.error('Error fetching Pokémon details:', {
@@ -472,4 +472,3 @@ export function usePokemonDetails(pokemonName) {
 
   return { data, isLoading, error }
 }
-

@@ -6,7 +6,7 @@ export function showFrame(index) {
     if (state.currentFrames.length === 0) return;
 
     state.currentFrameIndex = ((index % state.currentFrames.length) + state.currentFrames.length) % state.currentFrames.length;
-        if (elements.frameInfo) elements.frameInfo.textContent = `Frame ${state.currentFrameIndex + 1} / ${state.currentFrames.length}`;
+        if (elements.frameInfo) elements.frameInfo.textContent = `第 ${state.currentFrameIndex + 1} 帧／共 ${state.currentFrames.length} 帧`;
     renderCurrentFrame();
 }
 
@@ -32,7 +32,7 @@ export function startAnimation() {
     if (state.currentFrames.length <= 1) return;
 
     state.isPlaying = true;
-        if (elements.playPauseBtn) elements.playPauseBtn.textContent = '⏸️ Pause';
+        if (elements.playPauseBtn) elements.playPauseBtn.textContent = '⏸️ 暂停';
 
     let lastTime = 0;
     const animate = () => {
@@ -50,7 +50,7 @@ export function startAnimation() {
 
 export function stopAnimation() {
     state.isPlaying = false;
-        if (elements.playPauseBtn) elements.playPauseBtn.textContent = '▶️ Play';
+        if (elements.playPauseBtn) elements.playPauseBtn.textContent = '▶️ 播放';
 }
 
 export function togglePlayPause() {

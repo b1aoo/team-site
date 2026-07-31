@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import styles from './EventsPage.module.css'
 import { useDocumentHead } from '../../hooks/useDocumentHead'
 import { slugify } from '../../utils/slugify';
+import { formatCommunityEventTitle } from '../../utils/contentZh';
 
 export default function EventsPage() {
   const [events, setEvents] = useState([])
@@ -24,7 +25,7 @@ export default function EventsPage() {
     async function fetchEvents() {
       try {
         const res = await fetch('https://adminpage.hypersmmo.workers.dev/admin/events')
-        if (!res.ok) throw new Error(`Failed to fetch events: ${res.status}`)
+        if (!res.ok) throw new Error(`活动资料加载失败：${res.status}`)
         const data = await res.json()
         // Sort by startDate descending (latest first)
         data.sort((a, b) => new Date(b.startDate) - new Date(a.startDate))
@@ -62,14 +63,14 @@ export default function EventsPage() {
         >
           <img
             src={event.imageLink || `${import.meta.env.BASE_URL}placeholder.png`}
-            alt={event.title}
+            alt={formatCommunityEventTitle(event.title)}
             className={styles.img}
             width="200"
             height="120"
             loading="lazy"
           />
           <div className={styles.label}>
-            <strong>{event.title}</strong>
+            <strong>{formatCommunityEventTitle(event.title)}</strong>
             <div>{new Date(event.startDate).toLocaleString('zh-CN')}</div>
           </div>
         </div>

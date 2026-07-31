@@ -6,7 +6,7 @@ async function fetchStreamers() {
   const res = await fetch(API.twitchStreamers)
 
   if (!res.ok) {
-    throw new Error('Failed to load streamer list')
+    throw new Error('主播列表加载失败')
   }
 
   const data = await res.json()

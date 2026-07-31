@@ -1266,6 +1266,85 @@ const REGION_NAMES_ZH = Object.freeze({
   "unova": "合众",
 })
 
+// PokeMMO 使用的五个地区地点。数据文件中有些采用英文名称，有些采用
+// URL slug；显示时统一为《宝可梦》简体中文官方译名。
+const POKEMMO_LOCATION_NAMES_ZH = Object.freeze({
+  // 关都
+  'pallet-town': '真新镇', 'viridian-city': '常青市', 'pewter-city': '深灰市',
+  'cerulean-city': '华蓝市', 'vermilion-city': '枯叶市', 'lavender-town': '紫苑镇',
+  'celadon-city': '玉虹市', 'fuchsia-city': '浅红市', 'saffron-city': '金黄市',
+  'cinnabar-island': '红莲岛', 'indigo-plateau': '石英高原',
+  'viridian-forest': '常青森林', 'mt-moon': '月见山', 'mount-moon': '月见山',
+  'rock-tunnel': '岩山隧道', 'digletts-cave': '地鼠洞穴', 'pokemon-tower': '宝可梦塔',
+  'pokemon-mansion': '宝可梦屋', 'silph-co': '西尔佛公司', 'ss-anne': '圣安奴号',
+  'seafoam-islands': '双子岛', 'victory-road': '冠军之路', 'cerulean-cave': '华蓝洞窟',
+  'power-plant': '无人发电厂', 'safari-zone': '狩猎地带', 'cycling-road': '自行车道',
+  'mt-ember': '火焰山', 'mount-ember': '火焰山', 'one-island': '一之岛',
+  'two-island': '二之岛', 'three-island': '三之岛', 'four-island': '四之岛',
+  'five-island': '五之岛', 'six-island': '六之岛', 'seven-island': '七之岛',
+  'kindle-road': '火焰近路', 'treasure-beach': '宝藏海滩', 'cape-brink': '尽头岬',
+  'bond-bridge': '友谊桥', 'berry-forest': '树果森林', 'lost-cave': '遗迹山谷',
+  'tanoby-ruins': '遗迹山谷', 'pattern-bush': '标记森林', 'altering-cave': '变化洞窟',
+  'water-path': '水之小路', 'green-path': '绿之小径', 'ruin-valley': '遗迹山谷',
+  'trainer-tower': '训练家之塔', 'sevault-canyon': '绝境峡谷',
+  // 城都
+  'new-bark-town': '若叶镇', 'cherrygrove-city': '吉花市', 'violet-city': '桔梗市',
+  'azalea-town': '桧皮镇', 'goldenrod-city': '满金市', 'ecruteak-city': '圆朱市',
+  'olivine-city': '浅葱市', 'cianwood-city': '湛蓝市', 'mahogany-town': '卡吉镇',
+  'blackthorn-city': '烟墨市', 'lake-of-rage': '愤怒湖', 'ruins-of-alph': '阿露福遗迹',
+  'sprout-tower': '喇叭芽之塔', 'union-cave': '连接洞穴', 'slowpoke-well': '呆呆兽之井',
+  'ilex-forest': '桐树林', 'national-park': '自然公园', 'burned-tower': '烧焦塔',
+  'bell-tower': '铃铛塔', 'tin-tower': '铃铛塔', 'whirl-islands': '漩涡列岛',
+  'mt-mortar': '研钵山', 'mount-mortar': '研钵山', 'ice-path': '冰雪通道',
+  'dragons-den': '龙之穴', 'dark-cave': '黑暗山洞', 'mt-silver': '白银山',
+  'mount-silver': '白银山', 'cliff-cave': '悬崖洞窟', 'embedded-tower': '埋藏之塔',
+  'pokeathlon-dome': '宝可梦运动场', 'battle-frontier': '对战开拓区',
+  // 丰缘
+  'littleroot-town': '未白镇', 'oldale-town': '古辰镇', 'petalburg-city': '橙华市',
+  'rustboro-city': '卡那兹市', 'dewford-town': '武斗镇', 'slateport-city': '凯那市',
+  'mauville-city': '紫堇市', 'verdanturf-town': '绿荫镇', 'fallarbor-town': '秋叶镇',
+  'lavaridge-town': '釜炎镇', 'fortree-city': '茵郁市', 'lilycove-city': '水静市',
+  'mossdeep-city': '绿岭市', 'sootopolis-city': '琉璃市', 'pacifidlog-town': '暮水镇',
+  'petalburg-woods': '橙华森林', 'rusturf-tunnel': '卡绿隧道', 'granite-cave': '石之洞窟',
+  'meteor-falls': '流星瀑布', 'fiery-path': '炎之小径', 'mt-chimney': '烟囱山',
+  'mount-chimney': '烟囱山', 'jagged-pass': '凹凸山道', 'desert-ruins': '沙漠遗迹',
+  'mirage-tower': '幻影之塔', 'weather-institute': '天气研究所', 'mt-pyre': '送神山',
+  'mount-pyre': '送神山', 'seafloor-cavern': '海底洞窟', 'sky-pillar': '天空之柱',
+  'abandoned-ship': '废弃船', 'new-mauville': '新紫堇', 'shoal-cave': '浅滩洞穴',
+  'cave-of-origin': '觉醒祠堂', 'magma-hideout': '熔岩队基地', 'aqua-hideout': '海洋队基地',
+  'artisan-cave': '工匠洞穴', 'scorched-slab': '焦岩', 'sealed-chamber': '海底遗迹',
+  'desert-underpass': '沙漠地下道', 'faraway-island': '遥远之岛',
+  // 神奥
+  'twinleaf-town': '双叶镇', 'sandgem-town': '真砂镇', 'jubilife-city': '祝庆市',
+  'oreburgh-city': '黑金市', 'floaroma-town': '苑之镇', 'eterna-city': '百代市',
+  'hearthome-city': '家缘市', 'solaceon-town': '随意镇', 'veilstone-city': '帷幕市',
+  'pastoria-city': '湿原市', 'canalave-city': '水脉市', 'snowpoint-city': '雪峰市',
+  'sunnyshore-city': '滨海市', 'pokemon-league': '宝可梦联盟', 'valley-windworks': '谷间发电厂',
+  'eterna-forest': '百代森林', 'mt-coronet': '天冠山', 'mount-coronet': '天冠山',
+  'great-marsh': '大湿原', 'trophy-garden': '自豪的后院', 'old-chateau': '森之洋馆',
+  'wayward-cave': '迷幻洞窟', 'iron-island': '钢铁岛', 'fuego-ironworks': '炼铁厂',
+  'lake-verity': '心齐湖', 'lake-valor': '立志湖', 'lake-acuity': '睿智湖',
+  'spear-pillar': '枪之柱', 'turnback-cave': '归途洞窟', 'stark-mountain': '严酷山',
+  'snowpoint-temple': '雪峰神殿', 'hall-of-origin': '起始之间', 'flower-paradise': '花之乐园',
+  'fullmoon-island': '满月岛', 'newmoon-island': '新月岛', 'sendoff-spring': '送行泉',
+  'spring-path': '泉水小路', 'distortion-world': '毁坏的世界', 'maniac-tunnel': '狂热迷洞窟',
+  // 合众
+  'nuvema-town': '鹿子镇', 'accumula-town': '唐草镇', 'striaton-city': '三曜市',
+  'nacrene-city': '七宝市', 'castelia-city': '飞云市', 'nimbasa-city': '雷文市',
+  'driftveil-city': '帆巴市', 'mistralton-city': '风聚市', 'icirrus-city': '雪花市',
+  'opelucid-city': '双龙市', 'lacunosa-town': '黑色市', 'undella-town': '小波镇',
+  'humilau-city': '青海波市', 'black-city': '黑色市', 'white-forest': '白色森林',
+  'aspertia-city': '桧扇市', 'floccesy-town': '山路镇', 'virbank-city': '立涌市',
+  'castelia-sewers': '飞云地下水道', 'join-avenue': '连接大道', 'pinwheel-forest': '矢车森林',
+  'wellspring-cave': '涌泉洞穴', 'relic-castle': '古代城', 'desert-resort': '沙漠遗迹',
+  'chargestone-cave': '电气石洞穴', 'mistralton-cave': '风聚洞穴', 'twist-mountain': '螺旋山',
+  'dragonspiral-tower': '龙螺旋之塔', 'giant-chasm': '巨人洞窟', 'lostlorn-forest': '迷失森林',
+  'abundant-shrine': '丰饶之社', 'marvelous-bridge': '奇幻桥', 'village-bridge': '村桥',
+  'liberty-garden': '自由庭园岛', 'p2-laboratory': 'P2实验室', 'moor-of-icirrus': '雪花湿地',
+  'reversal-mountain': '反转山', 'strange-house': '奇异屋', 'celestial-tower': '天堂之塔',
+  'tubeline-bridge': '天箭桥', 'skyarrow-bridge': '天箭桥', 'victory-road-unova': '冠军之路',
+})
+
 
 const TYPE_NAMES_ZH = Object.freeze({
   normal: '一般', fire: '火', water: '水', electric: '电', grass: '草', ice: '冰',
@@ -1331,7 +1410,8 @@ export function translateEggGroupName(group) {
 
 export function translateEncounterTerm(term) {
   if (!term) return ''
-  return ENCOUNTER_TERMS_ZH[term] || term
+  const normalized = humanizeIdentifier(term)
+  return ENCOUNTER_TERMS_ZH[term] || ENCOUNTER_TERMS_ZH[normalized] || normalized
 }
 
 export function translateRegionName(region) {
@@ -1342,11 +1422,16 @@ export function translateRegionName(region) {
 export function translateLocationName(location) {
   if (!location) return ''
   const text = String(location)
-  const direct = LOCATION_NAMES_ZH[toIdentifier(text)]
+  const identifier = toIdentifier(text)
+  const direct = LOCATION_NAMES_ZH[identifier] || POKEMMO_LOCATION_NAMES_ZH[identifier]
   if (direct) return direct
 
-  const route = text.match(/^route[\s-]*(\d+)$/i)
-  if (route) return `${route[1]}号道路`
+  const route = text.match(/(?:^|\b)route[\s-]*(\d+)\b/i)
+  if (route) {
+    const regionPrefix = text.match(/^(kanto|johto|hoenn|sinnoh|unova)[\s-]+/i)
+    const region = regionPrefix ? `${translateRegionName(regionPrefix[1])}` : ''
+    return `${region}${route[1]}号道路`
+  }
 
   return text
 }

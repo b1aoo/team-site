@@ -9,6 +9,7 @@ import { getLocalPokemonGif, onGifError, normalizePokemonName, translatePokemonN
 import { useDatabase } from '../../hooks/useDatabase';
 import { useDocumentHead } from '../../hooks/useDocumentHead';
 import { API } from '../../api/endpoints';
+import { chineseOrFallback } from '../../utils/contentZh';
 
 const FILTERED_POKEMON = [
   'mew', 'mewtwo', `phione`, `manaphy`, `victini`, 'articuno', 'zapdos', 'moltres', 'suicune', 'entei', 'raikou', 'giratina-origin',
@@ -158,7 +159,7 @@ export default function DexHelper() {
     queryKey: ['dex-helper-bounties', month, year],
     queryFn: async () => {
       const response = await fetch(`${API.bounties}?month=${month}&year=${year}`);
-      if (!response.ok) throw new Error(`Failed to load bounties: ${response.status}`);
+      if (!response.ok) throw new Error(`悬赏数据加载失败：${response.status}`);
       return response.json();
     },
     refetchInterval: 30 * 1000,
@@ -327,7 +328,7 @@ export default function DexHelper() {
                         <Link to={`/pokemon/${encodeURIComponent(pokemon.id)}/`} className="pokemonLink">
                           <img
                             src={getLocalPokemonGif(pokemon.name)}
-                            alt={pokemon.name}
+                            alt={formatPokemonDisplayName(pokemon.name)}
                             onError={onGifError(pokemon.name)}
                             className="pokemonGif"
                             loading="lazy"
@@ -338,14 +339,14 @@ export default function DexHelper() {
                           <div className="bountyMarker" tabIndex={0} aria-label={`${formatPokemonDisplayName(pokemon.name)} 的悬赏`}>
                             <span className="bountyIcon" aria-hidden="true">B</span>
                             <div className="bountyTooltip" role="tooltip">
-                              <p><strong>标题：</strong> {bounty.title || formatPokemonDisplayName(bounty.pokemon) || '未命名'}</p>
+                              <p><strong>标题：</strong> {chineseOrFallback(bounty.title, `闪光悬赏：${formatPokemonDisplayName(bounty.pokemon)}`)}</p>
                               <p><strong>悬赏目标：</strong> <strong>{formatPokemonDisplayName(bountySourcePokemon)}</strong></p>
                               <p>
                                 <strong>说明：</strong>{' '}
-                                {bounty.description || '暂无说明'}
+                                {chineseOrFallback(bounty.description, bounty.description ? '详细条件请向悬赏主办人确认。' : '暂无说明')}
                               </p>
                               <p><strong>类型：</strong> {bounty.bountyType === 'monthly' ? '月度' : '永久'}</p>
-                              <p><strong>奖励：</strong> {bounty.reward || '未注明'}</p>
+                              <p><strong>奖励：</strong> {chineseOrFallback(bounty.reward, bounty.reward ? '奖励详情请向主办人确认。' : '未注明')}</p>
                               <p><strong>主办人：</strong> {bounty.host || '未知'}</p>
                             </div>
                           </div>
@@ -355,7 +356,7 @@ export default function DexHelper() {
                       <div className="pokemonInfo">
                         <h2 className="pokemonName">{formatPokemonDisplayName(pokemon.name)}</h2>
                         {pokemon.description && (
-                          <p className="pokemonDescription">{pokemon.description}</p>
+                          <p className="pokemonDescription">{chineseOrFallback(pokemon.description, '该进化家族尚未收录于公会闪光图鉴，建议结合地点查询器确认遭遇方式。')}</p>
                         )}
                       </div>
                     </article>

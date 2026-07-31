@@ -6,6 +6,7 @@ import { getLocalPokemonGif, onGifError, getRemoteFallbackUrl, normalizePokemonN
 import { translateEncounterTerm, translateLocationName, translateRegionName } from '../../utils/pokemonTermsZh'
 import safariData from '../../data/safari_zones.json'
 import styles from './SafariZones.module.css'
+import { chineseOrFallback } from '../../utils/contentZh'
 
 const REGIONS = ['kanto', 'johto', 'hoenn', 'sinnoh']
 const REGION_LABELS = { kanto: '关都', johto: '城都', hoenn: '丰缘', sinnoh: '神奥' }
@@ -360,7 +361,9 @@ function RegionContent({ region, initialArea }) {
   return (
     <div className={styles.regionContent}>
       <p className={styles.regionGame}>{translateLocationName(data.game)}</p>
-      <p className={styles.regionDescription}>{data.description}</p>
+      <p className={styles.regionDescription}>
+        {chineseOrFallback(data.description, `${REGION_LABELS[region] || translateRegionName(region)}狩猎地带的出现池、捕获度与推荐捕捉策略已整理在下方。`)}
+      </p>
 
       <InGameClock region={region} />
 
