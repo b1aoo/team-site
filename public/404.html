@@ -1,22 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Team Synergy - PokeMMO</title>
-  <!-- GitHub Pages SPA redirect: encodes the path into the query string so
-       index.html can restore it via history.replaceState.
-       Pre-rendered pages are served directly and never reach this file.
-       This only fires for routes that don't have a pre-rendered index.html
-       (e.g. a new event created after the last build). -->
-  <script type="text/javascript">
-    var l = window.location;
-    l.replace(
-      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-      l.pathname.split('/').slice(0, 1).join('/') + '/?/' +
-      l.pathname.slice(1).split('/').join('/').replace(/&/g, '~and~') +
-      (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-      l.hash
-    );
+  <!--
+    GitHub Pages does not serve a document for BrowserRouter deep links.  Keep
+    the project-site prefix when forwarding the unknown route to index.html;
+    otherwise /team-site/pokedex/ would incorrectly become /?/team-site/pokedex/.
+  -->
+  <script>
+    (function () {
+      var location = window.location
+      var basePath = '/team-site'
+      var route = location.pathname.indexOf(basePath + '/') === 0
+        ? location.pathname.slice(basePath.length)
+        : location.pathname
+
+      location.replace(
+        location.protocol + '//' + location.host + basePath + '/?/' +
+        route.replace(/^\//, '').replace(/&/g, '~and~') +
+        (location.search ? '&' + location.search.slice(1).replace(/&/g, '~and~') : '') +
+        location.hash
+      )
+    })()
   </script>
 </head>
 <body></body>

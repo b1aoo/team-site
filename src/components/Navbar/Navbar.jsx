@@ -75,7 +75,13 @@ export default function Navbar() {
           >
             {item.submenu ? (
               <>
-                <button className={`${styles.link} ${styles.dropdownToggle}`}>
+                <button
+                  type="button"
+                  className={`${styles.link} ${styles.dropdownToggle}`}
+                  onClick={() => setOpenDropdown(openDropdown === item.label ? null : item.label)}
+                  aria-expanded={openDropdown === item.label}
+                  aria-haspopup="menu"
+                >
                   {item.label}
                   <span className={styles.dropdownArrow}>▼</span>
                 </button>
@@ -87,6 +93,7 @@ export default function Navbar() {
                         className={({ isActive }) =>
                           `${styles.dropdownLink} ${isActive ? styles.dropdownActive : ''}`
                         }
+                        onClick={() => setOpenDropdown(null)}
                       >
                         {subitem.label}
                       </NavLink>

@@ -91,12 +91,27 @@ window.addEventListener('error', (event) => {
   }
 })
 
-// Register service worker for caching (production only)
+// Earlier deployments registered a service worker that can retain obsolete
+// hashed chunks after a release. This site now relies on GitHub Pages' cache
+// headers, so retire any existing registration once and reload into fresh code.
 if (!import.meta.env.DEV && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}service-worker.js`)
+    navigator.serviceWorker.getRegistrations()
+      .then(async (registrations) => {
+        if (registrations.length === 0) return false
+
+        await Promise.all(registrations.map((registration) => registration.unregister()))
+        return true
+      })
+      .then((removedLegacyWorker) => {
+        const cleanupKey = 'team-site-service-worker-cleanup'
+        if (removedLegacyWorker && !sessionStorage.getItem(cleanupKey)) {
+          sessionStorage.setItem(cleanupKey, '1')
+          window.location.reload()
+        }
+      })
       .catch((error) => {
-        console.error('Service Worker registration failed:', error)
+        console.warn('旧版缓存清理失败：', error)
       })
   })
 }
