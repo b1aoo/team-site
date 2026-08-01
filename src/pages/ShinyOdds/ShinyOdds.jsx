@@ -92,56 +92,58 @@ function ShinyProbabilityCalculator() {
   }, [donator, charm, customBoost, encounters, sanitizedCurrentEncounters]);
 
   return (
-    <div style={{ marginTop: '2em' }}>
-      <h2>概率加成</h2>
-      <label>
-        <input type="checkbox" checked={donator} onChange={() => setDonator(!donator)} className={styles.shinyInput} />
-        捐赠者状态（+10%）
-      </label>
-      <br />
-      <label>
-        <input type="checkbox" checked={charm} onChange={() => setCharm(!charm)} className={styles.shinyInput} />
-        闪耀护符（+10%）
-      </label>
-      <br />
-      <label>
-        自定义加成（%）：{' '}
-        <input
-          type="number"
-          value={customBoost}
-          onChange={e => setCustomBoost(e.target.value)}
-          className={styles.shinyInput}
-          style={{ width: 80 }}
-        />
-      </label>
+    <div className={styles.calculatorLayout}>
+      <section className={styles.controlsColumn} aria-label="概率计算">
+        <div className={styles.controlSection}>
+          <h2>概率加成</h2>
+          <label className={styles.optionLabel}>
+            <input type="checkbox" checked={donator} onChange={() => setDonator(!donator)} className={styles.shinyInput} />
+            捐赠者状态（+10%）
+          </label>
+          <label className={styles.optionLabel}>
+            <input type="checkbox" checked={charm} onChange={() => setCharm(!charm)} className={styles.shinyInput} />
+            闪耀护符（+10%）
+          </label>
+          <label className={`${styles.optionLabel} ${styles.numberFieldLabel}`}>
+            自定义加成（%）
+            <input
+              type="number"
+              value={customBoost}
+              onChange={e => setCustomBoost(e.target.value)}
+              className={`${styles.shinyInput} ${styles.compactInput}`}
+            />
+          </label>
+        </div>
 
-      <hr />
+        <div className={styles.controlSection}>
+          <h2>遭遇次数</h2>
+          <label className={`${styles.optionLabel} ${styles.numberFieldLabel}`}>
+            当前遭遇次数
+            <input
+              type="number"
+              value={currentEncountersInput}
+              onChange={e => setCurrentEncountersInput(e.target.value)}
+              className={`${styles.shinyInput} ${styles.encounterInput}`}
+            />
+          </label>
+        </div>
 
-      <h2>遭遇次数</h2>
-      <label>
-        当前遭遇次数：{' '}
-        <input
-          type="number"
-          value={currentEncountersInput}
-          onChange={e => setCurrentEncountersInput(e.target.value)}
-          className={styles.shinyInput}
-        />
-      </label>
+        <div className={`${styles.controlSection} ${styles.resultsSection}`} aria-live="polite">
+          <h2>计算结果</h2>
+          <dl className={styles.resultsList}>
+            <div><dt>实际闪光概率</dt><dd>1 / {Math.round(effectiveDenominator).toLocaleString()}</dd></div>
+            <div><dt>每 100 万名玩家中</dt><dd>约有 {Math.round(percentile).toLocaleString()} 人已出闪</dd></div>
+            <div><dt>达到 50% 概率</dt><dd>{Math.round(expected50).toLocaleString()} 次遭遇</dd></div>
+            <div><dt>达到 90% 概率</dt><dd>{Math.round(expected90).toLocaleString()} 次遭遇</dd></div>
+            <div><dt>达到 99% 概率</dt><dd>{Math.round(expected99).toLocaleString()} 次遭遇</dd></div>
+          </dl>
+        </div>
+      </section>
 
-      <hr />
-
-      <h2>计算结果</h2>
-      <p><strong>实际闪光概率：</strong>1 / {Math.round(effectiveDenominator).toLocaleString()}</p>
-      <p><strong>每 100 万名玩家中：</strong>约有 {Math.round(percentile).toLocaleString()} 人已出闪</p>
-      <p><strong>达到 50% 概率：</strong>{Math.round(expected50).toLocaleString()} 次遭遇</p>
-      <p><strong>达到 90% 概率：</strong>{Math.round(expected90).toLocaleString()} 次遭遇</p>
-      <p><strong>达到 99% 概率：</strong>{Math.round(expected99).toLocaleString()} 次遭遇</p>
-
-      <hr />
-
-      {/* Chart */}
-      <h2>闪光概率分布（以 100 万人为样本）</h2>
-      <div style={{ width: "100%", maxWidth: 900, height: 400, margin: "0 auto" }}>
+      <aside className={styles.visualizationColumn} aria-labelledby="probability-distribution-heading">
+        <section className={styles.chartPanel}>
+          <h2 id="probability-distribution-heading">闪光概率分布（以 100 万人为样本）</h2>
+          <div className={styles.chartFrame}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.3)" />
@@ -204,18 +206,20 @@ function ShinyProbabilityCalculator() {
             <ReferenceLine x={expected99} stroke="red" label="99%" />
           </LineChart>
         </ResponsiveContainer>
-      </div>
+          </div>
+        </section>
 
-      <div className="indexLegend" style={{ marginTop: "1.5em" }}>
-        <h3>图例</h3>
-        <ul>
-          <li><span className="indicator line-main"></span> <strong>紫色</strong> — 闪光概率分布（主曲线）</li>
-          <li><span className="indicator line-50"></span> <strong>绿色</strong> — 50% 概率（竖线）</li>
-          <li><span className="indicator line-90"></span> <strong>橙色</strong> — 90% 概率（竖线）</li>
-          <li><span className="indicator line-99"></span> <strong>红色</strong> — 99% 概率（竖线）</li>
-          <li><span className="indicator line-user"></span> <strong>粉色虚线</strong> — 你当前的遭遇次数</li>
-        </ul>
-      </div>
+        <section className={styles.indexLegend} aria-label="曲线图例">
+          <h3>图例</h3>
+          <ul>
+            <li><span className={`${styles.indicator} ${styles.lineMain}`}></span><span><strong>紫色</strong> — 闪光概率分布（主曲线）</span></li>
+            <li><span className={`${styles.indicator} ${styles.line50}`}></span><span><strong>绿色</strong> — 50% 概率（竖线）</span></li>
+            <li><span className={`${styles.indicator} ${styles.line90}`}></span><span><strong>橙色</strong> — 90% 概率（竖线）</span></li>
+            <li><span className={`${styles.indicator} ${styles.line99}`}></span><span><strong>红色</strong> — 99% 概率（竖线）</span></li>
+            <li><span className={`${styles.indicator} ${styles.lineUser}`}></span><span><strong>粉色虚线</strong> — 你当前的遭遇次数</span></li>
+          </ul>
+        </section>
+      </aside>
     </div>
   );
 }
